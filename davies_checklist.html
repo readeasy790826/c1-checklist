@@ -265,26 +265,28 @@ async function submitChecklist() {
     return;
   }
 
-  const tasks = {};
+  // Collect completed tasks and abnormal issues
+  const tasksCompleted = [];
+  const abnormalNotes = [];
+  
   ALL_TASKS.forEach(c => {
+    if (checkedSet.has(c)) {
+      tasksCompleted.push(c);
+    }
     const notesEl = document.getElementById('notes_' + c);
-    tasks[c] = {
-      checked: checkedSet.has(c),
-      notes: notesEl ? notesEl.value.trim() : ''
-    };
+    if (notesEl && notesEl.value.trim()) {
+      abnormalNotes.push(`${c}: ${notesEl.value.trim()}`);
+    }
   });
 
   const payload = {
     date: date,
     time: time,
-    datetime: `${date} ${time}`,
     location: location,
-    machine_id: machine_id,
-    staff_name: '', // Removed - use camera footage
-    supervisor: '', // Removed - use camera footage
+    machineId: machine_id,
     frequency: 'daily',
-    tasks: tasks,
-    abnormal_issues: ''
+    tasksCompleted: tasksCompleted,
+    abnormalIssues: abnormalNotes.join('; ')
   };
 
   const btn = document.getElementById('submit_btn');
