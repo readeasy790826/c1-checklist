@@ -1,0 +1,66 @@
+# D1: Coffee System Tablet Cleaning
+
+**Frequency**: Daily  
+**Time**: 10-15 minutes  
+**Videos**: [Google Drive Folder](https://drive.google.com/drive/folders/1QUJTRZZq9H95vjXKdMcvDKvWC5w2YUxT)
+
+---
+
+## Materials Needed
+
+- **Urnex Cafiza Tablets (E31)**
+
+![Urnex Cafiza E31 Tablets](images/urnex_cafiza_e31_tablet.jpg)
+
+---
+
+## Procedure
+
+### Step 1: Enter Service Menu
+
+1. Complete **D0: Enter Maintenance Mode** before starting D1.
+2. Return to coffee machine interface, click **top-right "≡"** (three lines) to enter service menu.
+3. Enter password when prompted (date/time format, numbers reversed).
+
+---
+
+### Step 2: Start Tablet Cleaning
+
+1. On coffee machine interface, select **"Maintenance"**.
+2. Click **"Tablet cleaning of coffee system"**.
+3. **Follow on-screen prompts step-by-step**.
+   - Machine will tell you when to insert tablet.
+   - Machine will tell you when to open/close doors or drawers.
+   - Machine will show cleaning progress.
+
+---
+
+### Step 3: Insert Cleaning Tablet When Prompted
+
+1. **Wait for screen prompt** before inserting tablet.
+2. Insert **1 Urnex Cafiza Tablet (E31)** — RED tablet only.
+   - ⚠️ Do NOT use blue tablet (milk system).
+3. Insert the tablet to the coffee brewer. If not sure, please watch the video **"form_a_tablet_cleaning_of_coffee_system_-_01"**.
+4. Follow remaining screen instructions.
+
+---
+
+### Step 4: Wait for Completion
+
+1. Machine will run automatic cleaning cycle (10-12 minutes).
+2. **Do NOT interrupt** the process.
+3. Wait for machine to display **"Complete"** or return to standby.
+
+---
+
+## Important Warnings
+
+⚠️ **Complete D0: Enter Maintenance Mode before starting D1.**  
+⚠️ **Use Urnex Cafiza Tablets (E31) RED tablet only** — Blue tablet is for milk system.  
+⚠️ **Wait for screen prompt before inserting tablet** — Do NOT insert early.  
+⚠️ **Do NOT interrupt** cleaning cycle.
+
+---
+
+**Last Updated**: 2026-05-25  
+**Version**: 2.4 (Service menu moved from D0)
