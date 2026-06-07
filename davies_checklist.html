@@ -209,7 +209,7 @@
 </div>
 
 <div class="submit-area">
-  <button class="submit-btn" id="submit_btn" onclick="submitChecklist()">Submit Checklist</button>
+  <button class="submit-btn" id="submit_btn" onclick="submitChecklist()" disabled>Submit Checklist</button>
   <div class="submit-status" id="submit_status"></div>
 </div>
 
@@ -226,6 +226,14 @@ function updateProgress() {
   const total = ALL_TASKS.length;
   document.getElementById('progress_fill').style.width = (done / total * 100) + '%';
   document.getElementById('progress_text').textContent = `${done} / ${total} tasks completed`;
+  const btn = document.getElementById('submit_btn');
+  if (done === total) {
+    btn.disabled = false;
+    btn.style.opacity = '1';
+  } else {
+    btn.disabled = true;
+    btn.style.opacity = '0.4';
+  }
 }
 updateProgress();
 
@@ -275,6 +283,13 @@ async function submitChecklist() {
   if (!date || !time) {
     document.getElementById('submit_status').className = 'submit-status err';
     document.getElementById('submit_status').textContent = '⚠️ Please fill in Date and Time first.';
+    return;
+  }
+
+  const incomplete = ALL_TASKS.filter(c => !checkedSet.has(c));
+  if (incomplete.length > 0) {
+    document.getElementById('submit_status').className = 'submit-status err';
+    document.getElementById('submit_status').textContent = '⚠️ All 7 tasks must be completed before submitting. Missing: ' + incomplete.join(', ');
     return;
   }
 
