@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>M5 — Syrup Tube Flushing</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d; --card: #1a1a1a; --surface: #242424; --border: #2e2e2e;
+    --text: #f0f0f0; --muted: #666; --accent: #f5a623; --green: #4caf50;
+    --red: #e53935; --blue: #42a5f5; --radius: 12px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 0 0 40px; }
+  .header { background: linear-gradient(135deg, #1a1a1a, #111); padding: 20px; border-bottom: 1px solid var(--border); }
+  .header .badge { display: inline-block; background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
+  .header h1 { font-size: 18px; font-weight: 700; color: var(--text); }
+  .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .section { padding: 16px 20px; }
+  .section-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px; }
+  .purpose-box { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 14px 16px; font-size: 14px; color: var(--text); line-height: 1.6; }
+  .warning-box { background: #b71c1c18; border: 1px solid #e5393544; border-left: 3px solid var(--red); border-radius: var(--radius); padding: 14px 16px; font-size: 13px; color: #ef9a9a; line-height: 1.6; margin-bottom: 10px; }
+  .steps-list { list-style: none; }
+  .steps-list li { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start; }
+  .step-num { background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 2px; }
+  .step-text { font-size: 14px; line-height: 1.6; color: var(--text); }
+  .step-text .console-path { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 2px 8px; font-size: 13px; color: var(--accent); font-family: monospace; display: inline-block; margin: 4px 0; }
+  .back-btn { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 13px; color: var(--muted); text-decoration: none; margin: 0 20px; width: fit-content; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">M5 — Monthly</div>
+  <h1>Syrup Tube Flushing</h1>
+  <p>Flush syrup tubes to prevent residue buildup and clogging</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Purpose</div>
+  <div class="purpose-box">
+    Remove syrup residue from tubes to prevent clogging, maintain flavor accuracy, and ensure hygienic dispensing.
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📄 SOP Steps</div>
+  <div class="warning-box">⚠️ Wear gloves before handling syrup tubes.</div>
+  <ul class="steps-list">
+    <li>
+      <span class="step-num">Step 1</span>
+      <span class="step-text">带上手套</span>
+    </li>
+    <li>
+      <span class="step-num">Step 2</span>
+      <span class="step-text">将糖浆管子从糖浆瓶中抽出来</span>
+    </li>
+    <li>
+      <span class="step-num">Step 3</span>
+      <span class="step-text">杯子中加入温水，将糖浆管子放入杯子中</span>
+    </li>
+    <li>
+      <span class="step-num">Step 4</span>
+      <span class="step-text">
+        打开 CoffeeRobot Console：<br>
+        <span class="console-path">Coffee Machine → Syrup</span><br>
+        点击对应糖浆的 <strong>▶ 三角箭头</strong> 开始清洗，直到水管中的水变清为止
+      </span>
+    </li>
+  </ul>
+</div>
+
+<a href="javascript:history.back()" class="back-btn">← Back to Checklist</a>
+
+</body>
+</html>
