@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>W4 — Clean Coffee Grinder</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0d0d0d; --card: #1a1a1a; --surface: #242424; --border: #2e2e2e;
+    --text: #f0f0f0; --muted: #666; --accent: #f5a623; --green: #4caf50;
+    --red: #e53935; --blue: #42a5f5; --radius: 12px;
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 0 0 40px; }
+  .header { background: linear-gradient(135deg, #1a1a1a, #111); padding: 20px; border-bottom: 1px solid var(--border); }
+  .header .badge { display: inline-block; background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
+  .header h1 { font-size: 18px; font-weight: 700; color: var(--text); }
+  .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .section { padding: 16px 20px; }
+  .section-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px; }
+  .purpose-box { background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--accent); border-radius: var(--radius); padding: 14px 16px; font-size: 14px; color: var(--text); line-height: 1.6; }
+  .supplies-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; align-items: center; gap: 16px; }
+  .supplies-icon { font-size: 40px; flex-shrink: 0; }
+  .supplies-info { flex: 1; }
+  .supplies-name { font-size: 15px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+  .supplies-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .supplies-tag { display: inline-block; background: #1a2a1a; border: 1px solid #4caf5044; color: var(--green); font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-top: 6px; }
+  .steps-list { list-style: none; }
+  .steps-list li { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px; display: flex; gap: 12px; align-items: flex-start; }
+  .step-num { background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.6; color: var(--text); }
+  .step-text .note { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); border-left: 2px solid var(--border); padding-left: 8px; }
+  .back-btn { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 13px; color: var(--muted); text-decoration: none; margin: 0 20px; width: fit-content; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">W4 — Weekly</div>
+  <h1>Clean Coffee Grinder</h1>
+  <p>Use GRINDZ tablets to clean grinder burrs and remove oil buildup</p>
+</div>
+
+<div class="section">
+  <div class="section-title">Purpose</div>
+  <div class="purpose-box">
+    Remove coffee oil and residue from grinder burrs to maintain grind quality and prevent stale flavour buildup.
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">🧴 Required Supplies</div>
+  <div class="supplies-card">
+    <div class="supplies-icon">🟡</div>
+    <div class="supplies-info">
+      <div class="supplies-name">Urnex GRINDZ — Grinder Cleaner</div>
+      <div class="supplies-desc">Food-safe, gluten-free & organic grinder cleaning tablets. Absorbs coffee oils and residue as they pass through the burrs.</div>
+      <div class="supplies-tag">✅ Gluten Free &amp; Organic</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">📄 SOP Steps</div>
+  <ul class="steps-list">
+    <li>
+      <span class="step-num">Step 1</span>
+      <span class="step-text">
+        Prepare the <strong>Urnex GRINDZ</strong> grinder cleaner tablets — have them ready before starting.
+      </span>
+    </li>
+    <li>
+      <span class="step-num">Step 2</span>
+      <span class="step-text">
+        On the coffee machine screen, tap <strong>维护保养 (Maintenance)</strong>, then select <strong>磨豆机保养 (Grinder Maintenance)</strong>.
+      </span>
+    </li>
+    <li>
+      <span class="step-num">Step 3</span>
+      <span class="step-text">
+        Follow the on-screen prompts <strong>step by step</strong> until the cleaning cycle is complete.
+        <span class="note">⚠️ Do not skip or interrupt steps mid-cycle — follow the screen exactly.</span>
+      </span>
+    </li>
+  </ul>
+</div>
+
+<a href="javascript:history.back()" class="back-btn">← Back to Checklist</a>
+
+</body>
+</html>
