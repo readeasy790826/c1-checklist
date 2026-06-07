@@ -28,9 +28,9 @@
   .task-list { padding: 16px 20px; }
   .section-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin: 14px 0 8px; }
   .task-card { background: var(--card); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; border: 1px solid var(--border); transition: border-color .2s; }
-  .task-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+  .task-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
   .task-code { background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 6px; flex-shrink: 0; }
-  .task-title { font-size: 14px; font-weight: 600; flex: 1; cursor: pointer; }
+  .task-title { font-size: 14px; font-weight: 600; flex: 1; }
   .task-checkbox { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: all .2s; position: relative; }
   .task-checkbox input { position: absolute; opacity: 0; cursor: pointer; }
   .task-checkbox::after { content: ""; display: none; width: 8px; height: 14px; border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg); margin-bottom: 2px; }
@@ -87,11 +87,10 @@
 <div class="task-list">
   <div class="section-label">MONTHLY TASKS — Click checkbox to complete, click title for details</div>
 
-  <!-- M1 -->
   <div class="task-card" id="task_M1">
     <div class="task-header" onclick="toggleTask('M1')">
       <span class="task-code">M1</span>
-      <span class="task-title">Deep cleaning of beverage spout groups</span>
+      <span class="task-title">Empty the ice maker</span>
       <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('M1')">
         <input type="checkbox" id="check_M1">
       </div>
@@ -103,11 +102,10 @@
     </div>
   </div>
 
-  <!-- M2 -->
   <div class="task-card" id="task_M2">
     <div class="task-header" onclick="toggleTask('M2')">
       <span class="task-code">M2</span>
-      <span class="task-title">Flush the syrup tubes</span>
+      <span class="task-title">Powder system deep manual cleaning</span>
       <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('M2')">
         <input type="checkbox" id="check_M2">
       </div>
@@ -119,11 +117,10 @@
     </div>
   </div>
 
-  <!-- M3 -->
   <div class="task-card" id="task_M3">
     <div class="task-header" onclick="toggleTask('M3')">
       <span class="task-code">M3</span>
-      <span class="task-title">Empty the ice maker</span>
+      <span class="task-title">Deep cleaning of beverage spout groups</span>
       <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('M3')">
         <input type="checkbox" id="check_M3">
       </div>
@@ -135,11 +132,10 @@
     </div>
   </div>
 
-  <!-- M4 -->
   <div class="task-card" id="task_M4">
     <div class="task-header" onclick="toggleTask('M4')">
       <span class="task-code">M4</span>
-      <span class="task-title">Powder system deep manual cleaning</span>
+      <span class="task-title">Clean coffee grinder with cleaning tablets</span>
       <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('M4')">
         <input type="checkbox" id="check_M4">
       </div>
@@ -151,11 +147,10 @@
     </div>
   </div>
 
-  <!-- M5 -->
   <div class="task-card" id="task_M5">
     <div class="task-header" onclick="toggleTask('M5')">
       <span class="task-code">M5</span>
-      <span class="task-title">Clean coffee grinder with cleaning tablets</span>
+      <span class="task-title">Syrup dispenser deep cleaning</span>
       <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('M5')">
         <input type="checkbox" id="check_M5">
       </div>
@@ -188,19 +183,12 @@ function updateProgress() {
   document.getElementById('progress_fill').style.width = (done / total * 100) + '%';
   document.getElementById('progress_text').textContent = `${done} / ${total} tasks completed`;
   const btn = document.getElementById('submit_btn');
-  if (done === total) {
-    btn.disabled = false;
-    btn.style.opacity = '1';
-  } else {
-    btn.disabled = true;
-    btn.style.opacity = '0.4';
-  }
+  btn.disabled = done !== total;
+  btn.style.opacity = done === total ? '1' : '0.4';
 }
 updateProgress();
 
-function toggleTask(code) {
-  document.getElementById('body_' + code).classList.toggle('open');
-}
+function toggleTask(code) { document.getElementById('body_' + code).classList.toggle('open'); }
 
 function toggleCheck(code) {
   if (checkedSet.has(code)) {
@@ -216,19 +204,19 @@ function toggleCheck(code) {
 }
 
 function selectAll() {
-  ALL_TASKS.forEach(code => {
-    checkedSet.add(code);
-    document.getElementById('task_' + code).classList.add('checked');
-    document.getElementById('check_' + code).checked = true;
+  ALL_TASKS.forEach(c => {
+    checkedSet.add(c);
+    document.getElementById('task_' + c).classList.add('checked');
+    document.getElementById('check_' + c).checked = true;
   });
   updateProgress();
 }
 
 function clearAll() {
-  ALL_TASKS.forEach(code => {
-    checkedSet.delete(code);
-    document.getElementById('task_' + code).classList.remove('checked');
-    document.getElementById('check_' + code).checked = false;
+  ALL_TASKS.forEach(c => {
+    checkedSet.delete(c);
+    document.getElementById('task_' + c).classList.remove('checked');
+    document.getElementById('check_' + c).checked = false;
   });
   updateProgress();
 }
@@ -250,30 +238,20 @@ async function submitChecklist() {
   const incomplete = ALL_TASKS.filter(c => !checkedSet.has(c));
   if (incomplete.length > 0) {
     document.getElementById('submit_status').className = 'submit-status err';
-    document.getElementById('submit_status').textContent = '⚠️ All tasks must be completed before submitting. Missing: ' + incomplete.join(', ');
+    document.getElementById('submit_status').textContent = '⚠️ All tasks must be completed. Missing: ' + incomplete.join(', ');
     return;
   }
 
   const tasks = {};
   ALL_TASKS.forEach(c => {
     const notesEl = document.getElementById('notes_' + c);
-    tasks[c] = {
-      checked: checkedSet.has(c),
-      notes: notesEl ? notesEl.value.trim() : ''
-    };
+    tasks[c] = { checked: checkedSet.has(c), notes: notesEl ? notesEl.value.trim() : '' };
   });
 
   const payload = {
-    date: date,
-    time: time,
-    datetime: `${date} ${time}`,
-    location: location,
-    machine_id: machine_id,
-    staff_name: '',
-    supervisor: '',
-    frequency: 'monthly',
-    tasks: tasks,
-    abnormal_issues: ''
+    date, time, datetime: `${date} ${time}`,
+    location, machine_id, staff_name: '', supervisor: '',
+    frequency: 'monthly', tasks, abnormal_issues: ''
   };
 
   const btn = document.getElementById('submit_btn');
@@ -284,27 +262,21 @@ async function submitChecklist() {
 
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload),
-      mode: 'no-cors'
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload), mode: 'no-cors'
     });
-
     status.className = 'submit-status ok';
     status.textContent = `✅ Submitted! (${date} ${time} — ${location})`;
-
     setTimeout(() => {
       checkedSet.clear();
       document.querySelectorAll('.task-card').forEach(c => c.classList.remove('checked'));
       document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
       document.querySelectorAll('.notes-input').forEach(n => n.value = '');
       updateProgress();
-      const newNow = new Date();
-      document.getElementById('check_time').value = newNow.toTimeString().slice(0,5);
+      document.getElementById('check_time').value = new Date().toTimeString().slice(0,5);
       btn.disabled = false;
       status.textContent = '';
     }, 3000);
-
   } catch(e) {
     status.className = 'submit-status err';
     status.textContent = '❌ Submit failed: ' + e.message;

@@ -28,9 +28,9 @@
   .task-list { padding: 16px 20px; }
   .section-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin: 14px 0 8px; }
   .task-card { background: var(--card); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; border: 1px solid var(--border); transition: border-color .2s; }
-  .task-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+  .task-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
   .task-code { background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 6px; flex-shrink: 0; }
-  .task-title { font-size: 14px; font-weight: 600; flex: 1; cursor: pointer; }
+  .task-title { font-size: 14px; font-weight: 600; flex: 1; }
   .task-checkbox { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: all .2s; position: relative; }
   .task-checkbox input { position: absolute; opacity: 0; cursor: pointer; }
   .task-checkbox::after { content: ""; display: none; width: 8px; height: 14px; border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg); margin-bottom: 2px; }
@@ -55,7 +55,7 @@
 
 <div class="header">
   <h1>☕ C1 Pro Weekly Maintenance — Davies</h1>
-  <p>Complete all 7 tasks before submitting</p>
+  <p>Complete all 5 tasks before submitting</p>
 </div>
 
 <div class="info-form">
@@ -82,16 +82,15 @@
 </div>
 
 <div class="progress-bar"><div class="progress-fill" id="progress_fill"></div></div>
-<div class="progress-text" id="progress_text">0 / 7 tasks completed</div>
+<div class="progress-text" id="progress_text">0 / 5 tasks completed</div>
 
 <div class="task-list">
   <div class="section-label">WEEKLY TASKS — Click checkbox to complete, click title for details</div>
 
-  <!-- W1 -->
   <div class="task-card" id="task_W1">
     <div class="task-header" onclick="toggleTask('W1')">
       <span class="task-code">W1</span>
-      <span class="task-title">Restart Windows, start console, set online mode</span>
+      <span class="task-title">Restart Windows</span>
       <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W1')">
         <input type="checkbox" id="check_W1">
       </div>
@@ -103,7 +102,6 @@
     </div>
   </div>
 
-  <!-- W2 -->
   <div class="task-card" id="task_W2">
     <div class="task-header" onclick="toggleTask('W2')">
       <span class="task-code">W2</span>
@@ -119,11 +117,10 @@
     </div>
   </div>
 
-  <!-- W3 -->
   <div class="task-card" id="task_W3">
     <div class="task-header" onclick="toggleTask('W3')">
       <span class="task-code">W3</span>
-      <span class="task-title">Reset the kiosk</span>
+      <span class="task-title">Brewer deep cleaning (swap)</span>
       <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W3')">
         <input type="checkbox" id="check_W3">
       </div>
@@ -135,11 +132,10 @@
     </div>
   </div>
 
-  <!-- W4 -->
   <div class="task-card" id="task_W4">
     <div class="task-header" onclick="toggleTask('W4')">
       <span class="task-code">W4</span>
-      <span class="task-title">Brewer deep cleaning (swap)</span>
+      <span class="task-title">Clean the fridges</span>
       <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W4')">
         <input type="checkbox" id="check_W4">
       </div>
@@ -151,11 +147,10 @@
     </div>
   </div>
 
-  <!-- W5 -->
   <div class="task-card" id="task_W5">
     <div class="task-header" onclick="toggleTask('W5')">
       <span class="task-code">W5</span>
-      <span class="task-title">Clean the fridges</span>
+      <span class="task-title">Recalibrate the scales</span>
       <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W5')">
         <input type="checkbox" id="check_W5">
       </div>
@@ -164,38 +159,6 @@
       <span class="sop-link" style="opacity:0.4;cursor:default;">📄 SOP Steps</span>
       <div class="notes-label">Notes / Abnormal issue (optional):</div>
       <textarea class="notes-input" id="notes_W5" placeholder="Leave blank if no issues"></textarea>
-    </div>
-  </div>
-
-  <!-- W6 -->
-  <div class="task-card" id="task_W6">
-    <div class="task-header" onclick="toggleTask('W6')">
-      <span class="task-code">W6</span>
-      <span class="task-title">Syrup dispenser deep cleaning</span>
-      <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W6')">
-        <input type="checkbox" id="check_W6">
-      </div>
-    </div>
-    <div class="task-body" id="body_W6">
-      <span class="sop-link" style="opacity:0.4;cursor:default;">📄 SOP Steps</span>
-      <div class="notes-label">Notes / Abnormal issue (optional):</div>
-      <textarea class="notes-input" id="notes_W6" placeholder="Leave blank if no issues"></textarea>
-    </div>
-  </div>
-
-  <!-- W7 -->
-  <div class="task-card" id="task_W7">
-    <div class="task-header" onclick="toggleTask('W7')">
-      <span class="task-code">W7</span>
-      <span class="task-title">Recalibrate the scales</span>
-      <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W7')">
-        <input type="checkbox" id="check_W7">
-      </div>
-    </div>
-    <div class="task-body" id="body_W7">
-      <span class="sop-link" style="opacity:0.4;cursor:default;">📄 SOP Steps</span>
-      <div class="notes-label">Notes / Abnormal issue (optional):</div>
-      <textarea class="notes-input" id="notes_W7" placeholder="Leave blank if no issues"></textarea>
     </div>
   </div>
 
@@ -211,7 +174,7 @@ const now = new Date();
 document.getElementById('check_date').value = now.toISOString().split('T')[0];
 document.getElementById('check_time').value = now.toTimeString().slice(0,5);
 
-const ALL_TASKS = ["W1", "W2", "W3", "W4", "W5", "W6", "W7"];
+const ALL_TASKS = ["W1", "W2", "W3", "W4", "W5"];
 const checkedSet = new Set();
 
 function updateProgress() {
@@ -220,19 +183,12 @@ function updateProgress() {
   document.getElementById('progress_fill').style.width = (done / total * 100) + '%';
   document.getElementById('progress_text').textContent = `${done} / ${total} tasks completed`;
   const btn = document.getElementById('submit_btn');
-  if (done === total) {
-    btn.disabled = false;
-    btn.style.opacity = '1';
-  } else {
-    btn.disabled = true;
-    btn.style.opacity = '0.4';
-  }
+  btn.disabled = done !== total;
+  btn.style.opacity = done === total ? '1' : '0.4';
 }
 updateProgress();
 
-function toggleTask(code) {
-  document.getElementById('body_' + code).classList.toggle('open');
-}
+function toggleTask(code) { document.getElementById('body_' + code).classList.toggle('open'); }
 
 function toggleCheck(code) {
   if (checkedSet.has(code)) {
@@ -248,19 +204,19 @@ function toggleCheck(code) {
 }
 
 function selectAll() {
-  ALL_TASKS.forEach(code => {
-    checkedSet.add(code);
-    document.getElementById('task_' + code).classList.add('checked');
-    document.getElementById('check_' + code).checked = true;
+  ALL_TASKS.forEach(c => {
+    checkedSet.add(c);
+    document.getElementById('task_' + c).classList.add('checked');
+    document.getElementById('check_' + c).checked = true;
   });
   updateProgress();
 }
 
 function clearAll() {
-  ALL_TASKS.forEach(code => {
-    checkedSet.delete(code);
-    document.getElementById('task_' + code).classList.remove('checked');
-    document.getElementById('check_' + code).checked = false;
+  ALL_TASKS.forEach(c => {
+    checkedSet.delete(c);
+    document.getElementById('task_' + c).classList.remove('checked');
+    document.getElementById('check_' + c).checked = false;
   });
   updateProgress();
 }
@@ -282,30 +238,20 @@ async function submitChecklist() {
   const incomplete = ALL_TASKS.filter(c => !checkedSet.has(c));
   if (incomplete.length > 0) {
     document.getElementById('submit_status').className = 'submit-status err';
-    document.getElementById('submit_status').textContent = '⚠️ All tasks must be completed before submitting. Missing: ' + incomplete.join(', ');
+    document.getElementById('submit_status').textContent = '⚠️ All tasks must be completed. Missing: ' + incomplete.join(', ');
     return;
   }
 
   const tasks = {};
   ALL_TASKS.forEach(c => {
     const notesEl = document.getElementById('notes_' + c);
-    tasks[c] = {
-      checked: checkedSet.has(c),
-      notes: notesEl ? notesEl.value.trim() : ''
-    };
+    tasks[c] = { checked: checkedSet.has(c), notes: notesEl ? notesEl.value.trim() : '' };
   });
 
   const payload = {
-    date: date,
-    time: time,
-    datetime: `${date} ${time}`,
-    location: location,
-    machine_id: machine_id,
-    staff_name: '',
-    supervisor: '',
-    frequency: 'weekly',
-    tasks: tasks,
-    abnormal_issues: ''
+    date, time, datetime: `${date} ${time}`,
+    location, machine_id, staff_name: '', supervisor: '',
+    frequency: 'weekly', tasks, abnormal_issues: ''
   };
 
   const btn = document.getElementById('submit_btn');
@@ -316,27 +262,21 @@ async function submitChecklist() {
 
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload),
-      mode: 'no-cors'
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload), mode: 'no-cors'
     });
-
     status.className = 'submit-status ok';
     status.textContent = `✅ Submitted! (${date} ${time} — ${location})`;
-
     setTimeout(() => {
       checkedSet.clear();
       document.querySelectorAll('.task-card').forEach(c => c.classList.remove('checked'));
       document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
       document.querySelectorAll('.notes-input').forEach(n => n.value = '');
       updateProgress();
-      const newNow = new Date();
-      document.getElementById('check_time').value = newNow.toTimeString().slice(0,5);
+      document.getElementById('check_time').value = new Date().toTimeString().slice(0,5);
       btn.disabled = false;
       status.textContent = '';
     }, 3000);
-
   } catch(e) {
     status.className = 'submit-status err';
     status.textContent = '❌ Submit failed: ' + e.message;
