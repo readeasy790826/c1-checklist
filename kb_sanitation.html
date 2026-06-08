@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>容器清洁消毒 SOP — Dianmood</title>
+<style>
+  :root {
+    --bg: #0f0f0f; --surface: #1a1a1a; --card: #222;
+    --border: #333; --accent: #f5a623; --green: #4caf50;
+    --red: #e53935; --text: #eee; --muted: #888;
+    --blue: #42a5f5; --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; padding-bottom: 48px; }
+
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px; }
+  .badge { display: inline-block; background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  /* Info banner */
+  .info-banner { background: #1a1500; border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 12px 16px; margin: 16px 20px 0; font-size: 13px; color: var(--muted); }
+  .info-banner strong { color: var(--accent); }
+
+  /* Container cards */
+  .container-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin: 12px 20px 0; overflow: hidden; }
+  .container-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; }
+  .container-header:hover { background: #2a2a2a; }
+  .container-icon { font-size: 20px; flex-shrink: 0; }
+  .container-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .chevron { color: var(--muted); font-size: 13px; transition: transform .2s; }
+  .container-card.open .chevron { transform: rotate(90deg); }
+  .container-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+  .container-card.open .container-body { display: block; }
+
+  /* Sub-sections */
+  .sub-section { margin-top: 14px; }
+  .sub-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
+
+  .step { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+  .step-num { background: var(--accent); color: #000; font-size: 12px; font-weight: 700; min-width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.6; }
+  .step-text strong { color: #fff; }
+  .step-text .note { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  /* Warning pill */
+  .warning-pill { display: inline-block; background: #1a0a0a; border: 1px solid #e5393566; color: #ef9a9a; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 20px; margin-top: 12px; }
+
+  /* Cleaner note */
+  .cleaner-note { background: #0d1a1a; border-left: 4px solid var(--blue); border-radius: 8px; padding: 10px 14px; margin-top: 14px; font-size: 13px; color: var(--muted); line-height: 1.6; }
+  .cleaner-note strong { color: var(--blue); }
+
+  .back-btn { display: inline-block; margin: 20px 20px 0; padding: 10px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">知识库</div>
+  <h1>容器清洁消毒 SOP</h1>
+  <p>Dianmood — 容器清洁与消毒操作规程</p>
+</div>
+
+<div class="info-banner">
+  漂白水稀释标准：<strong>1 ml 漂白水 + 1 L 水 = 50 ppm</strong>
+</div>
+
+<!-- 清洁剂说明 -->
+<div class="cleaner-note" style="margin: 12px 20px 0;">
+  <strong>清洁剂使用规则：</strong><br>
+  奶路清洁片 / Urnex Rinza → 奶脂/奶蛋白（碱性）→ 牛奶罐专用<br>
+  柠檬酸（Citric Acid）→ 茶多酚/单宁（酸性）→ 茶汤罐专用<br>
+  <span style="color:#ef9a9a;">⚠️ 两者不可互换</span>
+</div>
+
+<!-- 牛奶罐 -->
+<div class="container-card open" id="c1">
+  <div class="container-header" onclick="toggleCard('c1')">
+    <span class="container-icon">🥛</span>
+    <span class="container-name">牛奶罐</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="container-body">
+    <div class="sub-section">
+      <div class="sub-title">一、换奶 / 基础清洗</div>
+      <div class="step"><div class="step-num">1</div><div class="step-text">彻底倒空，新旧奶不能混合，有剩奶直接废弃。</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">用 <strong>45°C</strong> 温水预冲，冲掉内壁奶脂膜。</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">加<strong>温水 + 奶路清洁片</strong>，浸泡 <strong>10 分钟</strong>。</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text">用软刷或海绵轻刷四壁和底角。</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-text">清水冲洗<strong>至少 2 次</strong>。</div></div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title">二、消毒</div>
+      <div class="step"><div class="step-num">1</div><div class="step-text">配制漂白水 <strong>50 ppm</strong>（1 ml 漂白水 + 1 L 水）。</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">浸泡 <strong>10 分钟</strong>。</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">倒掉后自然沥干。</div></div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title">三、晾干与存放</div>
+      <div class="step"><div class="step-num">1</div><div class="step-text">倒扣在通风架上，完全干燥后再盖盖子。</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text"><strong>盖子绝对不能密封存湿气。</strong></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 不锈钢茶汤罐 -->
+<div class="container-card" id="c2">
+  <div class="container-header" onclick="toggleCard('c2')">
+    <span class="container-icon">🫖</span>
+    <span class="container-name">不锈钢茶汤罐</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="container-body">
+    <div class="warning-pill">⏱ 茶汤不超过 24 小时</div>
+    <div class="sub-section">
+      <div class="sub-title">一、清洗</div>
+      <div class="step"><div class="step-num">1</div><div class="step-text">倒空茶汤。</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">用 <strong>45°C</strong> 温水冲洗（防止茶多酚膜挂壁褐化）。</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">加<strong>温水 + 柠檬酸（Citric Acid）</strong>（5 g 柠檬酸 + 1 L 温水），浸泡 <strong>10 分钟</strong>。</div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-text">海绵或软刷清洗内壁、底角、盖内侧。</div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-text">清水冲 <strong>2 次</strong>。</div></div>
+    </div>
+    <div class="sub-section">
+      <div class="sub-title">二、消毒</div>
+      <div class="step"><div class="step-num">1</div><div class="step-text">配制漂白水 <strong>50 ppm</strong>。</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">浸泡 <strong>10 分钟</strong>。</div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-text">倒掉后自然沥干。</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 水桶套 -->
+<div class="container-card" id="c3">
+  <div class="container-header" onclick="toggleCard('c3')">
+    <span class="container-icon">🪣</span>
+    <span class="container-name">水桶套</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="container-body">
+    <div class="sub-section">
+      <div class="step"><div class="step-num">1</div><div class="step-text">温水清洗。</div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-text">漂白水浸泡 <strong>10 分钟</strong>消毒。</div></div>
+    </div>
+  </div>
+</div>
+
+<a class="back-btn" onclick="history.back()">← 返回</a>
+
+<script>
+function toggleCard(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>添加物料 SOP — Dianmood</title>
+<style>
+  :root {
+    --bg: #0f0f0f; --surface: #1a1a1a; --card: #222;
+    --border: #333; --accent: #f5a623; --green: #4caf50;
+    --red: #e53935; --text: #eee; --muted: #888;
+    --blue: #42a5f5; --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; padding-bottom: 48px; }
+
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px; }
+  .badge { display: inline-block; background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .section { padding: 16px 20px 0; }
+  .section-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+
+  /* Alert box */
+  .alert-box { background: #1a1500; border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 8px; font-size: 14px; line-height: 1.6; }
+  .alert-box .alert-title { font-weight: 700; color: var(--accent); margin-bottom: 6px; }
+  .alert-box ol { padding-left: 18px; }
+  .alert-box ol li { margin-bottom: 4px; }
+  .alert-box a { color: var(--blue); }
+
+  /* Section cards */
+  .task-section { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin: 12px 20px 0; overflow: hidden; }
+  .task-section-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; }
+  .task-section-header:hover { background: #2a2a2a; }
+  .section-code { background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; }
+  .section-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .chevron { color: var(--muted); font-size: 13px; transition: transform .2s; }
+  .task-section.open .chevron { transform: rotate(90deg); }
+  .task-section-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+  .task-section.open .task-section-body { display: block; }
+
+  .step { display: flex; gap: 12px; margin-top: 14px; align-items: flex-start; }
+  .step-num { background: var(--accent); color: #000; font-size: 12px; font-weight: 700; min-width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.6; }
+  .step-text .note { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .step-text strong { color: #fff; }
+
+  /* After-ops box */
+  .after-box { background: #0d1a0d; border-left: 4px solid var(--green); border-radius: var(--radius); padding: 14px 16px; margin: 12px 20px 0; font-size: 14px; line-height: 1.6; }
+  .after-box .after-title { font-weight: 700; color: var(--green); margin-bottom: 6px; }
+  .after-box ol { padding-left: 18px; }
+  .after-box ol li { margin-bottom: 4px; }
+  .after-box a { color: var(--blue); }
+
+  .back-btn { display: inline-block; margin: 20px 20px 0; padding: 10px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">知识库</div>
+  <h1>添加物料 SOP</h1>
+  <p>Dianmood — 物料补充操作规程</p>
+</div>
+
+<!-- 操作前 -->
+<div class="section" style="margin-top:16px;">
+  <div class="section-title">操作前准备</div>
+  <div class="alert-box">
+    <div class="alert-title">⚠️ 开始前必须完成</div>
+    <ol>
+      <li>所有物料必须密封好，拿到咖啡机前再打开。操作前戴上手套。</li>
+      <li>打开键盘，按 ESC 键，进入 <a href="https://admin.hestiarobotics.com/" target="_blank">admin.hestiarobotics.com</a>，将系统调整到 <strong>In Maintenance</strong> 模式。</li>
+    </ol>
+  </div>
+</div>
+
+<!-- 1. 冰箱1号 -->
+<div class="task-section open" id="sec1">
+  <div class="task-section-header" onclick="toggleSection('sec1')">
+    <span class="section-code">1</span>
+    <span class="section-name">冰箱 1 号 — 抹茶 / 牛奶 / 燕麦奶</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="task-section-body">
+    <div class="step"><div class="step-num">1</div><div class="step-text">打开冰箱 1 号，关闭抹茶旋转。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">解开接管，取下旧抹茶罐。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">放入新抹茶罐，接上接管。</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">把旋转纽旋到指定位置，确认抹茶在旋转，<strong>不起泡</strong>为标准。</div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text">依次撤下牛奶、燕麦奶，换上新鲜物料。</div></div>
+    <div class="step"><div class="step-num">6</div><div class="step-text">确保物料管的管道接口处<strong>拧紧</strong>。</div></div>
+    <div class="step"><div class="step-num">7</div><div class="step-text">关闭冰箱。</div></div>
+  </div>
+</div>
+
+<!-- 2. 冰箱2号 -->
+<div class="task-section" id="sec2">
+  <div class="task-section-header" onclick="toggleSection('sec2')">
+    <span class="section-code">2</span>
+    <span class="section-name">冰箱 2 号 — 茶水物料</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="task-section-body">
+    <div class="step"><div class="step-num">1</div><div class="step-text">打开冰箱 2 号，撤出旧茶水物料，换上新鲜物料，关闭冰箱。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">拿出咖啡机操作键盘，进入系统界面。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">点击 <strong>COGS MANAGEMENT</strong> → 找到 <strong>Blacktea</strong> → 更新添加茶水的毫升数。</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">点击 <strong>Device Monitor</strong> → 单点 <strong>Flavor Dispenser #1</strong> → 输入数字 <strong>8</strong>，点击 submit。</div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text">观察茶汤顺利出汤。</div></div>
+  </div>
+</div>
+
+<!-- 3. 咖啡豆 -->
+<div class="task-section" id="sec3">
+  <div class="task-section-header" onclick="toggleSection('sec3')">
+    <span class="section-code">3</span>
+    <span class="section-name">咖啡豆</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="task-section-body">
+    <div class="step"><div class="step-num">1</div><div class="step-text">把豆子放入咖啡机豆仓，盖好盖子。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">拿出键盘，进入系统界面。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">点击 <strong>COGS MANAGEMENT</strong> → 找到 <strong>Coffee beans</strong> → 更新加入后的总重量数。</div></div>
+  </div>
+</div>
+
+<!-- 4. 巧克力粉 -->
+<div class="task-section" id="sec4">
+  <div class="task-section-header" onclick="toggleSection('sec4')">
+    <span class="section-code">4</span>
+    <span class="section-name">巧克力粉</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="task-section-body">
+    <div class="step"><div class="step-num">1</div><div class="step-text">把巧克力粉倒入粉仓，盖好盖子。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">拿出键盘，进入系统界面。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">点击 <strong>COGS MANAGEMENT</strong> → 找到 <strong>Chocolate Powder</strong> → 更新加入后的总重量数。</div></div>
+  </div>
+</div>
+
+<!-- 5. 杯子 -->
+<div class="task-section" id="sec5">
+  <div class="task-section-header" onclick="toggleSection('sec5')">
+    <span class="section-code">5</span>
+    <span class="section-name">杯子</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="task-section-body">
+    <div class="step"><div class="step-num">1</div><div class="step-text">把杯子放入落杯器，盖好盖子。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">拿出键盘，进入系统界面。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">点击 <strong>COGS MANAGEMENT</strong> → 找到对应落杯器 <strong>cup#1</strong> 或 <strong>cup#2</strong> → 更新加入后的总重数。</div></div>
+  </div>
+</div>
+
+<!-- 6. Syrups -->
+<div class="task-section" id="sec6">
+  <div class="task-section-header" onclick="toggleSection('sec6')">
+    <span class="section-code">6</span>
+    <span class="section-name">Syrups</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="task-section-body">
+    <div class="step"><div class="step-num">1</div><div class="step-text">取下快用完的 Syrup，装上新的 Syrup。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">拿出键盘，进入系统界面。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">点击 <strong>COGS MANAGEMENT</strong> → 找到对应 Syrup 编号 → 更新加入后的总重数。</div></div>
+  </div>
+</div>
+
+<!-- 操作后 -->
+<div class="section" style="margin-top:16px;">
+  <div class="section-title">操作后</div>
+  <div class="after-box">
+    <div class="after-title">✅ 完成前必须做</div>
+    <ol>
+      <li>进入 <a href="https://admin.hestiarobotics.com/" target="_blank">admin.hestiarobotics.com</a>，将系统调整回 <strong>Online</strong> 模式。</li>
+      <li>CoffeeRobot Console — 双击 KDS 中空白处回到广告界面 → 放回键盘。</li>
+    </ol>
+  </div>
+</div>
+
+<a class="back-btn" onclick="history.back()">← 返回</a>
+
+<script>
+function toggleSection(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+</body>
+</html>

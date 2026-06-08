@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>粹茶 SOP — Dianmood</title>
+<style>
+  :root {
+    --bg: #0f0f0f; --surface: #1a1a1a; --card: #222;
+    --border: #333; --accent: #f5a623; --green: #4caf50;
+    --red: #e53935; --text: #eee; --muted: #888;
+    --blue: #42a5f5; --teal: #26c6da; --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; padding-bottom: 48px; }
+
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px; }
+  .badge { display: inline-block; background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+  .section { padding: 16px 20px 0; }
+  .section-title { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+
+  .tea-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin: 12px 20px 0; overflow: hidden; }
+  .tea-card-header { display: flex; align-items: center; gap: 10px; padding: 14px 16px; cursor: pointer; }
+  .tea-card-header:hover { background: #2a2a2a; }
+  .tea-badge { background: var(--teal); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; }
+  .tea-name { font-size: 15px; font-weight: 600; flex: 1; }
+  .tea-origin { font-size: 12px; color: var(--muted); }
+  .chevron { color: var(--muted); font-size: 13px; transition: transform .2s; }
+  .tea-card.open .chevron { transform: rotate(90deg); }
+  .tea-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+  .tea-card.open .tea-body { display: block; }
+
+  /* Ingredients table */
+  .ingredients { width: 100%; border-collapse: collapse; margin-top: 14px; margin-bottom: 4px; }
+  .ingredients th { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  .ingredients td { padding: 8px 10px; font-size: 14px; border-bottom: 1px solid #2a2a2a; }
+  .ingredients td:last-child { font-weight: 700; color: var(--accent); }
+  .ingredients tr:last-child td { border-bottom: none; }
+
+  .steps-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin: 16px 0 8px; }
+  .step { display: flex; gap: 12px; margin-bottom: 12px; align-items: flex-start; }
+  .step-num { background: var(--accent); color: #000; font-size: 12px; font-weight: 700; min-width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.6; }
+  .step-text strong { color: #fff; }
+  .step-text .note { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+  .back-btn { display: inline-block; margin: 20px 20px 0; padding: 10px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">知识库</div>
+  <h1>粹茶 SOP</h1>
+  <p>Dianmood — 茶饮预制操作规程</p>
+</div>
+
+<!-- 茉莉花茶 -->
+<div class="tea-card open" id="tea1">
+  <div class="tea-card-header" onclick="toggleTea('tea1')">
+    <span class="tea-badge">茉莉花茶</span>
+    <span class="tea-name">Jasmine Green Tea</span>
+    <span class="tea-origin">Premium · Tapio</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="tea-body">
+    <table class="ingredients">
+      <tr><th>材料</th><th>用量</th></tr>
+      <tr><td>茶叶</td><td>50 g</td></tr>
+      <tr><td>热水（80°C）</td><td>1500 ml</td></tr>
+      <tr><td>冰块</td><td>500 g</td></tr>
+    </table>
+    <div class="steps-label">步骤</div>
+    <div class="step"><div class="step-num">1</div><div class="step-text">将 50 g 茶叶倒入粹茶容器。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">倒入 1500 ml <strong>80°C</strong> 热水，盖上盖子，计时 <strong>7 分钟</strong>。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">另取茶水容器，提前放入 500 g 冰块。</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">计时结束前，将茶水过滤出来，倒入装有冰块的容器中。</div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text">盖好盖子，保鲜膜密封。粹茶完成。</div></div>
+  </div>
+</div>
+
+<!-- 红茶 -->
+<div class="tea-card" id="tea2">
+  <div class="tea-card-header" onclick="toggleTea('tea2')">
+    <span class="tea-badge">红茶</span>
+    <span class="tea-name">Assam Black Tea</span>
+    <span class="tea-origin">Premium · Tapio</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="tea-body">
+    <table class="ingredients">
+      <tr><th>材料</th><th>用量</th></tr>
+      <tr><td>茶叶</td><td>70 g</td></tr>
+      <tr><td>热水（100°C）</td><td>1500 ml</td></tr>
+      <tr><td>冰块</td><td>500 g</td></tr>
+    </table>
+    <div class="steps-label">步骤</div>
+    <div class="step"><div class="step-num">1</div><div class="step-text">将 70 g 茶叶倒入粹茶容器。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">倒入 1500 ml <strong>100°C</strong> 热水，盖上盖子，计时 <strong>12 分钟</strong>。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">另取茶水容器，提前放入 500 g 冰块。</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">计时结束，将茶水<strong>过滤两次</strong>，倒入装有冰块的容器混合。</div></div>
+    <div class="step"><div class="step-num">5</div><div class="step-text">盖好盖子，保鲜膜密封。粹茶完成。</div></div>
+  </div>
+</div>
+
+<!-- 抹茶 -->
+<div class="tea-card" id="tea3">
+  <div class="tea-card-header" onclick="toggleTea('tea3')">
+    <span class="tea-badge">抹茶</span>
+    <span class="tea-name">Matcha</span>
+    <span class="tea-origin">ALIGN Grade B Barista · ICHA Mocha</span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="tea-body">
+    <table class="ingredients">
+      <tr><th>材料</th><th>用量</th></tr>
+      <tr><td>抹茶粉</td><td>50 g</td></tr>
+      <tr><td>温水（50°C）</td><td>200 ml</td></tr>
+      <tr><td>冷藏冰水</td><td>1300 ml</td></tr>
+    </table>
+    <div class="steps-label">步骤</div>
+    <div class="step"><div class="step-num">1</div><div class="step-text">将 50 g 抹茶粉<strong>过筛</strong>至抹茶容器。</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-text">倒入 200 ml <strong>50°C</strong> 温水，充分搅拌至粉末完全融合。</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-text">加入 1300 ml 冷藏冰水，搅拌混合均匀。
+      <span class="note">⚠️ 用冷藏冰水（非冰块）确保总量精准，浓度稳定在 1:30。</span>
+    </div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-text">盖好盖子，保鲜膜密封。粹茶完成。</div></div>
+  </div>
+</div>
+
+<a class="back-btn" onclick="history.back()">← 返回</a>
+
+<script>
+function toggleTea(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
+</body>
+</html>
