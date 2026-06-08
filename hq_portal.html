@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>C1 Pro Portal — ITC</title>
+<title>HQ — All Locations</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -46,8 +46,8 @@
 <body>
 
 <div class="header">
-  <h1>☕ ITC Portal</h1>
-  <p>C1-ITC-01 · Real-time status</p>
+  <h1>☕ HQ Dashboard</h1>
+  <p>All locations status</p>
 </div>
 
 <div id="alert-banner" class="alert-banner"></div>
@@ -125,6 +125,21 @@ function buildCard(freq, info, url) {
 }
 
 
+function renderLocationCard(locName, machineId, statusData, dailyUrl, weeklyUrl, monthlyUrl) {
+  var container = document.getElementById('cards');
+  var div = document.createElement('div');
+  div.className = 'location-block';
+  div.innerHTML = '<div class="location-heading">📍 ' + locName + ' <span class="machine-id">' + machineId + '</span></div>';
+  container.appendChild(div);
+  ['daily','weekly','monthly'].forEach(function(freq) {
+    var key = locName + '|' + freq;
+    var url = freq === 'daily' ? dailyUrl : freq === 'weekly' ? weeklyUrl : monthlyUrl;
+    var entry = statusData[key];
+    var info = getStatusInfo(freq, entry);
+    var card = buildCard(freq, info, url);
+    div.appendChild(card);
+  });
+}
 
 function updateBanner(statusData) {
   var banner = document.getElementById('alert-banner');
@@ -157,17 +172,20 @@ function loadStatus() {
       var statusData = json.data || {};
       updateBanner(statusData);
       
-  ['daily','weekly','monthly'].forEach(function(freq) {
-    var urls = {
+  var locations = [
+    { name: 'Davies', machineId: 'C1-DV-01',
+      daily:   'https://readeasy790826.github.io/c1-checklist/davies_checklist.html',
+      weekly:  'https://readeasy790826.github.io/c1-checklist/davies_weekly_checklist.html',
+      monthly: 'https://readeasy790826.github.io/c1-checklist/davies_monthly_checklist.html'
+    },
+    { name: 'ITC', machineId: 'C1-ITC-01',
       daily:   'https://readeasy790826.github.io/c1-checklist/itc_checklist.html',
       weekly:  'https://readeasy790826.github.io/c1-checklist/itc_weekly_checklist.html',
       monthly: 'https://readeasy790826.github.io/c1-checklist/itc_monthly_checklist.html'
-    };
-    var key = 'ITC|' + freq;
-    var entry = statusData[key];
-    var info = getStatusInfo(freq, entry);
-    var card = buildCard(freq, info, urls[freq]);
-    document.getElementById('cards').appendChild(card);
+    }
+  ];
+  locations.forEach(function(loc) {
+    renderLocationCard(loc.name, loc.machineId, statusData, loc.daily, loc.weekly, loc.monthly);
   });
       document.getElementById('last-refresh').textContent = 'Last refreshed: ' + new Date().toLocaleTimeString();
     })
