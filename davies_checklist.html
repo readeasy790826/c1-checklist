@@ -58,7 +58,7 @@
 
 <div class="header">
   <h1>☕ C1 Pro Daily Maintenance — Davies</h1>
-  <p>Complete all 7 tasks before opening</p>
+  <p>Complete all 8 tasks before opening</p>
 </div>
 
 <div class="info-form">
@@ -85,7 +85,7 @@
 </div>
 
 <div class="progress-bar"><div class="progress-fill" id="progress_fill"></div></div>
-<div class="progress-text" id="progress_text">0 / 7 tasks completed</div>
+<div class="progress-text" id="progress_text">0 / 8 tasks completed</div>
 
 <div class="task-list">
   <div class="section-label">Daily Tasks — D0 to D6. Click checkbox to complete, click title for details</div>
@@ -205,6 +205,21 @@
       <div class="notes-label">Notes / Abnormal issue (optional):</div>
       <textarea class="notes-input" id="notes_D6" placeholder="Leave blank if no issues"></textarea>
     </div>
+
+  <!-- D7 -->
+  <div class="task-card" id="task_D7">
+    <div class="task-header">
+      <span class="task-code">D7</span>
+      <span class="task-title" onclick="toggleTask('D7')">Chocolate powder hopper inspection</span>
+      <div class="task-checkbox" onclick="toggleCheck('D7')">
+        <input type="checkbox" id="check_D7">
+      </div>
+    </div>
+    <div class="task-body" id="body_D7">
+      <a class="sop-link" href="D7_chocolate_hopper_inspect.html" target="_blank">📄 SOP Steps</a>
+      <div class="notes-label">Notes / Abnormal issue (optional):</div>
+      <textarea class="notes-input" id="notes_D7" placeholder="Leave blank if no issues"></textarea>
+    </div>
   </div>
 </div>
 
@@ -218,7 +233,7 @@ const now = new Date();
 document.getElementById('check_date').value = now.toISOString().split('T')[0];
 document.getElementById('check_time').value = now.toTimeString().slice(0,5);
 
-const ALL_TASKS = ['D0','D1','D2','D3','D4','D5','D6'];
+const ALL_TASKS = ['D0','D1','D2','D3','D4','D5','D6','D7'];
 const checkedSet = new Set();
 
 function updateProgress() {
@@ -289,7 +304,7 @@ async function submitChecklist() {
   const incomplete = ALL_TASKS.filter(c => !checkedSet.has(c));
   if (incomplete.length > 0) {
     document.getElementById('submit_status').className = 'submit-status err';
-    document.getElementById('submit_status').textContent = '⚠️ All 7 tasks must be completed before submitting. Missing: ' + incomplete.join(', ');
+    document.getElementById('submit_status').textContent = '⚠️ All 8 tasks must be completed before submitting. Missing: ' + incomplete.join(', ');
     return;
   }
 

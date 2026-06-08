@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D7 — Chocolate Powder Hopper Inspection</title>
+<style>
+  :root {
+    --bg: #0f0f0f; --surface: #1a1a1a; --card: #222;
+    --border: #333; --accent: #f5a623; --green: #4caf50;
+    --red: #e53935; --text: #eee; --muted: #888;
+    --blue: #42a5f5; --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 15px; padding: 0 0 40px; }
+  .header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 20px; }
+  .badge { display: inline-block; background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .section { padding: 20px; }
+  .purpose-box { background: var(--card); border-left: 4px solid var(--accent); border-radius: var(--radius); padding: 14px 16px; margin-bottom: 20px; font-size: 14px; color: var(--text); }
+  .steps-title { font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin-bottom: 12px; }
+  .step { display: flex; gap: 14px; margin-bottom: 16px; align-items: flex-start; }
+  .step-num { background: var(--accent); color: #000; font-size: 12px; font-weight: 700; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-text { font-size: 14px; line-height: 1.55; }
+  .step-text .note { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .back-btn { display: inline-block; margin: 8px 20px 0; padding: 10px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">D7</div>
+  <h1>Chocolate Powder Hopper Inspection</h1>
+  <p>Daily — Powder flow check and levelling</p>
+</div>
+
+<div class="section">
+  <div class="purpose-box">
+    Ensure the chocolate powder hopper is correctly filled, free of clumping, and no product remains stuck to the walls — preventing dispensing errors and inconsistent drink output.
+  </div>
+
+  <div class="steps-title">SOP Steps</div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-text">
+      Open the chocolate powder hopper compartment.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-text">
+      Inspect the powder level and check the interior walls for any product stuck to the sides or corners.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-text">
+      Level the powder inside using a clean, dry utensil — gently sweep any stuck powder off the walls and redistribute evenly.
+      <span class="note">Do not use wet or damp tools inside the hopper.</span>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-text">
+      Confirm no product remains stuck to the walls and the surface is level.
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-text">
+      Close the hopper compartment securely.
+    </div>
+  </div>
+
+</div>
+
+<a class="back-btn" onclick="history.back()">← Back</a>
+
+</body>
+</html>
