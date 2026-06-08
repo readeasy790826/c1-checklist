@@ -40,6 +40,18 @@
   .card-sub.yellow { color: #ffcc80; }
   .card-sub.green { color: #a5d6a7; }
   .go-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
+
+  .kb-section { padding: 16px 20px 0; }
+  .kb-heading { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+  .kb-grid { display: flex; flex-direction: column; gap: 8px; }
+  .kb-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-decoration: none; color: inherit; transition: border-color .2s; }
+  .kb-card:hover { border-color: var(--accent); }
+  .kb-icon { font-size: 22px; flex-shrink: 0; }
+  .kb-text { flex: 1; }
+  .kb-title { font-size: 14px; font-weight: 600; }
+  .kb-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .kb-arrow { color: var(--muted); font-size: 14px; }
+
   .last-refresh { text-align: center; font-size: 11px; color: var(--muted); padding: 8px; }
 </style>
 </head>
@@ -53,6 +65,37 @@
 <div id="alert-banner" class="alert-banner"></div>
 <div id="loading" class="loading">⏳ Loading status…</div>
 <div id="cards"></div>
+
+<div class="kb-section">
+  <div class="kb-heading">📚 Knowledge Base</div>
+  <div class="kb-grid">
+    <a class="kb-card" href="https://readeasy790826.github.io/c1-checklist/kb_refill.html" target="_blank">
+      <span class="kb-icon">📦</span>
+      <div class="kb-text">
+        <div class="kb-title">添加物料 SOP</div>
+        <div class="kb-desc">冰箱 1/2 号、咖啡豆、巧克力粉、杯子、Syrups</div>
+      </div>
+      <span class="kb-arrow">›</span>
+    </a>
+    <a class="kb-card" href="https://readeasy790826.github.io/c1-checklist/kb_brewing.html" target="_blank">
+      <span class="kb-icon">🍵</span>
+      <div class="kb-text">
+        <div class="kb-title">粹茶 SOP</div>
+        <div class="kb-desc">茉莉花茶、红茶、抹茶配方与步骤</div>
+      </div>
+      <span class="kb-arrow">›</span>
+    </a>
+    <a class="kb-card" href="https://readeasy790826.github.io/c1-checklist/kb_sanitation.html" target="_blank">
+      <span class="kb-icon">🧼</span>
+      <div class="kb-text">
+        <div class="kb-title">容器清洁消毒 SOP</div>
+        <div class="kb-desc">牛奶罐、茶汤罐、水桶套清洁消毒规程</div>
+      </div>
+      <span class="kb-arrow">›</span>
+    </a>
+  </div>
+</div>
+<div style="height:24px;"></div>
 <div class="last-refresh" id="last-refresh"></div>
 
 <script>
