@@ -17,8 +17,27 @@
   .badge { display: inline-block; background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
   .header h1 { font-size: 20px; font-weight: 700; }
   .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
-  .empty .icon { font-size: 40px; margin-bottom: 12px; }
+
+  .step-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin: 12px 20px 0; overflow: hidden; }
+  .step-card-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
+  .step-card-header:hover { background: #2a2a2a; }
+  .step-num-badge { background: var(--accent); color: #000; font-size: 13px; font-weight: 800; min-width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-title { font-size: 15px; font-weight: 600; flex: 1; }
+  .step-icon { font-size: 20px; flex-shrink: 0; }
+  .chevron { color: var(--muted); font-size: 13px; transition: transform .2s; }
+  .step-card.open .chevron { transform: rotate(90deg); }
+  .step-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--border); }
+  .step-card.open .step-body { display: block; }
+
+  .sub-steps-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin: 14px 0 8px; }
+  .sub-step { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+  .sub-num { background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-size: 11px; font-weight: 700; min-width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
+  .sub-text { font-size: 14px; line-height: 1.6; }
+  .sub-text strong { color: #fff; }
+  .sub-text .note { display: block; font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .warning-box { background: #b71c1c22; border: 1px solid #e5393544; border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 13px; color: #ef9a9a; }
+  .tip-box { background: #1b5e2022; border: 1px solid #4caf5044; border-radius: 8px; padding: 10px 12px; margin-top: 12px; font-size: 13px; color: #a5d6a7; }
+
   .back-btn { display: inline-block; margin: 20px 20px 0; padding: 10px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; }
 </style>
 </head>
@@ -27,16 +46,82 @@
 <div class="header">
   <div class="badge">知识库</div>
   <h1>Machine Moving SOP</h1>
-  <p>Dianmood — Steps for safely relocating the coffee machine</p>
+  <p>Dianmood — Pre-move preparation checklist</p>
 </div>
 
-<div class="empty">
-  <div class="icon">🚚</div>
-  <div>Content coming soon</div>
-  <div style="margin-top:6px;font-size:12px;">SOP under development</div>
+<!-- Step 1: Coffee Machine Wash & Boiler Cooldown -->
+<div class="step-card open" id="step1">
+  <div class="step-card-header" onclick="toggleStep('step1')">
+    <div class="step-num-badge">1</div>
+    <span class="step-icon">☕</span>
+    <span class="step-title">咖啡机清洗 & 锅炉冷却<br><span style="font-size:12px;font-weight:400;color:var(--muted);">Coffee Machine Wash & Boiler Cooldown</span></span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="step-body">
+    <div class="sub-steps-label">Steps</div>
+    <div class="sub-step"><div class="sub-num">1</div><div class="sub-text">运行咖啡机完整清洗程序（Tablet Cleaning）。</div></div>
+    <div class="sub-step"><div class="sub-num">2</div><div class="sub-text">清洗完成后，<strong>关闭咖啡机电源</strong>，让锅炉自然冷却。</div></div>
+    <div class="sub-step"><div class="sub-num">3</div><div class="sub-text">等待至少 <strong>60 分钟</strong>，确认机身不再发热后方可搬运。</div></div>
+    <div class="warning-box">⚠️ 锅炉未冷却时严禁移动，避免烫伤及内部损坏。</div>
+  </div>
+</div>
+
+<!-- Step 2: Ice Machine Clean Mode -->
+<div class="step-card" id="step2">
+  <div class="step-card-header" onclick="toggleStep('step2')">
+    <div class="step-num-badge">2</div>
+    <span class="step-icon">🧊</span>
+    <span class="step-title">制冰机长按 Clean 防水<br><span style="font-size:12px;font-weight:400;color:var(--muted);">Ice Machine — Hold Clean to Drain</span></span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="step-body">
+    <div class="sub-steps-label">Steps</div>
+    <div class="sub-step"><div class="sub-num">1</div><div class="sub-text">找到制冰机控制面板上的 <strong>Clean</strong> 按钮。</div></div>
+    <div class="sub-step"><div class="sub-num">2</div><div class="sub-text"><strong>长按 Clean 按钮</strong>，进入排水 / 防水模式。</div></div>
+    <div class="sub-step"><div class="sub-num">3</div><div class="sub-text">等待机器完成排水，确认无积水后继续下一步。</div></div>
+    <div class="tip-box">✅ 此步骤防止搬运时内部积水溢出，必须在移机前完成。</div>
+  </div>
+</div>
+
+<!-- Step 3: Dispense All Ice -->
+<div class="step-card" id="step3">
+  <div class="step-card-header" onclick="toggleStep('step3')">
+    <div class="step-num-badge">3</div>
+    <span class="step-icon">🧊</span>
+    <span class="step-title">制冰机冰块全部 Dispense<br><span style="font-size:12px;font-weight:400;color:var(--muted);">Dispense All Ice from Ice Machine</span></span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="step-body">
+    <div class="sub-steps-label">Steps</div>
+    <div class="sub-step"><div class="sub-num">1</div><div class="sub-text">将制冰机内所有冰块全部 dispense 出来。</div></div>
+    <div class="sub-step"><div class="sub-num">2</div><div class="sub-text">确认储冰仓<strong>已完全清空</strong>，无残余冰块。</div></div>
+    <div class="warning-box">⚠️ 冰块残留会在搬运中融化，导致漏水及电气短路风险。</div>
+  </div>
+</div>
+
+<!-- Step 4: Remove Robotic Arm -->
+<div class="step-card" id="step4">
+  <div class="step-card-header" onclick="toggleStep('step4')">
+    <div class="step-num-badge">4</div>
+    <span class="step-icon">🦾</span>
+    <span class="step-title">拆下机械臂<br><span style="font-size:12px;font-weight:400;color:var(--muted);">Remove Robotic Arm</span></span>
+    <span class="chevron">▶</span>
+  </div>
+  <div class="step-body">
+    <div class="sub-steps-label">Steps</div>
+    <div class="sub-step"><div class="sub-num">1</div><div class="sub-text">确认机器已断电。</div></div>
+    <div class="sub-step"><div class="sub-num">2</div><div class="sub-text">按照标准流程<strong>拆下机械臂</strong>，妥善放置避免碰撞。</div></div>
+    <div class="sub-step"><div class="sub-num">3</div><div class="sub-text">检查机械臂连接处无残留配件后方可搬运整机。</div></div>
+    <div class="tip-box">✅ 机械臂单独包装运输，避免搬运过程中损坏。</div>
+  </div>
 </div>
 
 <a class="back-btn" onclick="history.back()">← Back</a>
 
+<script>
+function toggleStep(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+</script>
 </body>
 </html>
