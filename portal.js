@@ -8,7 +8,12 @@ function getStatusInfo(freq, entry) {
   var limitH = LIMITS[freq];
   var warnH  = WARN_BEFORE[freq];
   if (!entry || !entry.datetime) {
-    return { level: 'red', label: 'Never completed', sub: '⚠️ No record found', subClass: 'red' };
+    return {
+      level: 'red',
+      label: freq.charAt(0).toUpperCase() + freq.slice(1),
+      sub: '⚠️ Never completed — no record found',
+      subClass: 'red'
+    };
   }
   var last      = new Date(entry.datetime);
   var now       = new Date();

@@ -19,6 +19,12 @@
   --radius:  12px;
 }
 
+/* ── Pulse animation for urgent status dots ───── */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: .4; }
+}
+
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   background: var(--bg);
@@ -35,6 +41,7 @@ body.checklist-page { padding-bottom: 100px; }
   background: linear-gradient(135deg, #1a1a1a, #111);
   padding: 20px;
   border-bottom: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
 }
 .portal-header h1 { font-size: 20px; font-weight: 700; color: var(--accent); }
 .portal-header p  { font-size: 13px; color: var(--muted); margin-top: 4px; }
@@ -43,6 +50,7 @@ body.checklist-page { padding-bottom: 100px; }
 .checklist-header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
   padding: 16px 20px;
   position: sticky;
   top: 0;
@@ -101,8 +109,9 @@ body.checklist-page { padding-bottom: 100px; }
   border-radius: var(--radius);
   margin: 0 20px 10px;
   overflow: hidden;
-  transition: border-color .2s;
+  transition: border-color .2s, transform .15s;
 }
+.freq-card:hover { transform: translateX(3px); }
 .freq-card.status-red    { border-color: var(--red); }
 .freq-card.status-yellow { border-color: var(--yellow); }
 .freq-card.status-green  { border-color: var(--green); }
@@ -115,9 +124,10 @@ body.checklist-page { padding-bottom: 100px; }
   text-decoration: none;
   color: inherit;
 }
+
 .status-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-.status-red    .status-dot { background: var(--red);    box-shadow: 0 0 6px var(--red); }
-.status-yellow .status-dot { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
+.status-red    .status-dot { background: var(--red);    box-shadow: 0 0 6px var(--red);    animation: pulse 2s ease-in-out infinite; }
+.status-yellow .status-dot { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); animation: pulse 2.5s ease-in-out infinite; }
 .status-green  .status-dot { background: var(--green);  box-shadow: 0 0 6px var(--green); }
 
 .card-text  { flex: 1; }
@@ -136,7 +146,9 @@ body.checklist-page { padding-bottom: 100px; }
   color: var(--muted);
   font-weight: 600;
   white-space: nowrap;
+  transition: color .2s, border-color .2s;
 }
+.card-inner:hover .go-btn { color: var(--accent); border-color: var(--accent); }
 
 /* ── Knowledge base section ───────────────────── */
 .kb-section { padding: 16px 20px 0; }
@@ -159,14 +171,15 @@ body.checklist-page { padding-bottom: 100px; }
   padding: 14px 16px;
   text-decoration: none;
   color: inherit;
-  transition: border-color .2s;
+  transition: border-color .2s, transform .15s;
 }
-.kb-card:hover { border-color: var(--accent); }
+.kb-card:hover { border-color: var(--accent); transform: translateX(3px); }
 .kb-icon  { font-size: 22px; flex-shrink: 0; }
 .kb-text  { flex: 1; }
 .kb-title { font-size: 14px; font-weight: 600; }
 .kb-desc  { font-size: 12px; color: var(--muted); margin-top: 2px; }
-.kb-arrow { color: var(--muted); font-size: 14px; }
+.kb-arrow { color: var(--muted); font-size: 14px; transition: color .2s, transform .15s; }
+.kb-card:hover .kb-arrow { color: var(--accent); transform: translateX(3px); }
 
 /* ── Last-refresh timestamp ───────────────────── */
 .last-refresh { text-align: center; font-size: 11px; color: var(--muted); padding: 8px; }
@@ -197,7 +210,9 @@ body.checklist-page { padding-bottom: 100px; }
   border-radius: 8px;
   padding: 8px 10px;
   font-size: 14px;
+  transition: border-color .2s;
 }
+.info-group input:focus { outline: none; border-color: var(--accent); }
 .readonly-input { background: var(--surface) !important; color: var(--accent); font-weight: 600; }
 
 .quick-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
@@ -211,13 +226,15 @@ body.checklist-page { padding-bottom: 100px; }
   cursor: pointer;
   background: var(--card);
   color: var(--text);
+  transition: opacity .2s;
 }
+.quick-btn:active { opacity: .7; }
 .quick-btn.all   { border-color: var(--green); color: var(--green); }
 .quick-btn.clear { border-color: var(--red);   color: var(--red); }
 
 /* ── Progress bar ─────────────────────────────── */
-.progress-bar  { height: 4px; background: var(--border); }
-.progress-fill { height: 100%; background: var(--green); transition: width .3s; width: 0%; }
+.progress-bar  { height: 6px; background: var(--border); }
+.progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width .3s; width: 0%; }
 .progress-text {
   font-size: 12px;
   color: var(--muted);
@@ -227,7 +244,7 @@ body.checklist-page { padding-bottom: 100px; }
 }
 
 /* ── Task list ────────────────────────────────── */
-.task-list    { padding: 16px 20px; }
+.task-list { padding: 16px 20px; }
 .section-label {
   font-size: 11px;
   font-weight: 700;
@@ -235,6 +252,8 @@ body.checklist-page { padding-bottom: 100px; }
   letter-spacing: .08em;
   text-transform: uppercase;
   margin: 14px 0 8px;
+  padding-left: 10px;
+  border-left: 3px solid var(--border);
 }
 
 /* ── Task card ────────────────────────────────── */
@@ -261,8 +280,19 @@ body.checklist-page { padding-bottom: 100px; }
   padding: 3px 7px;
   border-radius: 6px;
   flex-shrink: 0;
+  transition: background .2s;
 }
-.task-title { font-size: 14px; font-weight: 600; flex: 1; }
+.task-title {
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+  transition: color .2s;
+}
+
+/* Checked state: badge turns green, title dims */
+.task-card.checked .task-code  { background: var(--green); }
+.task-card.checked .task-title { color: var(--muted); }
+.task-card.checked { border-color: var(--green); }
 
 .task-checkbox {
   width: 24px;
@@ -290,7 +320,6 @@ body.checklist-page { padding-bottom: 100px; }
 }
 .task-card.checked .task-checkbox { background: var(--green); border-color: var(--green); }
 .task-card.checked .task-checkbox::after { display: block; }
-.task-card.checked { border-color: var(--green); }
 
 .task-body {
   display: none;
@@ -338,7 +367,9 @@ body.checklist-page { padding-bottom: 100px; }
   font-size: 13px;
   resize: vertical;
   min-height: 60px;
+  transition: border-color .2s;
 }
+.notes-input:focus { outline: none; border-color: var(--accent); }
 
 /* ── Fixed submit bar ─────────────────────────── */
 .submit-area {
@@ -360,8 +391,9 @@ body.checklist-page { padding-bottom: 100px; }
   font-size: 16px;
   font-weight: 700;
   cursor: pointer;
-  transition: opacity .2s;
+  transition: opacity .2s, box-shadow .2s;
 }
+.submit-btn:not(:disabled) { box-shadow: 0 4px 20px rgba(245, 166, 35, .2); }
 .submit-btn:disabled { opacity: .4; cursor: not-allowed; }
 .submit-status { text-align: center; margin-top: 10px; font-size: 13px; color: var(--muted); }
 .submit-status.ok  { color: var(--green); }
