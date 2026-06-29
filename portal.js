@@ -11,7 +11,7 @@ function getStatusInfo(freq, entry) {
     return {
       level: 'red',
       label: freq.charAt(0).toUpperCase() + freq.slice(1),
-      sub: '⚠️ Never completed — no record found',
+      sub: 'No record — never completed',
       subClass: 'red'
     };
   }
@@ -25,21 +25,21 @@ function getStatusInfo(freq, entry) {
     return {
       level: 'red',
       label: freq.charAt(0).toUpperCase() + freq.slice(1),
-      sub: '🔴 Overdue by ' + formatDuration(Math.round(-remaining)) + ' · Last: ' + doneStr,
+      sub: 'Overdue by ' + formatDuration(Math.round(-remaining)) + ' · Last done ' + doneStr,
       subClass: 'red'
     };
   } else if (remaining < warnH) {
     return {
       level: 'yellow',
       label: freq.charAt(0).toUpperCase() + freq.slice(1),
-      sub: '🟡 Due in ' + formatDuration(Math.round(remaining)) + ' · Last: ' + doneStr,
+      sub: 'Due in ' + formatDuration(Math.round(remaining)) + ' · Last done ' + doneStr,
       subClass: 'yellow'
     };
   } else {
     return {
       level: 'green',
       label: freq.charAt(0).toUpperCase() + freq.slice(1),
-      sub: '✅ Last done ' + doneStr,
+      sub: 'Last done ' + doneStr,
       subClass: 'green'
     };
   }
@@ -63,12 +63,11 @@ function buildCard(freq, info, url) {
   card.className = 'freq-card status-' + info.level;
   card.innerHTML =
     '<a class="card-inner" href="' + url + '">' +
-      '<div class="status-dot"></div>' +
       '<div class="card-text">' +
         '<div class="card-title">' + info.label + '</div>' +
         '<div class="card-sub ' + info.subClass + '">' + info.sub + '</div>' +
       '</div>' +
-      '<div class="go-btn">Go →</div>' +
+      '<div class="open-btn">Open</div>' +
     '</a>';
   return card;
 }
@@ -81,15 +80,15 @@ function updateBanner(statusData) {
     var parts = key.split('|');
     var freq  = parts[1];
     var info  = getStatusInfo(freq, statusData[key]);
-    if (info.level === 'red')    redItems.push(parts[0] + ' ' + freq);
+    if (info.level === 'red')         redItems.push(parts[0] + ' ' + freq);
     else if (info.level === 'yellow') yellowItems.push(parts[0] + ' ' + freq);
   });
   if (redItems.length > 0) {
     banner.className   = 'alert-banner red';
-    banner.textContent = '🔴 OVERDUE: ' + redItems.join(', ').toUpperCase();
+    banner.textContent = 'Overdue: ' + redItems.join(', ');
   } else if (yellowItems.length > 0) {
     banner.className   = 'alert-banner yellow';
-    banner.textContent = '🟡 DUE SOON: ' + yellowItems.join(', ');
+    banner.textContent = 'Due soon: ' + yellowItems.join(', ');
   } else {
     banner.className   = 'alert-banner';
     banner.textContent = '';
@@ -119,7 +118,7 @@ function initPortal(config) {
           'Last refreshed: ' + new Date().toLocaleTimeString();
       })
       .catch(function () {
-        document.getElementById('loading').textContent = '❌ Failed to load status. Check connection.';
+        document.getElementById('loading').textContent = 'Failed to load status — check connection.';
       });
   }
 

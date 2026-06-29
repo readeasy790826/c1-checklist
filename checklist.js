@@ -13,7 +13,7 @@
       { code: 'D4', title: 'Waste water tank swap and cleaning',       sopUrl: 'D4_waste_water_tank_swap_cleaning.html',  videoUrl: 'https://drive.google.com/drive/folders/1Zs_Ps4Cd4f-ucI_LivjSsS6hz2AE-XM9' },
       { code: 'D5', title: 'Surface cleaning and waste bag replacement', sopUrl: 'D5_surface_cleaning_system_online.html', videoUrl: 'https://drive.google.com/drive/folders/1LwK6yS4H4wAGMQmwKd1oZ3s4l0blD3s1' },
       { code: 'D6', title: 'Set robot online and KDS full screen',     sopUrl: 'D6_set_online_kds_fullscreen.html' },
-      { code: 'D7', title: 'Chocolate powder hopper inspection',       sopUrl: 'D7_chocolate_hopper_inspect.html',        videoUrl: 'https://drive.google.com/file/d/18dWltS0gTkbMUtEbsUxiKglpgwI5MaYl/view?usp=drive_link', videoLabel: '⚠️ What to Avoid' }
+      { code: 'D7', title: 'Chocolate powder hopper inspection',       sopUrl: 'D7_chocolate_hopper_inspect.html',        videoUrl: 'https://drive.google.com/file/d/18dWltS0gTkbMUtEbsUxiKglpgwI5MaYl/view?usp=drive_link', videoLabel: 'What to Avoid' }
     ],
     weekly: [
       { code: 'W1', title: 'Restart Windows',              sopUrl: 'W1_weekly_restart.html' },
@@ -31,8 +31,8 @@
     ]
   };
 
-  var cfg      = window.CHECKLIST_CONFIG;
-  var tasks    = TASK_DEFS[cfg.frequency];
+  var cfg       = window.CHECKLIST_CONFIG;
+  var tasks     = TASK_DEFS[cfg.frequency];
   var ALL_CODES = tasks.map(function (t) { return t.code; });
   var checkedSet = new Set();
 
@@ -41,15 +41,13 @@
 
     // Page metadata
     document.title = 'C1 Pro ' + freqLabel + ' Maintenance — ' + cfg.location;
-    document.getElementById('page-title').textContent =
-      '☕ C1 Pro ' + freqLabel + ' Maintenance — ' + cfg.location;
-    document.getElementById('page-subtitle').textContent =
-      'Complete all ' + tasks.length + ' tasks before ' +
-      (cfg.frequency === 'daily' ? 'opening' : 'submitting');
+    document.getElementById('page-title').textContent    = freqLabel + ' Maintenance';
+    document.getElementById('page-subtitle').textContent = cfg.location + ' · ' + cfg.machineId;
 
-    // Readonly form fields
-    document.getElementById('location').value   = cfg.location;
-    document.getElementById('machine_id').value = cfg.machineId;
+    // Session metadata text (visible) + hidden inputs (for submit payload)
+    document.getElementById('session-meta').textContent = tasks.length + ' tasks to complete';
+    document.getElementById('location').value           = cfg.location;
+    document.getElementById('machine_id').value         = cfg.machineId;
 
     // Default date/time to now
     var now = new Date();
@@ -60,7 +58,7 @@
     var list  = document.getElementById('task-list');
     var label = document.createElement('div');
     label.className   = 'section-label';
-    label.textContent = freqLabel.toUpperCase() + ' TASKS — Click task to expand, checkbox to complete';
+    label.textContent = freqLabel + ' Tasks';
     list.appendChild(label);
     tasks.forEach(function (task) { list.appendChild(buildTaskCard(task)); });
 
@@ -77,10 +75,10 @@
     card.className = 'task-card';
     card.id = 'task_' + task.code;
 
-    var links = '<a class="sop-link" href="' + task.sopUrl + '" target="_blank">📄 SOP Steps</a>';
+    var links = '<a class="sop-link" href="' + task.sopUrl + '" target="_blank">SOP Steps</a>';
     if (task.videoUrl) {
-      var label = task.videoLabel || '▶ Videos';
-      links += '<a class="video-btn" href="' + task.videoUrl + '" target="_blank">' + label + '</a>';
+      var lbl = task.videoLabel || 'Videos';
+      links += '<a class="video-btn" href="' + task.videoUrl + '" target="_blank">' + lbl + '</a>';
     }
 
     card.innerHTML =
@@ -113,10 +111,8 @@
     var done  = ALL_CODES.filter(function (c) { return checkedSet.has(c); }).length;
     var total = ALL_CODES.length;
     document.getElementById('progress_fill').style.width = (done / total * 100) + '%';
-    document.getElementById('progress_text').textContent = done + ' / ' + total + ' tasks completed';
-    var btn = document.getElementById('submit_btn');
-    btn.disabled     = done !== total;
-    btn.style.opacity = done === total ? '1' : '0.4';
+    document.getElementById('progress_text').textContent = done + ' / ' + total + ' complete';
+    document.getElementById('submit_btn').disabled = done !== total;
   }
 
   function toggleTask(code) {
@@ -167,13 +163,13 @@
     var time       = document.getElementById('check_time').value;
 
     if (!date || !time) {
-      setStatus('err', '⚠️ Please fill in Date and Time first.');
+      setStatus('err', 'Please fill in date and time.');
       return;
     }
 
     var incomplete = ALL_CODES.filter(function (c) { return !checkedSet.has(c); });
     if (incomplete.length > 0) {
-      setStatus('err', '⚠️ All tasks must be completed. Missing: ' + incomplete.join(', '));
+      setStatus('err', 'Complete all tasks before submitting. Missing: ' + incomplete.join(', '));
       return;
     }
 
@@ -208,7 +204,7 @@
         mode: 'no-cors'
       });
 
-      setStatus('ok', '✅ Submitted! (' + date + ' ' + time + ' — ' + location + ')');
+      setStatus('ok', 'Submitted — ' + date + ' ' + time + ' · ' + location);
 
       setTimeout(function () {
         checkedSet.clear();
@@ -222,7 +218,7 @@
       }, 3000);
 
     } catch (e) {
-      setStatus('err', '❌ Submit failed: ' + e.message);
+      setStatus('err', 'Submit failed: ' + e.message);
       btn.disabled = false;
     }
   }

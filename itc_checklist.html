@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>C1 Pro Daily Maintenance — ITC</title>
   <link rel="stylesheet" href="styles.css">
 </head>
@@ -13,31 +13,30 @@
   <p id="page-subtitle"></p>
 </div>
 
-<div class="info-form">
-  <div class="info-group">
-    <label>📍 Location</label>
-    <input type="text" id="location" readonly class="readonly-input">
-  </div>
-  <div class="info-group">
-    <label>🤖 Machine ID</label>
-    <input type="text" id="machine_id" readonly class="readonly-input">
-  </div>
-  <div class="info-group">
-    <label>📅 Date</label>
-    <input type="date" id="check_date">
-  </div>
-  <div class="info-group">
-    <label>🕐 Time</label>
-    <input type="time" id="check_time">
+<div class="info-bar">
+  <div class="session-meta" id="session-meta"></div>
+  <input type="hidden" id="location">
+  <input type="hidden" id="machine_id">
+  <div class="datetime-row">
+    <div class="info-group">
+      <label>Date</label>
+      <input type="date" id="check_date">
+    </div>
+    <div class="info-group">
+      <label>Time</label>
+      <input type="time" id="check_time">
+    </div>
   </div>
   <div class="quick-actions">
-    <button class="quick-btn all" id="btn-select-all">✅ Select All</button>
-    <button class="quick-btn clear" id="btn-clear-all">⭕ Clear All</button>
+    <button class="quick-btn all" id="btn-select-all">Select All</button>
+    <button class="quick-btn clear" id="btn-clear-all">Clear All</button>
   </div>
 </div>
 
-<div class="progress-bar"><div class="progress-fill" id="progress_fill"></div></div>
-<div class="progress-text" id="progress_text"></div>
+<div class="progress-wrap">
+  <div class="progress-bar"><div class="progress-fill" id="progress_fill"></div></div>
+  <div class="progress-text" id="progress_text"></div>
+</div>
 
 <div class="task-list" id="task-list"></div>
 
