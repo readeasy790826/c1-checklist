@@ -1,71 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>C1 Pro Weekly Maintenance — ITC</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0d0d0d; --card: #1a1a1a; --surface: #242424; --border: #2e2e2e;
-    --text: #f0f0f0; --muted: #666; --accent: #f5a623; --green: #4caf50;
-    --red: #e53935; --blue: #42a5f5; --radius: 12px;
-  }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 100px; }
-  .header { background: linear-gradient(135deg, #1a1a1a, #111); padding: 20px; border-bottom: 1px solid var(--border); }
-  .header h1 { font-size: 18px; font-weight: 700; color: var(--accent); }
-  .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .info-form { padding: 16px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .info-group label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
-  .info-group input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 14px; }
-  .quick-actions { grid-column: 1 / -1; display: flex; gap: 8px; }
-  .quick-btn { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border); font-size: 13px; font-weight: 600; cursor: pointer; background: var(--surface); color: var(--text); }
-  .quick-btn.all { border-color: var(--green); color: var(--green); }
-  .quick-btn.clear { border-color: var(--red); color: var(--red); }
-  .progress-bar { height: 4px; background: var(--surface); margin: 0 20px; border-radius: 2px; }
-  .progress-fill { height: 100%; background: var(--green); border-radius: 2px; width: 0%; transition: width .3s; }
-  .progress-text { text-align: center; font-size: 12px; color: var(--muted); padding: 6px; }
-  .task-list { padding: 16px 20px; }
-  .section-label { font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; margin: 14px 0 8px; }
-  .task-card { background: var(--card); border-radius: var(--radius); margin-bottom: 12px; overflow: hidden; border: 1px solid var(--border); transition: border-color .2s; }
-  .task-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
-  .task-code { background: var(--accent); color: #000; font-size: 11px; font-weight: 700; padding: 3px 7px; border-radius: 6px; flex-shrink: 0; }
-  .task-title { font-size: 14px; font-weight: 600; flex: 1; }
-  .task-checkbox { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; cursor: pointer; transition: all .2s; position: relative; }
-  .task-checkbox input { position: absolute; opacity: 0; cursor: pointer; }
-  .task-checkbox::after { content: ""; display: none; width: 8px; height: 14px; border: solid #fff; border-width: 0 3px 3px 0; transform: rotate(45deg); margin-bottom: 2px; }
-  .task-card.checked .task-checkbox { background: var(--green); border-color: var(--green); }
-  .task-card.checked .task-checkbox::after { display: block; }
-  .task-card.checked { border-color: var(--green); }
-  .task-body { display: none; padding: 0 16px 14px; border-top: 1px solid var(--border); margin-top: 10px; }
-  .task-body.open { display: block; }
-  .task-body .sop-link { display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 13px; color: var(--blue); text-decoration: none; margin: 10px 0 8px; }
-  .task-body .video-btn { display: inline-flex; align-items: center; gap: 6px; background: #b71c1c22; border: 1px solid #e5393566; border-radius: 8px; padding: 6px 12px; font-size: 13px; color: #ef9a9a; text-decoration: none; margin-left: 8px; }
-  .notes-label { font-size: 12px; color: var(--muted); margin: 8px 0 4px; }
-  .notes-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 8px; padding: 8px 10px; font-size: 13px; resize: vertical; min-height: 60px; }
-  .submit-area { padding: 20px; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg); border-top: 1px solid var(--border); }
-  .submit-btn { width: 100%; padding: 14px; border-radius: var(--radius); border: none; background: var(--accent); color: #000; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity .2s; }
-  .submit-btn:disabled { opacity: .4; cursor: not-allowed; }
-  .submit-status { text-align: center; margin-top: 10px; font-size: 13px; color: var(--muted); }
-  .submit-status.ok { color: var(--green); }
-  .submit-status.err { color: var(--red); }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>C1 Pro Weekly Maintenance — ITC</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="checklist-page">
 
-<div class="header">
-  <h1>☕ C1 Pro Weekly Maintenance — ITC</h1>
-  <p>Complete all 5 tasks before submitting</p>
+<div class="checklist-header">
+  <h1 id="page-title"></h1>
+  <p id="page-subtitle"></p>
 </div>
 
 <div class="info-form">
   <div class="info-group">
     <label>📍 Location</label>
-    <input type="text" id="location" value="ITC" readonly style="background: #1a1a1a; color: #f5a623; font-weight: 600;">
+    <input type="text" id="location" readonly class="readonly-input">
   </div>
   <div class="info-group">
     <label>🤖 Machine ID</label>
-    <input type="text" id="machine_id" value="C1-ITC-01" readonly style="background: #1a1a1a; color: #f5a623; font-weight: 600;">
+    <input type="text" id="machine_id" readonly class="readonly-input">
   </div>
   <div class="info-group">
     <label>📅 Date</label>
@@ -76,213 +31,22 @@
     <input type="time" id="check_time">
   </div>
   <div class="quick-actions">
-    <button class="quick-btn all" onclick="selectAll()">✅ Select All</button>
-    <button class="quick-btn clear" onclick="clearAll()">⭕ Clear All</button>
+    <button class="quick-btn all" id="btn-select-all">✅ Select All</button>
+    <button class="quick-btn clear" id="btn-clear-all">⭕ Clear All</button>
   </div>
 </div>
 
 <div class="progress-bar"><div class="progress-fill" id="progress_fill"></div></div>
-<div class="progress-text" id="progress_text">0 / 5 tasks completed</div>
+<div class="progress-text" id="progress_text"></div>
 
-<div class="task-list">
-  <div class="section-label">WEEKLY TASKS — Click checkbox to complete, click title for details</div>
-
-  <div class="task-card" id="task_W1">
-    <div class="task-header" onclick="toggleTask('W1')">
-      <span class="task-code">W1</span>
-      <span class="task-title">Restart Windows</span>
-      <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W1')">
-        <input type="checkbox" id="check_W1">
-      </div>
-    </div>
-    <div class="task-body" id="body_W1">
-      <a href="W1_weekly_restart.html" target="_blank" class="sop-link">📄 SOP Steps</a>
-      <div class="notes-label">Notes / Abnormal issue (optional):</div>
-      <textarea class="notes-input" id="notes_W1" placeholder="Leave blank if no issues"></textarea>
-    </div>
-  </div>
-
-  <div class="task-card" id="task_W2">
-    <div class="task-header" onclick="toggleTask('W2')">
-      <span class="task-code">W2</span>
-      <span class="task-title">Reboot kiosk</span>
-      <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W2')">
-        <input type="checkbox" id="check_W2">
-      </div>
-    </div>
-    <div class="task-body" id="body_W2">
-      <a href="https://readeasy790826.github.io/c1-checklist/W2_kiosk_reboot.html" target="_blank" class="sop-link">📄 SOP Steps</a>
-      <div class="notes-label">Notes / Abnormal issue (optional):</div>
-      <textarea class="notes-input" id="notes_W2" placeholder="Leave blank if no issues"></textarea>
-    </div>
-  </div>
-
-  <div class="task-card" id="task_W3">
-    <div class="task-header" onclick="toggleTask('W3')">
-      <span class="task-code">W3</span>
-      <span class="task-title">Brewer deep cleaning (swap)</span>
-      <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W3')">
-        <input type="checkbox" id="check_W3">
-      </div>
-    </div>
-    <div class="task-body" id="body_W3">
-      <a href="https://readeasy790826.github.io/c1-checklist/W3_weekly_kiosk_reset.html" target="_blank" class="sop-link">📄 SOP Steps</a>
-      <div class="notes-label">Notes / Abnormal issue (optional):</div>
-      <textarea class="notes-input" id="notes_W3" placeholder="Leave blank if no issues"></textarea>
-    </div>
-  </div>
-
-  <div class="task-card" id="task_W4">
-    <div class="task-header" onclick="toggleTask('W4')">
-      <span class="task-code">W4</span>
-      <span class="task-title">Clean the fridges</span>
-      <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W4')">
-        <input type="checkbox" id="check_W4">
-      </div>
-    </div>
-    <div class="task-body" id="body_W4">
-      <a href="https://readeasy790826.github.io/c1-checklist/W4_weekly_fridge_cleaning.html" target="_blank" class="sop-link">📄 SOP Steps</a>
-      <div class="notes-label">Notes / Abnormal issue (optional):</div>
-      <textarea class="notes-input" id="notes_W4" placeholder="Leave blank if no issues"></textarea>
-    </div>
-  </div>
-
-  <div class="task-card" id="task_W5">
-    <div class="task-header" onclick="toggleTask('W5')">
-      <span class="task-code">W5</span>
-      <span class="task-title">Recalibrate the scales</span>
-      <div class="task-checkbox" onclick="event.stopPropagation(); toggleCheck('W5')">
-        <input type="checkbox" id="check_W5">
-      </div>
-    </div>
-    <div class="task-body" id="body_W5">
-      <a href="https://readeasy790826.github.io/c1-checklist/W5_weekly_calibration.html" target="_blank" class="sop-link">📄 SOP Steps</a>
-      <div class="notes-label">Notes / Abnormal issue (optional):</div>
-      <textarea class="notes-input" id="notes_W5" placeholder="Leave blank if no issues"></textarea>
-    </div>
-  </div>
-
-</div>
+<div class="task-list" id="task-list"></div>
 
 <div class="submit-area">
-  <button class="submit-btn" id="submit_btn" onclick="submitChecklist()" disabled>Submit Checklist</button>
+  <button class="submit-btn" id="submit_btn" disabled>Submit Checklist</button>
   <div class="submit-status" id="submit_status"></div>
 </div>
 
-<script>
-const now = new Date();
-document.getElementById('check_date').value = now.toISOString().split('T')[0];
-document.getElementById('check_time').value = now.toTimeString().slice(0,5);
-
-const ALL_TASKS = ["W1", "W2", "W3", "W4", "W5"];
-const checkedSet = new Set();
-
-function updateProgress() {
-  const done = ALL_TASKS.filter(c => checkedSet.has(c)).length;
-  const total = ALL_TASKS.length;
-  document.getElementById('progress_fill').style.width = (done / total * 100) + '%';
-  document.getElementById('progress_text').textContent = `${done} / ${total} tasks completed`;
-  const btn = document.getElementById('submit_btn');
-  btn.disabled = done !== total;
-  btn.style.opacity = done === total ? '1' : '0.4';
-}
-updateProgress();
-
-function toggleTask(code) { document.getElementById('body_' + code).classList.toggle('open'); }
-
-function toggleCheck(code) {
-  if (checkedSet.has(code)) {
-    checkedSet.delete(code);
-    document.getElementById('task_' + code).classList.remove('checked');
-    document.getElementById('check_' + code).checked = false;
-  } else {
-    checkedSet.add(code);
-    document.getElementById('task_' + code).classList.add('checked');
-    document.getElementById('check_' + code).checked = true;
-  }
-  updateProgress();
-}
-
-function selectAll() {
-  ALL_TASKS.forEach(c => {
-    checkedSet.add(c);
-    document.getElementById('task_' + c).classList.add('checked');
-    document.getElementById('check_' + c).checked = true;
-  });
-  updateProgress();
-}
-
-function clearAll() {
-  ALL_TASKS.forEach(c => {
-    checkedSet.delete(c);
-    document.getElementById('task_' + c).classList.remove('checked');
-    document.getElementById('check_' + c).checked = false;
-  });
-  updateProgress();
-}
-
-const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeSoG86Dx17hLxma5pnx3DNgyqUFXtjukPGQljcCO4R2JBpf-_bQwKR0oFQL8AA4G5/exec';
-
-async function submitChecklist() {
-  const location = document.getElementById('location').value;
-  const machine_id = document.getElementById('machine_id').value;
-  const date = document.getElementById('check_date').value;
-  const time = document.getElementById('check_time').value;
-
-  if (!date || !time) {
-    document.getElementById('submit_status').className = 'submit-status err';
-    document.getElementById('submit_status').textContent = '⚠️ Please fill in Date and Time first.';
-    return;
-  }
-
-  const incomplete = ALL_TASKS.filter(c => !checkedSet.has(c));
-  if (incomplete.length > 0) {
-    document.getElementById('submit_status').className = 'submit-status err';
-    document.getElementById('submit_status').textContent = '⚠️ All tasks must be completed. Missing: ' + incomplete.join(', ');
-    return;
-  }
-
-  const tasks = {};
-  ALL_TASKS.forEach(c => {
-    const notesEl = document.getElementById('notes_' + c);
-    tasks[c] = { checked: checkedSet.has(c), notes: notesEl ? notesEl.value.trim() : '' };
-  });
-
-  const payload = {
-    date, time, datetime: `${date} ${time}`,
-    location, machine_id, staff_name: '', supervisor: '',
-    frequency: 'weekly', tasks, abnormal_issues: ''
-  };
-
-  const btn = document.getElementById('submit_btn');
-  btn.disabled = true;
-  const status = document.getElementById('submit_status');
-  status.className = 'submit-status';
-  status.textContent = 'Submitting…';
-
-  try {
-    await fetch(GOOGLE_SCRIPT_URL, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify(payload), mode: 'no-cors'
-    });
-    status.className = 'submit-status ok';
-    status.textContent = `✅ Submitted! (${date} ${time} — ${location})`;
-    setTimeout(() => {
-      checkedSet.clear();
-      document.querySelectorAll('.task-card').forEach(c => c.classList.remove('checked'));
-      document.querySelectorAll('input[type="checkbox"]').forEach(c => c.checked = false);
-      document.querySelectorAll('.notes-input').forEach(n => n.value = '');
-      updateProgress();
-      document.getElementById('check_time').value = new Date().toTimeString().slice(0,5);
-      btn.disabled = false;
-      status.textContent = '';
-    }, 3000);
-  } catch(e) {
-    status.className = 'submit-status err';
-    status.textContent = '❌ Submit failed: ' + e.message;
-    btn.disabled = false;
-  }
-}
-</script>
+<script>window.CHECKLIST_CONFIG = { location: 'ITC', machineId: 'C1-ITC-01', frequency: 'weekly' };</script>
+<script src="checklist.js"></script>
 </body>
 </html>

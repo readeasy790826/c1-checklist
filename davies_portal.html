@@ -1,63 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>C1 Pro Portal — Davies</title>
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #0d0d0d; --card: #1a1a1a; --surface: #242424; --border: #2e2e2e;
-    --text: #f0f0f0; --muted: #666; --accent: #f5a623;
-    --green: #4caf50; --yellow: #ffb300; --red: #e53935; --blue: #42a5f5;
-    --radius: 12px;
-  }
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 40px; }
-  .header { background: linear-gradient(135deg, #1a1a1a, #111); padding: 20px; border-bottom: 1px solid var(--border); }
-  .header h1 { font-size: 20px; font-weight: 700; color: var(--accent); }
-  .header p { font-size: 13px; color: var(--muted); margin-top: 4px; }
-  .alert-banner { display: none; padding: 12px 20px; font-size: 13px; font-weight: 600; text-align: center; }
-  .alert-banner.red { background: #b71c1c44; color: #ef9a9a; border-bottom: 1px solid #e5393533; display: block; }
-  .alert-banner.yellow { background: #f57f1744; color: #ffcc80; border-bottom: 1px solid #fb8c0033; display: block; }
-  .loading { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 14px; }
-  .section { padding: 16px 20px; }
-  .location-block { margin-bottom: 8px; }
-  .location-heading { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; padding: 16px 20px 8px; }
-  .machine-id { font-size: 11px; color: var(--muted); font-weight: 400; margin-left: 6px; text-transform: none; letter-spacing: 0; }
-  .freq-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); margin: 0 20px 10px; overflow: hidden; transition: border-color .2s; }
-  .freq-card.status-red { border-color: var(--red); }
-  .freq-card.status-yellow { border-color: var(--yellow); }
-  .freq-card.status-green { border-color: var(--green); }
-  .card-inner { display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-decoration: none; color: inherit; }
-  .status-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
-  .status-red .status-dot { background: var(--red); box-shadow: 0 0 6px var(--red); }
-  .status-yellow .status-dot { background: var(--yellow); box-shadow: 0 0 6px var(--yellow); }
-  .status-green .status-dot { background: var(--green); box-shadow: 0 0 6px var(--green); }
-  .card-text { flex: 1; }
-  .card-title { font-size: 14px; font-weight: 700; text-transform: capitalize; }
-  .card-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .card-sub.red { color: #ef9a9a; }
-  .card-sub.yellow { color: #ffcc80; }
-  .card-sub.green { color: #a5d6a7; }
-  .go-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; font-size: 12px; color: var(--muted); font-weight: 600; white-space: nowrap; }
-
-  .kb-section { padding: 16px 20px 0; }
-  .kb-heading { font-size: 13px; font-weight: 700; color: var(--accent); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
-  .kb-grid { display: flex; flex-direction: column; gap: 8px; }
-  .kb-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); display: flex; align-items: center; gap: 12px; padding: 14px 16px; text-decoration: none; color: inherit; transition: border-color .2s; }
-  .kb-card:hover { border-color: var(--accent); }
-  .kb-icon { font-size: 22px; flex-shrink: 0; }
-  .kb-text { flex: 1; }
-  .kb-title { font-size: 14px; font-weight: 600; }
-  .kb-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
-  .kb-arrow { color: var(--muted); font-size: 14px; }
-
-  .last-refresh { text-align: center; font-size: 11px; color: var(--muted); padding: 8px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>C1 Pro Portal — Davies</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<div class="header">
+<div class="portal-header">
   <h1>☕ Davies Portal</h1>
   <p>C1-DV-01 · Real-time status</p>
 </div>
@@ -69,7 +20,7 @@
 <div class="kb-section">
   <div class="kb-heading">📚 Knowledge Base</div>
   <div class="kb-grid">
-    <a class="kb-card" href="https://readeasy790826.github.io/c1-checklist/kb_refill.html" target="_blank">
+    <a class="kb-card" href="kb_refill.html" target="_blank">
       <span class="kb-icon">📦</span>
       <div class="kb-text">
         <div class="kb-title">Ingredient Restocking SOP</div>
@@ -77,19 +28,19 @@
       </div>
       <span class="kb-arrow">›</span>
     </a>
-    <a class="kb-card" href="https://readeasy790826.github.io/c1-checklist/kb_brewing.html" target="_blank">
+    <a class="kb-card" href="kb_brewing.html" target="_blank">
       <span class="kb-icon">🍵</span>
       <div class="kb-text">
         <div class="kb-title">Tea Brewing SOP</div>
-        <div class="kb-desc">Jasmine, black tea & matcha recipes and steps</div>
+        <div class="kb-desc">Jasmine, black tea &amp; matcha recipes and steps</div>
       </div>
       <span class="kb-arrow">›</span>
     </a>
-    <a class="kb-card" href="https://readeasy790826.github.io/c1-checklist/kb_sanitation.html" target="_blank">
+    <a class="kb-card" href="kb_sanitation.html" target="_blank">
       <span class="kb-icon">🧼</span>
       <div class="kb-text">
-        <div class="kb-title">Container Cleaning & Sanitising SOP</div>
-        <div class="kb-desc">Milk jug, tea urn & water bucket cover cleaning procedure</div>
+        <div class="kb-title">Container Cleaning &amp; Sanitising SOP</div>
+        <div class="kb-desc">Milk jug, tea urn &amp; water bucket cover cleaning procedure</div>
       </div>
       <span class="kb-arrow">›</span>
     </a>
@@ -98,129 +49,16 @@
 <div style="height:24px;"></div>
 <div class="last-refresh" id="last-refresh"></div>
 
+<script src="portal.js"></script>
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeSoG86Dx17hLxma5pnx3DNgyqUFXtjukPGQljcCO4R2JBpf-_bQwKR0oFQL8AA4G5/exec';
-const LIMITS = { daily: 36, weekly: 240, monthly: 1080 }; // hours
-const WARN_BEFORE = { daily: 6, weekly: 24, monthly: 72 }; // warn when X hours left
-
-function getStatusInfo(freq, entry) {
-  var limitH = LIMITS[freq];
-  var warnH  = WARN_BEFORE[freq];
-  if (!entry || !entry.datetime) {
-    return { level: 'red', label: 'Never completed', sub: '⚠️ No record found', subClass: 'red' };
+initPortal({
+  location: 'Davies',
+  urls: {
+    daily:   'davies_checklist.html',
+    weekly:  'davies_weekly_checklist.html',
+    monthly: 'davies_monthly_checklist.html'
   }
-  var last = new Date(entry.datetime);
-  var now  = new Date();
-  var diffH = (now - last) / 3600000;
-  var remaining = limitH - diffH;
-  var doneStr = formatAgo(diffH);
-
-  if (remaining < 0) {
-    var overdueH = Math.round(-remaining);
-    return {
-      level: 'red',
-      label: freq.charAt(0).toUpperCase() + freq.slice(1),
-      sub: '🔴 Overdue by ' + formatDuration(overdueH) + ' · Last: ' + doneStr,
-      subClass: 'red'
-    };
-  } else if (remaining < warnH) {
-    return {
-      level: 'yellow',
-      label: freq.charAt(0).toUpperCase() + freq.slice(1),
-      sub: '🟡 Due in ' + formatDuration(Math.round(remaining)) + ' · Last: ' + doneStr,
-      subClass: 'yellow'
-    };
-  } else {
-    return {
-      level: 'green',
-      label: freq.charAt(0).toUpperCase() + freq.slice(1),
-      sub: '✅ Last done ' + doneStr,
-      subClass: 'green'
-    };
-  }
-}
-
-function formatAgo(h) {
-  if (h < 1) return Math.round(h * 60) + 'm ago';
-  if (h < 24) return Math.round(h) + 'h ago';
-  return Math.round(h / 24) + 'd ago';
-}
-
-function formatDuration(h) {
-  if (h < 24) return h + 'h';
-  var d = Math.floor(h / 24);
-  var rem = h % 24;
-  return rem > 0 ? d + 'd ' + rem + 'h' : d + 'd';
-}
-
-function buildCard(freq, info, url) {
-  var card = document.createElement('div');
-  card.className = 'freq-card status-' + info.level;
-  card.innerHTML = '<a class="card-inner" href="' + url + '">' +
-    '<div class="status-dot"></div>' +
-    '<div class="card-text">' +
-      '<div class="card-title">' + info.label + '</div>' +
-      '<div class="card-sub ' + info.subClass + '">' + info.sub + '</div>' +
-    '</div>' +
-    '<div class="go-btn">Go →</div>' +
-    '</a>';
-  return card;
-}
-
-
-
-function updateBanner(statusData) {
-  var banner = document.getElementById('alert-banner');
-  var redItems = [];
-  var yellowItems = [];
-  Object.keys(statusData).forEach(function(key) {
-    var parts = key.split('|');
-    var freq = parts[1];
-    var info = getStatusInfo(freq, statusData[key]);
-    if (info.level === 'red') redItems.push(parts[0] + ' ' + freq);
-    else if (info.level === 'yellow') yellowItems.push(parts[0] + ' ' + freq);
-  });
-  if (redItems.length > 0) {
-    banner.className = 'alert-banner red';
-    banner.textContent = '🔴 OVERDUE: ' + redItems.join(', ').toUpperCase();
-  } else if (yellowItems.length > 0) {
-    banner.className = 'alert-banner yellow';
-    banner.textContent = '🟡 DUE SOON: ' + yellowItems.join(', ');
-  } else {
-    banner.className = 'alert-banner';
-    banner.textContent = '';
-  }
-}
-
-function loadStatus() {
-  fetch(SCRIPT_URL + '?action=status')
-    .then(function(r) { return r.json(); })
-    .then(function(json) {
-      document.getElementById('loading').style.display = 'none';
-      var statusData = json.data || {};
-      updateBanner(statusData);
-      
-  ['daily','weekly','monthly'].forEach(function(freq) {
-    var urls = {
-      daily:   'https://readeasy790826.github.io/c1-checklist/davies_checklist.html',
-      weekly:  'https://readeasy790826.github.io/c1-checklist/davies_weekly_checklist.html',
-      monthly: 'https://readeasy790826.github.io/c1-checklist/davies_monthly_checklist.html'
-    };
-    var key = 'Davies|' + freq;
-    var entry = statusData[key];
-    var info = getStatusInfo(freq, entry);
-    var card = buildCard(freq, info, urls[freq]);
-    document.getElementById('cards').appendChild(card);
-  });
-      document.getElementById('last-refresh').textContent = 'Last refreshed: ' + new Date().toLocaleTimeString();
-    })
-    .catch(function(err) {
-      document.getElementById('loading').textContent = '❌ Failed to load status. Check connection.';
-    });
-}
-
-loadStatus();
-setInterval(loadStatus, 60000);
+});
 </script>
 </body>
 </html>
