@@ -70,6 +70,35 @@
     });
   }
 
+  // ── SOP content rendering (shared by checklist, guided mode, sop view) ────
+  // SOP bodies live as Markdown files (content/sops/<code>.<lang>.md) and are
+  // fetched + cached on demand by md.js. These helpers turn a loaded doc into
+  // the unified UI and lazy-load it into a host element.
+  function videoChip(url, label) {
+    if (!url) return '';
+    return '<a class="chip-link chip-link--video" href="' + esc(url) +
+      '" target="_blank" rel="noopener">▶ ' + esc(label || t('videos')) + '</a>';
+  }
+  function sopHtml(code, meta, body, withFullLink) {
+    var lang = D.getLang();
+    var label = meta['video_label_' + lang] || meta.video_label;
+    return '<div class="sop-links">' + videoChip(meta.video, label) +
+      (withFullLink ? '<a class="chip-link" href="#/sop/' + code + '">' + t('open_full') + ' ›</a>' : '') +
+      '</div><div class="sop-content">' + D.md(body, BASE) + '</div>';
+  }
+  // Lazy-load an SOP into a host element. Falls back to the legacy standalone
+  // page link if the Markdown file is missing.
+  function fillSop(host, code, fallbackUrl) {
+    host.innerHTML = '<div class="loading">' + t('loading') + '</div>';
+    D.loadSop(code, D.getLang(), BASE).then(function (doc) {
+      host.innerHTML = sopHtml(code, doc.meta, doc.body, true);
+    }).catch(function () {
+      host.innerHTML = fallbackUrl
+        ? '<div class="sop-links"><a class="chip-link" href="' + BASE + fallbackUrl + '">' + t('sop_steps') + ' ›</a></div>'
+        : '<div class="empty">' + t('sop_missing') + '</div>';
+    });
+  }
+
   // ── Header (fixed; rendered once, updated per route) ─────────────────────
   function renderHeader() {
     var lang = D.getLang();
@@ -272,9 +301,6 @@
     tasks.forEach(function (task) { list.appendChild(taskCard(task)); });
 
     function taskCard(task) {
-      var links = '<a class="chip-link" href="' + BASE + task.sopUrl + '">' + t('sop_steps') + ' ›</a>';
-      if (task.videoUrl) links += '<a class="chip-link chip-link--video" href="' + task.videoUrl + '" target="_blank" rel="noopener">▶ ' +
-        esc(task.videoLabel || t('videos')) + '</a>';
       var card = el(
         '<div class="task" id="task-' + task.code + '">' +
           '<div class="task__head">' +
@@ -283,15 +309,21 @@
             '<span class="checkbox" data-check="' + task.code + '"></span>' +
           '</div>' +
           '<div class="task__body">' +
-            '<div class="task__links">' + links + '</div>' +
+            '<div class="sop-host"></div>' +
             '<div class="field"><label>' + t('notes_label') + '</label>' +
               '<textarea data-note="' + task.code + '" placeholder="' + t('notes_ph') + '"></textarea></div>' +
           '</div>' +
         '</div>');
-      // header toggles expand; checkbox toggles done (without expanding)
+      // header toggles expand; checkbox toggles done (without expanding).
+      // SOP content is fetched lazily the first time a task is opened.
       card.querySelector('.task__head').addEventListener('click', function (e) {
         if (e.target.closest('.checkbox')) return;
         card.classList.toggle('open');
+        var host = card.querySelector('.sop-host');
+        if (card.classList.contains('open') && !host.dataset.loaded) {
+          host.dataset.loaded = '1';
+          fillSop(host, task.code, task.sopUrl);
+        }
       });
       card.querySelector('.checkbox').addEventListener('click', function (e) {
         e.stopPropagation(); toggle(task.code);
@@ -365,6 +397,33 @@
     updateProgress();
   }
 
+  // ── View: full-page SOP (deep-linkable, printable) ──────────────────────
+  function viewSop(root, code) {
+    setBackVisible(true);
+    var wrap = el('<div class="wrap"><div class="loading">' + t('loading') + '</div></div>');
+    root.appendChild(wrap);
+    D.loadSop(code, D.getLang(), BASE).then(function (doc) {
+      var meta = doc.meta, lang = D.getLang();
+      var title = meta['title_' + lang] || meta.title || code;
+      var freqLabel = (D.FREQ_LABEL[lang] && D.FREQ_LABEL[lang][meta.freq]) || '';
+      var label = meta['video_label_' + lang] || meta.video_label;
+      var metaRow = '<div class="sop-meta">' +
+        '<span class="meta-chip meta-chip--code">' + esc(code) + '</span>' +
+        (freqLabel ? '<span class="meta-chip">' + esc(freqLabel) + '</span>' : '') +
+        (meta.time ? '<span class="meta-chip">' + esc(meta.time) + '</span>' : '') + '</div>';
+      var foot = meta.updated
+        ? '<div class="last-refresh">' + t('updated_on', { x: meta.updated }) +
+          (meta.version ? ' · v' + esc(meta.version) : '') + '</div>'
+        : '';
+      wrap.innerHTML =
+        '<div class="page-head"><h1>' + esc(title) + '</h1></div>' + metaRow +
+        (meta.video ? '<div class="sop-links">' + videoChip(meta.video, label) + '</div>' : '') +
+        '<div class="sop-content sop-content--page">' + D.md(doc.body, BASE) + '</div>' + foot;
+    }).catch(function () {
+      wrap.innerHTML = '<div class="empty">' + t('sop_missing') + '</div>';
+    });
+  }
+
   // ── Guided Mode: full-screen one-task-at-a-time stepper ─────────────────
   function openGuided(tasks, checked, onClose) {
     var i = 0;
@@ -383,16 +442,14 @@
 
     function render() {
       var task = tasks[i];
-      var links = '<a class="chip-link" href="' + BASE + task.sopUrl + '">' + t('sop_steps') + ' ›</a>';
-      if (task.videoUrl) links += '<a class="chip-link chip-link--video" href="' + task.videoUrl + '" target="_blank" rel="noopener">▶ ' +
-        esc(task.videoLabel || t('videos')) + '</a>';
       overlay.querySelector('#g-stage').innerHTML =
         '<span class="guided__code">' + esc(task.code) + ' · ' + t('guided_step', { i: i + 1, n: tasks.length }) + '</span>' +
         '<div class="guided__title">' + esc(task.title) + '</div>' +
-        '<div class="guided__links">' + links + '</div>' +
+        '<div class="guided__sop sop-host" id="g-sop"></div>' +
         '<div class="guided__check' + (checked[task.code] ? ' done' : '') + '" id="g-check">' +
           '<span class="checkbox"></span><span>' + (checked[task.code] ? t('done_label') : t('mark_done')) + '</span>' +
         '</div>';
+      fillSop(overlay.querySelector('#g-sop'), task.code, task.sopUrl);
       overlay.querySelector('#g-bar').style.width = ((i + 1) / tasks.length * 100) + '%';
       overlay.querySelector('#g-count').textContent = (i + 1) + ' / ' + tasks.length;
       overlay.querySelector('#g-prev').style.visibility = i === 0 ? 'hidden' : 'visible';
@@ -423,6 +480,8 @@
 
     if (parts[0] === 'c' && parts[1] && parts[2]) {
       viewChecklist(root, parts[1], parts[2]);
+    } else if (parts[0] === 'sop' && parts[1]) {
+      viewSop(root, parts[1]);
     } else {
       viewDashboard(root);
     }

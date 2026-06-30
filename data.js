@@ -21,18 +21,20 @@ window.DIANMOOD = window.DIANMOOD || {};
   D.LIMITS      = { daily: 36,  weekly: 240, monthly: 1080 };
   D.WARN_BEFORE = { daily: 6,   weekly: 24,  monthly: 72   };
 
-  // Maintenance tasks per frequency. sopUrl bridges to existing SOP pages for now;
-  // videoLabel overrides the default "Videos" chip.
+  // Maintenance tasks per frequency. `code` links each task to its SOP file at
+  // content/sops/<code>.<lang>.md (steps + reference video live in that file's
+  // frontmatter). `sopUrl` is the legacy standalone page, used only as a fallback
+  // if the Markdown file can't be loaded.
   D.TASKS = {
     daily: [
       { code: 'D0', title: 'Enter maintenance mode',                     sopUrl: 'D0_enter_maintenance_mode.html' },
-      { code: 'D1', title: 'Coffee system tablet cleaning',              sopUrl: 'D1_coffee_system_tablet_cleaning.html', videoUrl: 'https://drive.google.com/drive/folders/1QUJTRZZq9H95vjXKdMcvDKvWC5w2YUxT' },
-      { code: 'D2', title: 'Liquid dispenser cleaning',                  sopUrl: 'D2_liquid_dispenser_cleaning.html',      videoUrl: 'https://drive.google.com/drive/folders/1kWjNmZAKVA0vmNZWfmlynLeqehhfjr8m' },
-      { code: 'D3', title: 'Milk system cleaning',                       sopUrl: 'D3_milk_system_cleaning.html',           videoUrl: 'https://drive.google.com/drive/folders/1-ABEVhrBSKxZ-Cy7juKHT1sbNv9in1BQ' },
-      { code: 'D4', title: 'Waste water tank swap and cleaning',         sopUrl: 'D4_waste_water_tank_swap_cleaning.html', videoUrl: 'https://drive.google.com/drive/folders/1Zs_Ps4Cd4f-ucI_LivjSsS6hz2AE-XM9' },
-      { code: 'D5', title: 'Surface cleaning and waste bag replacement', sopUrl: 'D5_surface_cleaning_system_online.html', videoUrl: 'https://drive.google.com/drive/folders/1LwK6yS4H4wAGMQmwKd1oZ3s4l0blD3s1' },
+      { code: 'D1', title: 'Coffee system tablet cleaning',              sopUrl: 'D1_coffee_system_tablet_cleaning.html' },
+      { code: 'D2', title: 'Liquid dispenser cleaning',                  sopUrl: 'D2_liquid_dispenser_cleaning.html' },
+      { code: 'D3', title: 'Milk system cleaning',                       sopUrl: 'D3_milk_system_cleaning.html' },
+      { code: 'D4', title: 'Waste water tank swap and cleaning',         sopUrl: 'D4_waste_water_tank_swap_cleaning.html' },
+      { code: 'D5', title: 'Surface cleaning and waste bag replacement', sopUrl: 'D5_surface_cleaning_system_online.html' },
       { code: 'D6', title: 'Set robot online and KDS full screen',       sopUrl: 'D6_set_online_kds_fullscreen.html' },
-      { code: 'D7', title: 'Chocolate powder hopper inspection',         sopUrl: 'D7_chocolate_hopper_inspect.html',       videoUrl: 'https://drive.google.com/file/d/18dWltS0gTkbMUtEbsUxiKglpgwI5MaYl/view?usp=drive_link', videoLabel: 'What to Avoid' }
+      { code: 'D7', title: 'Chocolate powder hopper inspection',         sopUrl: 'D7_chocolate_hopper_inspect.html' }
     ],
     weekly: [
       { code: 'W1', title: 'Restart Windows',             sopUrl: 'W1_weekly_restart.html' },
@@ -44,7 +46,7 @@ window.DIANMOOD = window.DIANMOOD || {};
     ],
     monthly: [
       { code: 'M1', title: 'Empty the ice maker',                       sopUrl: 'M1_monthly_spout_cleaning.html' },
-      { code: 'M2', title: 'Powder system deep manual cleaning',        sopUrl: 'M2_monthly_powder_cleaning.html', videoUrl: 'https://drive.google.com/file/d/1cHumUZ8qdpyWO_qYNSSUm6Ts0Hl38FNS/view?usp=drive_link' },
+      { code: 'M2', title: 'Powder system deep manual cleaning',        sopUrl: 'M2_monthly_powder_cleaning.html' },
       { code: 'M3', title: 'Deep cleaning of beverage spout groups',    sopUrl: 'M3_monthly_spout_group_cleaning.html' },
       { code: 'M4', title: 'Clean coffee grinder with cleaning tablets',sopUrl: 'M4_monthly_grinder_cleaning.html' },
       { code: 'M5', title: 'Syrup dispenser deep cleaning',             sopUrl: 'M5_monthly_syrup_flushing.html' }

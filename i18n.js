@@ -59,7 +59,10 @@ window.DIANMOOD = window.DIANMOOD || {};
       next:           'Next',
       previous:       'Back',
       finish:         'Finish',
-      coming_soon:    'Coming soon'
+      coming_soon:    'Coming soon',
+      open_full:      'Open full SOP',
+      updated_on:     'Updated {x}',
+      sop_missing:    'This SOP has not been added yet.'
     },
     zh: {
       app_sub:        '运营门户',
@@ -111,7 +114,10 @@ window.DIANMOOD = window.DIANMOOD || {};
       next:           '下一步',
       previous:       '上一步',
       finish:         '完成',
-      coming_soon:    '即将推出'
+      coming_soon:    '即将推出',
+      open_full:      '打开完整 SOP',
+      updated_on:     '更新于 {x}',
+      sop_missing:    '此 SOP 尚未添加。'
     }
   };
 
