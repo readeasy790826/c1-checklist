@@ -1,0 +1,457 @@
+// ============================================================================
+// app.js — shared single-page app for every Dianmood entry point.
+// Hash-routed (GitHub-Pages safe, real Back button, deep-linkable). One shell
+// renders all views: dashboard, checklist (+ Guided Mode), KB list.
+//
+// Entry pages set window.DIANMOOD_PRESET before loading this file:
+//   { mode: 'location', slug: 'davies' }  -> a single store
+//   { mode: 'hq' }                         -> all locations (root)
+// ============================================================================
+(function () {
+  'use strict';
+  var D = window.DIANMOOD;
+  var t = D.t, tx = D.tx;
+  var PRESET = window.DIANMOOD_PRESET || { mode: 'hq' };
+  // Content (SOP/KB) files live at the repo root. Location entries sit in a
+  // subfolder (/davies/), so they reach root content via BASE = '../'.
+  var BASE = PRESET.base || '';
+
+  // ── Shared status cache so all views poll the backend only once ─────────
+  var statusData = {};
+  var statusLoaded = false;
+  var lastRefresh = '';
+
+  // ── Relative-time + duration formatting (localized) ─────────────────────
+  function formatAgo(h) {
+    var lang = D.getLang();
+    if (h < 1)  { var m = Math.max(1, Math.round(h * 60)); return lang === 'zh' ? m + '分钟前' : m + 'm ago'; }
+    if (h < 24) { var hh = Math.round(h);                  return lang === 'zh' ? hh + '小时前' : hh + 'h ago'; }
+    var d = Math.round(h / 24);                             return lang === 'zh' ? d + '天前'  : d + 'd ago';
+  }
+  function formatDuration(h) {
+    var lang = D.getLang();
+    if (h < 24) return lang === 'zh' ? h + '小时' : h + 'h';
+    var d = Math.floor(h / 24), rem = h % 24;
+    if (lang === 'zh') return rem > 0 ? d + '天' + rem + '小时' : d + '天';
+    return rem > 0 ? d + 'd ' + rem + 'h' : d + 'd';
+  }
+
+  // ── Status computation (preserves legacy thresholds exactly) ────────────
+  // Returns { level, pct, sub, subClass } for a location|frequency entry.
+  function statusInfo(freq, entry) {
+    var limit = D.LIMITS[freq], warn = D.WARN_BEFORE[freq];
+    if (!entry || !entry.datetime) {
+      return { level: 'red', pct: 0, sub: t('no_record'), subClass: 'red' };
+    }
+    var elapsed = (Date.now() - new Date(entry.datetime).getTime()) / 3600000;
+    var remaining = limit - elapsed;
+    var ago = formatAgo(elapsed);
+    if (remaining < 0) {
+      return { level: 'red', pct: 0,
+        sub: t('overdue_by', { x: formatDuration(Math.round(-remaining)) }), subClass: 'red' };
+    }
+    if (remaining < warn) {
+      return { level: 'amber', pct: Math.round(remaining / limit * 100),
+        sub: t('due_in', { x: formatDuration(Math.round(remaining)) }), subClass: 'amber' };
+    }
+    return { level: 'green', pct: Math.round(remaining / limit * 100),
+      sub: t('last_done', { x: ago }), subClass: 'green' };
+  }
+  var RING_COLOR = { green: 'var(--green)', amber: 'var(--amber)', red: 'var(--red)' };
+  var RING_GLYPH = { green: '✓', amber: '!', red: '!' };
+
+  // ── Tiny DOM helper ─────────────────────────────────────────────────────
+  function el(html) {
+    var d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild;
+  }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+  }
+
+  // ── Header (fixed; rendered once, updated per route) ─────────────────────
+  function renderHeader() {
+    var lang = D.getLang();
+    var sub = PRESET.mode === 'hq' ? t('hq_sub')
+      : (D.getLocation(PRESET.slug) ? D.getLocation(PRESET.slug).machineId + ' · ' + t('app_sub') : t('app_sub'));
+    var header = document.getElementById('app-header');
+    header.innerHTML =
+      '<button class="app-header__back" id="nav-back" aria-label="Back">‹</button>' +
+      '<a class="brand" href="#/">' +
+        '<span class="brand__logo">D</span>' +
+        '<span class="brand__text">' +
+          '<span class="brand__title">Dianmood</span>' +
+          '<span class="brand__sub">' + esc(sub) + '</span>' +
+        '</span>' +
+      '</a>' +
+      '<div class="lang-toggle">' +
+        D.LANGS.map(function (l) {
+          return '<button data-lang="' + l + '"' + (l === lang ? ' class="active"' : '') + '>' +
+            (l === 'en' ? 'EN' : '中文') + '</button>';
+        }).join('') +
+      '</div>';
+
+    header.querySelector('#nav-back').addEventListener('click', function () { history.back(); });
+    header.querySelectorAll('.lang-toggle button').forEach(function (b) {
+      b.addEventListener('click', function () { D.setLang(b.dataset.lang); renderHeader(); route(); });
+    });
+  }
+  function setBackVisible(v) {
+    var b = document.getElementById('nav-back');
+    if (b) b.classList.toggle('show', !!v);
+  }
+
+  // ── Location chip + bottom-sheet picker ─────────────────────────────────
+  function locChip(loc) {
+    return '<div class="loc-bar"><button class="loc-chip" id="loc-chip">' +
+      '<span class="loc-chip__dot"></span>' +
+      '<span class="loc-chip__name">' + esc(loc.name) + '</span>' +
+      '<span class="loc-chip__id">' + esc(loc.machineId) + '</span>' +
+      '<span class="loc-chip__caret">▾</span></button></div>';
+  }
+  function openLocationPicker(currentSlug, onPick) {
+    var items = D.LOCATIONS.map(function (l) {
+      return '<div class="sheet__item' + (l.slug === currentSlug ? ' active' : '') + '" data-slug="' + l.slug + '">' +
+        '<span class="loc-chip__dot"></span>' +
+        '<span class="sheet__item-name">' + esc(l.name) + '</span>' +
+        '<span class="sheet__item-id">' + esc(l.machineId) + '</span></div>';
+    }).join('');
+    var back = el('<div class="sheet-backdrop"><div class="sheet">' +
+      '<div class="sheet__grip"></div>' +
+      '<div class="sheet__title">' + t('switch_location') + '</div>' + items +
+      '</div></div>');
+    function close() { if (back.parentNode) back.parentNode.removeChild(back); }
+    back.addEventListener('click', function (e) { if (e.target === back) close(); });
+    back.querySelectorAll('.sheet__item').forEach(function (it) {
+      it.addEventListener('click', function () { close(); onPick(it.dataset.slug); });
+    });
+    document.body.appendChild(back);
+  }
+
+  // ── View: dashboard (one location or all) ───────────────────────────────
+  function statusCard(slug, freq) {
+    var info = statusInfo(freq, statusData[D.getLocation(slug).name + '|' + freq]);
+    var label = D.FREQ_LABEL[D.getLang()][freq];
+    var card = el(
+      '<a class="status-card" href="#/c/' + slug + '/' + freq + '">' +
+        '<span class="ring" style="--pct:' + info.pct + ';--ring:' + RING_COLOR[info.level] + '">' +
+          '<span class="ring__glyph">' + RING_GLYPH[info.level] + '</span></span>' +
+        '<span class="status-card__body">' +
+          '<span class="status-card__title">' + esc(label) + '</span>' +
+          '<span class="status-card__sub ' + info.subClass + '">' + esc(info.sub) + '</span>' +
+        '</span>' +
+        '<span class="status-card__cta">' + t('open') + ' ›</span>' +
+      '</a>');
+    return card;
+  }
+
+  function bannerFor(slugs) {
+    var red = [], amber = [];
+    slugs.forEach(function (slug) {
+      var loc = D.getLocation(slug);
+      ['daily', 'weekly', 'monthly'].forEach(function (freq) {
+        var info = statusInfo(freq, statusData[loc.name + '|' + freq]);
+        var tag = (slugs.length > 1 ? loc.name + ' ' : '') + D.FREQ_LABEL[D.getLang()][freq];
+        if (info.level === 'red') red.push(tag);
+        else if (info.level === 'amber') amber.push(tag);
+      });
+    });
+    if (red.length)   return '<div class="banner banner--red"><span class="banner__icon"></span>' + t('overdue') + ': ' + esc(red.join(', ')) + '</div>';
+    if (amber.length) return '<div class="banner banner--amber"><span class="banner__icon"></span>' + t('due_soon') + ': ' + esc(amber.join(', ')) + '</div>';
+    return '<div class="banner banner--green"><span class="banner__icon"></span>' + t('all_clear') + '</div>';
+  }
+
+  function kbList(includeHq) {
+    var items = D.KB.filter(function (k) { return k.scope === 'all' || includeHq; });
+    return '<div class="section-label">' + t('knowledge_base') + '</div>' +
+      '<div class="card-stack">' + items.map(function (k) {
+        var soon = k.soon
+          ? '<span class="kb-card__tag">' + t('coming_soon') + '</span>'
+          : '<span class="kb-card__caret">›</span>';
+        return '<a class="kb-card' + (k.soon ? ' kb-card--soon' : '') + '" href="' + BASE + k.file + '">' +
+          '<span class="kb-card__body"><span class="kb-card__title">' + esc(tx(k.title)) + '</span>' +
+          '<span class="kb-card__desc">' + esc(tx(k.desc)) + '</span></span>' + soon + '</a>';
+      }).join('') + '</div>';
+  }
+
+  function viewDashboard(root) {
+    setBackVisible(false);
+    var multi = PRESET.mode === 'hq';
+    var slugs = multi ? D.LOCATIONS.map(function (l) { return l.slug; }) : [PRESET.slug];
+
+    var html = '<div class="wrap">';
+    if (multi) {
+      html += '<div class="page-head"><h1>' + t('hq_title') + '</h1><p>' + t('hq_sub') + '</p></div>';
+    } else {
+      var loc = D.getLocation(PRESET.slug);
+      html += locChip(loc) +
+        '<div class="page-head"><h1>' + esc(loc.name) + '</h1><p>' + esc(loc.machineId) + ' · ' + t('app_sub') + '</p></div>';
+    }
+    html += '<div id="dash-dynamic">' + (statusLoaded ? '' : '<div class="loading">' + t('loading') + '</div>') + '</div>';
+    html += kbList(multi);
+    html += '<div class="last-refresh" id="dash-refresh"></div>';
+    html += '</div>';
+    root.appendChild(el(html));
+
+    if (!multi) {
+      root.querySelector('#loc-chip').addEventListener('click', function () {
+        openLocationPicker(PRESET.slug, function (slug) { location.href = '../' + slug + '/'; });
+      });
+    }
+    paintDashboard(slugs, multi);
+  }
+
+  // Fills the dynamic portion of the dashboard (called after status loads too).
+  function paintDashboard(slugs, multi) {
+    var host = document.getElementById('dash-dynamic');
+    if (!host) return;
+    if (!statusLoaded) { host.innerHTML = '<div class="loading">' + t('loading') + '</div>'; return; }
+    host.innerHTML = bannerFor(slugs);
+    slugs.forEach(function (slug) {
+      var loc = D.getLocation(slug);
+      var group = el('<div class="loc-group"></div>');
+      if (multi) group.appendChild(el('<div class="loc-group__title">' + esc(loc.name) +
+        '<span class="loc-group__id">' + esc(loc.machineId) + '</span></div>'));
+      var stack = el('<div class="card-stack"></div>');
+      ['daily', 'weekly', 'monthly'].forEach(function (freq) { stack.appendChild(statusCard(slug, freq)); });
+      group.appendChild(stack);
+      host.appendChild(group);
+    });
+    var r = document.getElementById('dash-refresh');
+    if (r && lastRefresh) r.textContent = t('last_refresh', { x: lastRefresh });
+  }
+
+  // ── View: checklist (+ submit + guided mode) ────────────────────────────
+  function viewChecklist(root, slug, freq) {
+    var loc = D.getLocation(slug);
+    if (!loc || !D.TASKS[freq]) { location.hash = '#/'; return; }
+    setBackVisible(true);
+    var tasks = D.TASKS[freq];
+    var checked = {};       // code -> bool
+    var notes = {};         // code -> string
+
+    document.body.classList.add('has-submit-bar');
+
+    var html = '<div class="wrap">' +
+      '<div class="page-head"><h1>' + t('maintenance', { x: D.FREQ_LABEL[D.getLang()][freq] }) + '</h1>' +
+        '<p>' + esc(loc.name) + ' · ' + esc(loc.machineId) + ' · ' + t('tasks_to_do', { n: tasks.length }) + '</p></div>' +
+
+      '<div class="meta-card">' +
+        '<div class="field-row">' +
+          '<div class="field"><label>' + t('date') + '</label><input type="date" id="f-date"></div>' +
+          '<div class="field"><label>' + t('time') + '</label><input type="time" id="f-time"></div>' +
+        '</div>' +
+        '<div class="field" style="margin-top:10px"><label>' + t('notes_label') + '</label>' +
+          '<textarea id="f-abnormal" placeholder="' + t('notes_ph') + '"></textarea></div>' +
+        '<div class="btn-row" style="margin-top:12px">' +
+          '<button class="btn btn--ok" id="b-all">' + t('select_all') + '</button>' +
+          '<button class="btn btn--warn" id="b-clear">' + t('clear_all') + '</button>' +
+          '<button class="btn btn--ghost" id="b-guided">' + t('start_guided') + '</button>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="progress"><div class="progress__track"><div class="progress__fill" id="pfill"></div></div>' +
+        '<div class="progress__text" id="ptext"></div></div>' +
+
+      '<div id="tasklist"></div>' +
+      '</div>' +
+
+      '<div class="submit-bar"><div class="submit-bar__inner">' +
+        '<button class="btn btn--primary btn--block" id="b-submit" disabled>' + t('submit') + '</button>' +
+        '<div class="submit-status" id="submit-status"></div>' +
+      '</div></div>';
+    root.appendChild(el(html));
+
+    // default date/time = now
+    var now = new Date();
+    root.querySelector('#f-date').value = now.toISOString().split('T')[0];
+    root.querySelector('#f-time').value = now.toTimeString().slice(0, 5);
+
+    var list = root.querySelector('#tasklist');
+    tasks.forEach(function (task) { list.appendChild(taskCard(task)); });
+
+    function taskCard(task) {
+      var links = '<a class="chip-link" href="' + BASE + task.sopUrl + '">' + t('sop_steps') + ' ›</a>';
+      if (task.videoUrl) links += '<a class="chip-link chip-link--video" href="' + task.videoUrl + '" target="_blank" rel="noopener">▶ ' +
+        esc(task.videoLabel || t('videos')) + '</a>';
+      var card = el(
+        '<div class="task" id="task-' + task.code + '">' +
+          '<div class="task__head">' +
+            '<span class="task__code">' + esc(task.code) + '</span>' +
+            '<span class="task__title">' + esc(task.title) + '</span>' +
+            '<span class="checkbox" data-check="' + task.code + '"></span>' +
+          '</div>' +
+          '<div class="task__body">' +
+            '<div class="task__links">' + links + '</div>' +
+            '<div class="field"><label>' + t('notes_label') + '</label>' +
+              '<textarea data-note="' + task.code + '" placeholder="' + t('notes_ph') + '"></textarea></div>' +
+          '</div>' +
+        '</div>');
+      // header toggles expand; checkbox toggles done (without expanding)
+      card.querySelector('.task__head').addEventListener('click', function (e) {
+        if (e.target.closest('.checkbox')) return;
+        card.classList.toggle('open');
+      });
+      card.querySelector('.checkbox').addEventListener('click', function (e) {
+        e.stopPropagation(); toggle(task.code);
+      });
+      card.querySelector('[data-note]').addEventListener('input', function (e) { notes[task.code] = e.target.value; });
+      return card;
+    }
+
+    function toggle(code) {
+      checked[code] = !checked[code];
+      document.getElementById('task-' + code).classList.toggle('done', checked[code]);
+      updateProgress();
+    }
+    function setAll(v) {
+      tasks.forEach(function (tk) { checked[tk.code] = v;
+        document.getElementById('task-' + tk.code).classList.toggle('done', v); });
+      updateProgress();
+    }
+    function doneCount() { return tasks.filter(function (tk) { return checked[tk.code]; }).length; }
+    function updateProgress() {
+      var done = doneCount(), total = tasks.length;
+      root.querySelector('#pfill').style.width = (done / total * 100) + '%';
+      root.querySelector('#ptext').textContent = t('n_complete', { done: done, total: total });
+      root.querySelector('#b-submit').disabled = done !== total;
+    }
+
+    root.querySelector('#b-all').addEventListener('click', function () { setAll(true); });
+    root.querySelector('#b-clear').addEventListener('click', function () { setAll(false); });
+    root.querySelector('#b-guided').addEventListener('click', function () {
+      openGuided(tasks, checked, function () { syncCards(); updateProgress(); });
+    });
+    root.querySelector('#b-submit').addEventListener('click', submit);
+
+    // Keep task cards visually in sync after Guided Mode edits state.
+    function syncCards() {
+      tasks.forEach(function (tk) {
+        document.getElementById('task-' + tk.code).classList.toggle('done', !!checked[tk.code]);
+      });
+    }
+
+    function submit() {
+      var date = root.querySelector('#f-date').value, time = root.querySelector('#f-time').value;
+      var status = root.querySelector('#submit-status');
+      if (!date || !time) { status.className = 'submit-status err'; status.textContent = t('need_date'); return; }
+      var missing = tasks.filter(function (tk) { return !checked[tk.code]; }).map(function (tk) { return tk.code; });
+      if (missing.length) { status.className = 'submit-status err'; status.textContent = t('need_all', { x: missing.join(', ') }); return; }
+
+      var taskData = {};
+      tasks.forEach(function (tk) { taskData[tk.code] = { checked: true, notes: (notes[tk.code] || '').trim() }; });
+      var payload = {
+        date: date, time: time, datetime: date + ' ' + time,
+        location: loc.name, machine_id: loc.machineId,
+        staff_name: '', supervisor: '', frequency: freq,
+        tasks: taskData, abnormal_issues: (root.querySelector('#f-abnormal').value || '').trim()
+      };
+
+      var btn = root.querySelector('#b-submit');
+      btn.disabled = true; status.className = 'submit-status'; status.textContent = t('submitting');
+      fetch(D.SCRIPT_URL, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload), mode: 'no-cors'
+      }).then(function () {
+        status.className = 'submit-status ok';
+        status.textContent = t('submitted') + ' — ' + date + ' ' + time;
+        setTimeout(function () { location.hash = '#/'; }, 1400);
+      }).catch(function () {
+        status.className = 'submit-status err'; status.textContent = t('submit_failed'); btn.disabled = false;
+      });
+    }
+
+    updateProgress();
+  }
+
+  // ── Guided Mode: full-screen one-task-at-a-time stepper ─────────────────
+  function openGuided(tasks, checked, onClose) {
+    var i = 0;
+    var overlay = el('<div class="guided">' +
+      '<div class="guided__top">' +
+        '<button class="guided__close" id="g-close">×</button>' +
+        '<div class="guided__progress"><span id="g-bar"></span></div>' +
+        '<div class="guided__count" id="g-count"></div>' +
+      '</div>' +
+      '<div class="guided__stage" id="g-stage"></div>' +
+      '<div class="guided__nav">' +
+        '<button class="btn btn--ghost" id="g-prev">' + t('previous') + '</button>' +
+        '<button class="btn btn--primary" id="g-next" style="flex:2">' + t('next') + '</button>' +
+      '</div></div>');
+    document.body.appendChild(overlay);
+
+    function render() {
+      var task = tasks[i];
+      var links = '<a class="chip-link" href="' + BASE + task.sopUrl + '">' + t('sop_steps') + ' ›</a>';
+      if (task.videoUrl) links += '<a class="chip-link chip-link--video" href="' + task.videoUrl + '" target="_blank" rel="noopener">▶ ' +
+        esc(task.videoLabel || t('videos')) + '</a>';
+      overlay.querySelector('#g-stage').innerHTML =
+        '<span class="guided__code">' + esc(task.code) + ' · ' + t('guided_step', { i: i + 1, n: tasks.length }) + '</span>' +
+        '<div class="guided__title">' + esc(task.title) + '</div>' +
+        '<div class="guided__links">' + links + '</div>' +
+        '<div class="guided__check' + (checked[task.code] ? ' done' : '') + '" id="g-check">' +
+          '<span class="checkbox"></span><span>' + (checked[task.code] ? t('done_label') : t('mark_done')) + '</span>' +
+        '</div>';
+      overlay.querySelector('#g-bar').style.width = ((i + 1) / tasks.length * 100) + '%';
+      overlay.querySelector('#g-count').textContent = (i + 1) + ' / ' + tasks.length;
+      overlay.querySelector('#g-prev').style.visibility = i === 0 ? 'hidden' : 'visible';
+      overlay.querySelector('#g-next').textContent = i === tasks.length - 1 ? t('finish') : t('next');
+      overlay.querySelector('#g-check').addEventListener('click', function () {
+        checked[task.code] = !checked[task.code]; render(); onClose();
+      });
+    }
+    function close() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); onClose(); }
+
+    overlay.querySelector('#g-close').addEventListener('click', close);
+    overlay.querySelector('#g-prev').addEventListener('click', function () { if (i > 0) { i--; render(); } });
+    overlay.querySelector('#g-next').addEventListener('click', function () {
+      if (i < tasks.length - 1) { i++; render(); } else { close(); }
+    });
+    render();
+  }
+
+  // ── Router ───────────────────────────────────────────────────────────────
+  function route() {
+    var root = document.getElementById('app');
+    root.innerHTML = '';
+    document.body.classList.remove('has-submit-bar');
+    window.scrollTo(0, 0);
+
+    var hash = location.hash.replace(/^#/, '');         // e.g. /c/davies/daily
+    var parts = hash.split('/').filter(Boolean);        // ['c','davies','daily']
+
+    if (parts[0] === 'c' && parts[1] && parts[2]) {
+      viewChecklist(root, parts[1], parts[2]);
+    } else {
+      viewDashboard(root);
+    }
+  }
+
+  // ── Backend status polling (shared, every 60s) ──────────────────────────
+  function loadStatus() {
+    fetch(D.SCRIPT_URL + '?action=status')
+      .then(function (r) { return r.json(); })
+      .then(function (json) {
+        statusData = json.data || {}; statusLoaded = true;
+        lastRefresh = new Date().toLocaleTimeString();
+        // Only the dashboard reflects status; repaint if it's showing.
+        if (document.getElementById('dash-dynamic')) {
+          var multi = PRESET.mode === 'hq';
+          paintDashboard(multi ? D.LOCATIONS.map(function (l) { return l.slug; }) : [PRESET.slug], multi);
+        }
+      })
+      .catch(function () {
+        statusLoaded = true;
+        var host = document.getElementById('dash-dynamic');
+        if (host) host.innerHTML = '<div class="empty">' + t('failed_load') + '</div>';
+      });
+  }
+
+  // ── Boot ─────────────────────────────────────────────────────────────────
+  renderHeader();
+  window.addEventListener('hashchange', route);
+  route();
+  loadStatus();
+  setInterval(loadStatus, 60000);
+})();
