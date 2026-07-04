@@ -150,22 +150,6 @@
     return card;
   }
 
-  function bannerFor(slugs) {
-    var red = [], amber = [];
-    slugs.forEach(function (slug) {
-      var loc = D.getLocation(slug);
-      ['daily', 'weekly', 'monthly'].forEach(function (freq) {
-        var info = statusInfo(freq, statusData[loc.name + '|' + freq]);
-        var tag = (slugs.length > 1 ? loc.name + ' ' : '') + D.FREQ_LABEL[freq];
-        if (info.level === 'red') red.push(tag);
-        else if (info.level === 'amber') amber.push(tag);
-      });
-    });
-    if (red.length)   return '<div class="banner banner--red"><span class="banner__icon"></span>' + t('overdue') + ': ' + esc(red.join(', ')) + '</div>';
-    if (amber.length) return '<div class="banner banner--amber"><span class="banner__icon"></span>' + t('due_soon') + ': ' + esc(amber.join(', ')) + '</div>';
-    return '<div class="banner banner--green"><span class="banner__icon"></span>' + t('all_clear') + '</div>';
-  }
-
   function kbList(includeHq) {
     var items = D.KB.filter(function (k) { return k.scope === 'all' || includeHq; });
     return '<div class="section-label">' + t('knowledge_base') + '</div>' +
@@ -210,14 +194,12 @@
   }
 
   // Fills the dynamic portion of the dashboard (re-run on every status poll).
-  // The banner reflects backend state; the cards are ALWAYS drawn so checklist
-  // links stay reachable while status is loading or if the fetch fails.
+  // Cards are ALWAYS drawn so checklist links stay reachable while status is
+  // loading or if the fetch fails; a failed fetch is noted in the refresh line.
   function paintDashboard(slugs, multi) {
     var host = document.getElementById('dash-dynamic');
     if (!host) return;
-    host.innerHTML = statusError
-      ? '<div class="banner banner--amber"><span class="banner__icon"></span>' + t('failed_load') + '</div>'
-      : statusLoaded ? bannerFor(slugs) : '';
+    host.innerHTML = '';
     slugs.forEach(function (slug) {
       var loc = D.getLocation(slug);
       var group = el('<div class="loc-group"></div>');
@@ -229,7 +211,11 @@
       host.appendChild(group);
     });
     var r = document.getElementById('dash-refresh');
-    if (r && lastRefresh) r.textContent = t('last_refresh', { x: lastRefresh });
+    if (r) {
+      r.textContent = statusError ? t('failed_load')
+        : (lastRefresh ? t('last_refresh', { x: lastRefresh }) : '');
+      r.classList.toggle('err', statusError);
+    }
   }
 
   // ── View: checklist (+ submit) ──────────────────────────────────────────
@@ -550,7 +536,7 @@
         lastRefresh = new Date().toLocaleTimeString();
       })
       .catch(function () { statusError = true; })
-      .then(repaintDashboard);   // refresh card/banner state either way
+      .then(repaintDashboard);   // refresh card state either way
   }
 
   // ── Boot ─────────────────────────────────────────────────────────────────

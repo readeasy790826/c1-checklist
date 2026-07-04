@@ -24,11 +24,7 @@ window.DIANMOOD = window.DIANMOOD || {};
     last_done:      'Last done {x}',
     overdue_by:     'Overdue by {x}',
     due_in:         'Due in {x}',
-    never_completed:'Never completed',
-    no_record:      'No record yet',
-    due_soon:       'Due soon',
-    overdue:        'Overdue',
-    all_clear:      'All maintenance up to date',
+    not_started:    'Not started',
 
     loading:        'Loading…',
     failed_load:    'Could not load status — check connection.',
@@ -51,6 +47,7 @@ window.DIANMOOD = window.DIANMOOD || {};
     need_date:      'Please fill in date and time.',
     need_all:       'Complete all tasks first. Missing: {x}',
     submit_failed:  'Submit failed — please retry.',
+    submit_unconfirmed: "Couldn't confirm submission — check connection and retry.",
 
     coming_soon:    'Coming soon',
     updated_on:     'Updated {x}',
