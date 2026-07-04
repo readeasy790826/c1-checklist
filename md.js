@@ -86,14 +86,10 @@ window.DIANMOOD = window.DIANMOOD || {};
     return docCache[path];
   };
 
-  // Load an SOP body by task code, preferring the current language and falling
-  // back to English: content/sops/<CODE>.<lang>.md -> content/sops/<CODE>.en.md
-  D.loadSop = function (code, lang, base) {
-    base = base || '';
-    var primary = base + 'content/sops/' + code + '.' + lang + '.md';
-    var english = base + 'content/sops/' + code + '.en.md';
-    var p = D.loadDoc(primary);
-    return primary === english ? p : p.catch(function () { return D.loadDoc(english); });
+  // Load an SOP body by task code. SOPs are English-only:
+  // content/sops/<CODE>.en.md
+  D.loadSop = function (code, base) {
+    return D.loadDoc((base || '') + 'content/sops/' + code + '.en.md');
   };
 
   D.md = function (src, base) {

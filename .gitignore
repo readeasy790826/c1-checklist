@@ -1,17 +1,8 @@
-# OS / editor junk — this is a buildless static site, so nothing else to ignore.
-
-# macOS
 .DS_Store
 ._*
-
-# Windows
 Thumbs.db
 Desktop.ini
-
-# Editor temp / swap
 *.swp
 *~
 .idea/
-
-# Logs
 *.log

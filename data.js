@@ -54,25 +54,27 @@ window.DIANMOOD = window.DIANMOOD || {};
   };
 
   // Knowledge base. scope 'all' shows everywhere; 'hq' only on the HQ dashboard.
+  // KB articles are the one bilingual surface — each has its own EN/中文 switch
+  // and loads content/kb/<id>.<lang>.md; card title/desc below are English.
   D.KB = [
     { id: 'refill',     file: 'kb_refill.html',     scope: 'all',
-      title: { en: 'Ingredient Restocking SOP', zh: '添加物料 SOP' },
-      desc:  { en: 'Fridge 1/2, coffee beans, chocolate powder, cups, syrups', zh: '冰箱 1/2、咖啡豆、巧克力粉、杯子、糖浆' } },
+      title: 'Ingredient Restocking SOP',
+      desc:  'Fridge 1/2, coffee beans, chocolate powder, cups, syrups' },
     { id: 'brewing',    file: 'kb_brewing.html',    scope: 'all',
-      title: { en: 'Tea Brewing SOP', zh: '粹茶 SOP' },
-      desc:  { en: 'Jasmine, black tea & matcha recipes and steps', zh: '茉莉、红茶与抹茶配方及步骤' } },
+      title: 'Tea Brewing SOP',
+      desc:  'Jasmine, black tea & matcha recipes and steps' },
     { id: 'sanitation', file: 'kb_sanitation.html', scope: 'all',
-      title: { en: 'Container Cleaning & Sanitising SOP', zh: '容器清洁消毒 SOP' },
-      desc:  { en: 'Milk jug, tea urn & water bucket cover cleaning', zh: '奶缸、茶桶与水桶盖清洁流程' } },
+      title: 'Container Cleaning & Sanitising SOP',
+      desc:  'Milk jug, tea urn & water bucket cover cleaning' },
     { id: 'setup',      file: 'kb_setup.html',      scope: 'hq', soon: true,
-      title: { en: 'Machine Setup SOP', zh: '机器安装 SOP' },
-      desc:  { en: 'Initial machine setup and installation', zh: '机器初始安装与设置流程' } },
+      title: 'Machine Setup SOP',
+      desc:  'Initial machine setup and installation' },
     { id: 'moving',     file: 'kb_moving.html',     scope: 'hq',
-      title: { en: 'Machine Moving SOP', zh: '机器搬运 SOP' },
-      desc:  { en: 'Steps for safely relocating the machine', zh: '安全搬运咖啡机的步骤' } },
+      title: 'Machine Moving SOP',
+      desc:  'Steps for safely relocating the machine' },
     { id: 'tuneup',     file: 'kb_tuneup.html',     scope: 'hq', soon: true,
-      title: { en: 'Machine Tune-up SOP', zh: '机器调试 SOP' },
-      desc:  { en: 'Calibration, adjustment and performance tuning', zh: '校准、调整与性能调试流程' } }
+      title: 'Machine Tune-up SOP',
+      desc:  'Calibration, adjustment and performance tuning' }
   ];
 
   // Helpers

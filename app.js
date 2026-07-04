@@ -10,7 +10,7 @@
 (function () {
   'use strict';
   var D = window.DIANMOOD;
-  var t = D.t, tx = D.tx;
+  var t = D.t;
   var PRESET = window.DIANMOOD_PRESET || { mode: 'hq' };
   // Content (SOP/KB) files live at the repo root. Location entries sit in a
   // subfolder (/davies/), so they reach root content via BASE = '../'.
@@ -21,18 +21,15 @@
   var statusLoaded = false;
   var lastRefresh = '';
 
-  // ── Relative-time + duration formatting (localized) ─────────────────────
+  // ── Relative-time + duration formatting ─────────────────────────────────
   function formatAgo(h) {
-    var lang = D.getLang();
-    if (h < 1)  { var m = Math.max(1, Math.round(h * 60)); return lang === 'zh' ? m + '分钟前' : m + 'm ago'; }
-    if (h < 24) { var hh = Math.round(h);                  return lang === 'zh' ? hh + '小时前' : hh + 'h ago'; }
-    var d = Math.round(h / 24);                             return lang === 'zh' ? d + '天前'  : d + 'd ago';
+    if (h < 1)  return Math.max(1, Math.round(h * 60)) + 'm ago';
+    if (h < 24) return Math.round(h) + 'h ago';
+    return Math.round(h / 24) + 'd ago';
   }
   function formatDuration(h) {
-    var lang = D.getLang();
-    if (h < 24) return lang === 'zh' ? h + '小时' : h + 'h';
+    if (h < 24) return h + 'h';
     var d = Math.floor(h / 24), rem = h % 24;
-    if (lang === 'zh') return rem > 0 ? d + '天' + rem + '小时' : d + '天';
     return rem > 0 ? d + 'd ' + rem + 'h' : d + 'd';
   }
 
@@ -81,7 +78,6 @@
 
   // ── Header (fixed; rendered once, updated per route) ─────────────────────
   function renderHeader() {
-    var lang = D.getLang();
     var sub = PRESET.mode === 'hq' ? t('hq_sub')
       : (D.getLocation(PRESET.slug) ? D.getLocation(PRESET.slug).machineId + ' · ' + t('app_sub') : t('app_sub'));
     var header = document.getElementById('app-header');
@@ -93,18 +89,9 @@
           '<span class="brand__title">Dianmood</span>' +
           '<span class="brand__sub">' + esc(sub) + '</span>' +
         '</span>' +
-      '</a>' +
-      '<div class="lang-toggle">' +
-        D.LANGS.map(function (l) {
-          return '<button data-lang="' + l + '"' + (l === lang ? ' class="active"' : '') + '>' +
-            (l === 'en' ? 'EN' : '中文') + '</button>';
-        }).join('') +
-      '</div>';
+      '</a>';
 
     header.querySelector('#nav-back').addEventListener('click', function () { history.back(); });
-    header.querySelectorAll('.lang-toggle button').forEach(function (b) {
-      b.addEventListener('click', function () { D.setLang(b.dataset.lang); renderHeader(); route(); });
-    });
   }
   function setBackVisible(v) {
     var b = document.getElementById('nav-back');
@@ -141,7 +128,7 @@
   // ── View: dashboard (one location or all) ───────────────────────────────
   function statusCard(slug, freq) {
     var info = statusInfo(freq, statusData[D.getLocation(slug).name + '|' + freq]);
-    var label = D.FREQ_LABEL[D.getLang()][freq];
+    var label = D.FREQ_LABEL[freq];
     var card = el(
       '<a class="status-card" href="#/c/' + slug + '/' + freq + '">' +
         '<span class="ring" style="--pct:' + info.pct + ';--ring:' + RING_COLOR[info.level] + '">' +
@@ -161,7 +148,7 @@
       var loc = D.getLocation(slug);
       ['daily', 'weekly', 'monthly'].forEach(function (freq) {
         var info = statusInfo(freq, statusData[loc.name + '|' + freq]);
-        var tag = (slugs.length > 1 ? loc.name + ' ' : '') + D.FREQ_LABEL[D.getLang()][freq];
+        var tag = (slugs.length > 1 ? loc.name + ' ' : '') + D.FREQ_LABEL[freq];
         if (info.level === 'red') red.push(tag);
         else if (info.level === 'amber') amber.push(tag);
       });
@@ -179,8 +166,8 @@
           ? '<span class="kb-card__tag">' + t('coming_soon') + '</span>'
           : '<span class="kb-card__caret">›</span>';
         return '<a class="kb-card' + (k.soon ? ' kb-card--soon' : '') + '" href="' + BASE + k.file + '">' +
-          '<span class="kb-card__body"><span class="kb-card__title">' + esc(tx(k.title)) + '</span>' +
-          '<span class="kb-card__desc">' + esc(tx(k.desc)) + '</span></span>' + soon + '</a>';
+          '<span class="kb-card__body"><span class="kb-card__title">' + esc(k.title) + '</span>' +
+          '<span class="kb-card__desc">' + esc(k.desc) + '</span></span>' + soon + '</a>';
       }).join('') + '</div>';
   }
 
@@ -243,7 +230,7 @@
     document.body.classList.add('has-submit-bar');
 
     var html = '<div class="wrap">' +
-      '<div class="page-head"><h1>' + t('maintenance', { x: D.FREQ_LABEL[D.getLang()][freq] }) + '</h1>' +
+      '<div class="page-head"><h1>' + t('maintenance', { x: D.FREQ_LABEL[freq] }) + '</h1>' +
         '<p>' + esc(loc.name) + ' · ' + esc(loc.machineId) + ' · ' + t('tasks_to_do', { n: tasks.length }) + '</p></div>' +
 
       '<div class="meta-card">' +
@@ -365,11 +352,10 @@
     setBackVisible(true);
     var wrap = el('<div class="wrap"><div class="loading">' + t('loading') + '</div></div>');
     root.appendChild(wrap);
-    D.loadSop(code, D.getLang(), BASE).then(function (doc) {
-      var meta = doc.meta, lang = D.getLang();
-      var title = meta['title_' + lang] || meta.title || code;
-      var freqLabel = (D.FREQ_LABEL[lang] && D.FREQ_LABEL[lang][meta.freq]) || '';
-      var label = meta['video_label_' + lang] || meta.video_label;
+    D.loadSop(code, BASE).then(function (doc) {
+      var meta = doc.meta;
+      var title = meta.title || code;
+      var freqLabel = D.FREQ_LABEL[meta.freq] || '';
       var metaRow = '<div class="sop-meta">' +
         '<span class="meta-chip meta-chip--code">' + esc(code) + '</span>' +
         (freqLabel ? '<span class="meta-chip">' + esc(freqLabel) + '</span>' : '') +
@@ -380,7 +366,7 @@
         : '';
       wrap.innerHTML =
         '<div class="page-head"><h1>' + esc(title) + '</h1></div>' + metaRow +
-        (meta.video ? '<div class="sop-links">' + videoChip(meta.video, label) + '</div>' : '') +
+        (meta.video ? '<div class="sop-links">' + videoChip(meta.video, meta.video_label) + '</div>' : '') +
         '<div class="sop-content sop-content--page">' + D.md(doc.body, BASE) + '</div>' + foot;
     }).catch(function () {
       wrap.innerHTML = '<div class="empty">' + t('sop_missing') + '</div>';
