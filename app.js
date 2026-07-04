@@ -1,7 +1,7 @@
 // ============================================================================
 // app.js — shared single-page app for every Dianmood entry point.
 // Hash-routed (GitHub-Pages safe, real Back button, deep-linkable). One shell
-// renders all views: dashboard, checklist, SOP page, KB list.
+// renders all views: dashboard, checklist, SOP page, KB article.
 //
 // Entry pages set window.DIANMOOD_PRESET before loading this file:
 //   { mode: 'location', slug: 'davies' }  -> a single store
@@ -162,12 +162,15 @@
     var items = D.KB.filter(function (k) { return k.scope === 'all' || includeHq; });
     return '<div class="section-label">' + t('knowledge_base') + '</div>' +
       '<div class="card-stack">' + items.map(function (k) {
-        var soon = k.soon
-          ? '<span class="kb-card__tag">' + t('coming_soon') + '</span>'
-          : '<span class="kb-card__caret">›</span>';
-        return '<a class="kb-card' + (k.soon ? ' kb-card--soon' : '') + '" href="' + BASE + k.file + '">' +
-          '<span class="kb-card__body"><span class="kb-card__title">' + esc(k.title) + '</span>' +
-          '<span class="kb-card__desc">' + esc(k.desc) + '</span></span>' + soon + '</a>';
+        var body = '<span class="kb-card__body"><span class="kb-card__title">' + esc(k.title) + '</span>' +
+          '<span class="kb-card__desc">' + esc(k.desc) + '</span></span>';
+        // "Coming soon" articles have no content yet — render a non-clickable card.
+        if (k.soon) {
+          return '<div class="kb-card kb-card--soon">' + body +
+            '<span class="kb-card__tag">' + t('coming_soon') + '</span></div>';
+        }
+        return '<a class="kb-card" href="#/kb/' + k.id + '">' + body +
+          '<span class="kb-card__caret">›</span></a>';
       }).join('') + '</div>';
   }
 
@@ -373,6 +376,41 @@
     });
   }
 
+  // ── View: KB article (bilingual, per-article EN/中文 switch) ─────────────
+  // KB is the only bilingual surface. The reader's language choice is remembered
+  // across articles in localStorage; content loads from content/kb/<id>.<lang>.md.
+  function kbLang() { return localStorage.getItem('dm_kb_lang') === 'zh' ? 'zh' : 'en'; }
+
+  function viewKb(root, id) {
+    setBackVisible(true);
+    var entry = D.KB.filter(function (k) { return k.id === id; })[0];
+    if (!entry || entry.soon) { location.hash = '#/'; return; }
+    var wrap = el('<div class="wrap"></div>');
+    root.appendChild(wrap);
+
+    function render() {
+      var lang = kbLang();
+      wrap.innerHTML = '<div class="loading">' + t('loading') + '</div>';
+      D.loadKb(id, lang, BASE).then(function (doc) {
+        wrap.innerHTML =
+          '<div class="page-head kb-head"><h1>' + esc(doc.meta.title || entry.title) + '</h1>' +
+            '<div class="lang-switch">' +
+              '<button data-l="en"' + (lang === 'en' ? ' class="active"' : '') + '>EN</button>' +
+              '<button data-l="zh"' + (lang === 'zh' ? ' class="active"' : '') + '>中文</button>' +
+            '</div></div>' +
+          '<div class="sop-content sop-content--page">' + D.md(doc.body, BASE) + '</div>';
+        wrap.querySelectorAll('.lang-switch button').forEach(function (b) {
+          b.addEventListener('click', function () {
+            localStorage.setItem('dm_kb_lang', b.dataset.l); render();
+          });
+        });
+      }).catch(function () {
+        wrap.innerHTML = '<div class="empty">' + t('sop_missing') + '</div>';
+      });
+    }
+    render();
+  }
+
   // ── Router ───────────────────────────────────────────────────────────────
   function route() {
     var root = document.getElementById('app');
@@ -387,6 +425,8 @@
       viewChecklist(root, parts[1], parts[2]);
     } else if (parts[0] === 'sop' && parts[1]) {
       viewSop(root, parts[1]);
+    } else if (parts[0] === 'kb' && parts[1]) {
+      viewKb(root, parts[1]);
     } else {
       viewDashboard(root);
     }

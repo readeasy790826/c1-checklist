@@ -15,6 +15,23 @@ window.DIANMOOD = window.DIANMOOD || {};
   }
   function isExternal(u) { return /^(https?:)?\/\//.test(u) || u.charAt(0) === '#'; }
 
+  // Maps a callout marker word to a colour variant (see .callout--* in app.css).
+  var CALLOUT_KIND = {
+    WARNING: 'warn', CAUTION: 'warn',
+    DANGER: 'danger', IMPORTANT: 'danger',
+    TIP: 'ok', SUCCESS: 'ok',
+    NOTE: 'info', INFO: 'info'
+  };
+
+  // Split a pipe-table row into trimmed cells, ignoring the optional outer pipes.
+  function tableCells(line) {
+    return line.trim().replace(/^\||\|$/g, '').split('|').map(function (c) { return c.trim(); });
+  }
+  // A GFM separator row: | --- | :--: | (dashes, optional colons for alignment).
+  function isTableSep(line) {
+    return /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(line) && line.indexOf('-') >= 0;
+  }
+
   // Inline span formatting (run after block-level escaping).
   function inline(text, base) {
     var s = escHtml(text);
@@ -92,6 +109,16 @@ window.DIANMOOD = window.DIANMOOD || {};
     return D.loadDoc((base || '') + 'content/sops/' + code + '.en.md');
   };
 
+  // Load a KB article, preferring the requested language and falling back to
+  // English: content/kb/<id>.<lang>.md -> content/kb/<id>.en.md
+  D.loadKb = function (id, lang, base) {
+    base = base || '';
+    var primary = base + 'content/kb/' + id + '.' + lang + '.md';
+    var english = base + 'content/kb/' + id + '.en.md';
+    var p = D.loadDoc(primary);
+    return primary === english ? p : p.catch(function () { return D.loadDoc(english); });
+  };
+
   D.md = function (src, base) {
     base = base || '';
     var lines = (src || '').replace(/\r/g, '').split('\n');
@@ -115,11 +142,20 @@ window.DIANMOOD = window.DIANMOOD || {};
       // horizontal rule
       if (/^---+$/.test(line.trim())) { out += '<hr>'; i++; continue; }
 
-      // callout (consecutive > lines)
+      // callout (consecutive > lines). An optional GitHub-style marker on the
+      // first line — > [!WARNING] / [!DANGER] / [!TIP] / [!NOTE] — picks the
+      // colour; plain "> ..." defaults to a warning.
       if (/^>\s?/.test(line)) {
         var buf = [];
         while (i < lines.length && /^>\s?/.test(lines[i])) { buf.push(lines[i].replace(/^>\s?/, '')); i++; }
-        out += '<div class="callout callout--warn">' +
+        var kind = 'warn';
+        var mk = /^\[!(\w+)\]\s*(.*)$/.exec(buf[0]);
+        if (mk) {
+          kind = CALLOUT_KIND[mk[1].toUpperCase()] || 'warn';
+          buf[0] = mk[2];                 // keep any text after the marker
+          if (!buf[0]) buf.shift();       // …or drop the marker-only line
+        }
+        out += '<div class="callout callout--' + kind + '">' +
           buf.map(function (b) { return inline(b, base); }).join('<br>') + '</div>';
         continue;
       }
@@ -131,6 +167,31 @@ window.DIANMOOD = window.DIANMOOD || {};
         out += '<figure><img src="' + src + '" alt="' + img[1] + '">' +
           (img[1] ? '<figcaption>' + escHtml(img[1]) + '</figcaption>' : '') + '</figure>';
         i++; continue;
+      }
+
+      // table: header row immediately followed by a separator row (GFM pipes)
+      if (line.indexOf('|') >= 0 && i + 1 < lines.length && isTableSep(lines[i + 1])) {
+        var head = tableCells(line);
+        var aligns = tableCells(lines[i + 1]).map(function (c) {
+          var l = c.charAt(0) === ':', r = c.charAt(c.length - 1) === ':';
+          return l && r ? 'center' : r ? 'right' : l ? 'left' : '';
+        });
+        i += 2;
+        var rows = [];
+        while (i < lines.length && lines[i].trim() && lines[i].indexOf('|') >= 0) { rows.push(tableCells(lines[i])); i++; }
+        // Cell renderer keyed to header column count so ragged rows stay aligned.
+        var cell = function (tag, txt, idx) {
+          return '<' + tag + (aligns[idx] ? ' style="text-align:' + aligns[idx] + '"' : '') + '>' +
+            inline(txt || '', base) + '</' + tag + '>';
+        };
+        out += '<table><thead><tr>' +
+          head.map(function (c, idx) { return cell('th', c, idx); }).join('') +
+          '</tr></thead><tbody>' +
+          rows.map(function (r) {
+            return '<tr>' + head.map(function (_, idx) { return cell('td', r[idx], idx); }).join('') + '</tr>';
+          }).join('') +
+          '</tbody></table>';
+        continue;
       }
 
       // list (gather consecutive list lines)

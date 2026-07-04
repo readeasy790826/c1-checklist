@@ -7,16 +7,14 @@ JavaScript, no build step.
 
 ## SOPs — `content/sops/`
 
-One file per maintenance task, named by its task code and language:
+The app UI is **English-only**, so SOPs need just one file per maintenance task,
+named by its task code:
 
 ```
-content/sops/D1.en.md      ← English (required)
-content/sops/D1.zh.md      ← 中文 (optional; add later)
+content/sops/D1.en.md
 ```
 
-The task code (`D1`, `W3`, `M5`, …) comes from `data.js`. The app shows the
-English file by default and automatically uses the `.zh.md` version when the
-language toggle is set to 中文 (falling back to English if it doesn't exist yet).
+The task code (`D1`, `W3`, `M5`, …) comes from `data.js`.
 
 ### File format
 
@@ -27,9 +25,7 @@ the body is plain Markdown:
 ---
 title: Coffee System Tablet Cleaning
 freq: daily            # daily | weekly | monthly
-time: 10–15 min
-updated: 2026-05-25
-version: 2.4
+time: 10–15 min        # optional chip
 video: https://drive.google.com/drive/folders/…   # optional reference video
 video_label: What to Avoid                          # optional chip label
 ---
@@ -45,17 +41,42 @@ video_label: What to Avoid                          # optional chip label
 1. Do the thing.
    - A sub-point.
 
-> A line starting with "> " becomes a yellow warning/safety callout.
+> A line starting with "> " becomes a warning callout.
 ```
 
-Supported Markdown: headings (`##`, `###`), **bold**, *italic*, `code`, lists
-(with one level of nesting), links, images, and `> ` warning callouts. Images
-use repo-root-relative paths, e.g. `![alt](images/foo.jpg)`.
-
-To add a Chinese version, copy the file to `D1.zh.md` and translate `title:` +
-the body. To add a brand-new task, add it to `data.js` and drop a matching
-`<code>.en.md` here.
+To add a brand-new task, add it to `data.js` and drop a matching `<code>.en.md`
+here.
 
 ## Knowledge base — `content/kb/`
 
-Same idea for KB articles (coming next): `refill.en.md`, `refill.zh.md`, etc.
+KB is the **one bilingual surface**. Each article has two files — English and
+中文 — and the KB page shows an EN/中文 switch that loads the matching one
+(falling back to English if the 中文 file is missing):
+
+```
+content/kb/refill.en.md
+content/kb/refill.zh.md
+```
+
+The article `id` (`refill`, `brewing`, …) comes from `D.KB` in `data.js`. Each
+file's frontmatter carries its own `title:` (in that language) and a short
+`summary:`. To add an article, add an entry to `D.KB` and drop the two files here.
+
+## Supported Markdown (`md.js`)
+
+Headings (`#`, `##`, `###`), **bold**, *italic*, `code`, ordered/unordered lists
+(one level of nesting), links, images, `---` dividers, **pipe tables**, and
+callouts. Images use repo-root-relative paths, e.g. `![alt](assets/foo.jpg)`.
+
+Callouts use an optional GitHub-style marker to pick the colour (a plain `> …`
+defaults to a warning):
+
+```markdown
+> [!WARNING] amber — cautions
+> [!DANGER] red — hard safety warnings
+> [!TIP] green — helpful confirmations
+> [!INFO] neutral — reference notes
+```
+
+Heading sizes: `#` is a large section title, `##` is a small uppercase
+sub-label, `###` is an accent-coloured step heading.

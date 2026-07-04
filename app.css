@@ -98,6 +98,18 @@ button { font-family: inherit; }
 .brand__sub   { display: block; font-size: 11px; color: var(--muted); line-height: 1.2;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+/* KB article header + per-article language switch (EN / 中文) */
+.kb-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.lang-switch {
+  display: inline-flex; background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 999px; padding: 2px; flex-shrink: 0; margin-top: 4px;
+}
+.lang-switch button {
+  border: 0; background: transparent; color: var(--muted);
+  font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px; cursor: pointer;
+}
+.lang-switch button.active { background: var(--surface); color: var(--accent-strong); box-shadow: var(--shadow-sm); }
+
 /* ── Location chip / switcher ──────────────────────────────────────────── */
 .loc-bar { display: flex; align-items: center; gap: 10px; margin: 4px 0 16px; }
 .loc-chip {
@@ -336,6 +348,14 @@ button { font-family: inherit; }
   display: block; max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);
 }
 .sop-content figcaption { font-size: 12px; color: var(--muted); margin-top: 6px; }
+.sop-content table {          /* GFM pipe tables (recipe/ingredient tables in KB) */
+  width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px;
+  border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
+}
+.sop-content th, .sop-content td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+.sop-content th { background: var(--surface-2); font-weight: 800; color: var(--text); }
+.sop-content tbody tr:last-child td { border-bottom: 0; }
+.sop-content tbody tr:nth-child(even) td { background: var(--surface); }
 
 /* Warning / safety callout (renders from "> ..." blockquotes) */
 .callout {
@@ -344,6 +364,15 @@ button { font-family: inherit; }
 }
 .callout--warn {
   background: var(--amber-bg); border: 1px solid var(--amber-border); color: #7A5310;
+}
+.callout--danger {
+  background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red);
+}
+.callout--ok {
+  background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green);
+}
+.callout--info {
+  background: var(--surface-2); border: 1px solid var(--border-2); color: var(--text-2);
 }
 
 /* ── Misc / empty / loading ────────────────────────────────────────────── */
