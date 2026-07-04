@@ -183,6 +183,7 @@ button { font-family: inherit; }
 .status-card__sub.red   { color: var(--red); }
 .status-card__sub.amber { color: var(--amber); }
 .status-card__sub.green { color: var(--green); }
+.status-card__sub.gray  { color: var(--muted); }   /* not started — neutral, not an alarm */
 .status-card__cta {
   font-size: 13px; font-weight: 700; color: var(--accent-strong);
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;
@@ -272,6 +273,15 @@ button { font-family: inherit; }
 .task__title { flex: 1; font-size: 14.5px; font-weight: 600; line-height: 1.35; }
 .task.done .task__title { color: var(--muted); }
 
+/* SOP shortcut lives in the header (always visible, one tap to the steps). */
+.task__sop {
+  flex-shrink: 0; white-space: nowrap;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 700; color: var(--accent-strong);
+  background: var(--accent-soft); border-radius: 999px; padding: 6px 11px;
+}
+.task__sop:active { opacity: .6; }
+
 .checkbox {
   width: 26px; height: 26px; border-radius: 8px; flex-shrink: 0;
   border: 2px solid var(--border-2); background: var(--surface);
@@ -287,8 +297,8 @@ button { font-family: inherit; }
 
 .task__body { display: none; padding: 0 14px 14px; }
 .task.open .task__body { display: block; }
-.task__links, .sop-links { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-.sop-links { margin: 2px 0 14px; }
+/* Video chip row on the standalone SOP page. */
+.sop-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 2px 0 14px; }
 .chip-link {
   display: inline-flex; align-items: center; gap: 6px;
   font-size: 12.5px; font-weight: 700; padding: 7px 12px; border-radius: 999px;

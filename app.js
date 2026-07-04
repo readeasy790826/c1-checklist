@@ -297,17 +297,17 @@
           '<div class="task__head">' +
             '<span class="task__code">' + esc(task.code) + '</span>' +
             '<span class="task__title">' + esc(task.title) + '</span>' +
+            '<a class="task__sop" href="#/sop/' + task.code + '">' + t('sop_steps') + ' ›</a>' +
             '<span class="checkbox" data-check="' + task.code + '"></span>' +
           '</div>' +
           '<div class="task__body">' +
-            '<div class="sop-links"><a class="chip-link" href="#/sop/' + task.code + '">' + t('sop_steps') + ' ›</a></div>' +
             '<div class="field"><label>' + t('notes_label') + '</label>' +
               '<textarea data-note="' + task.code + '" placeholder="' + t('notes_ph') + '"></textarea></div>' +
           '</div>' +
         '</div>');
-      // Header toggles the body (steps link + notes); checkbox toggles done.
+      // Header toggles the notes body; the SOP link and checkbox act on their own.
       card.querySelector('.task__head').addEventListener('click', function (e) {
-        if (e.target.closest('.checkbox')) return;
+        if (e.target.closest('.checkbox') || e.target.closest('.task__sop')) return;
         card.classList.toggle('open');
       });
       card.querySelector('.checkbox').addEventListener('click', function (e) {
