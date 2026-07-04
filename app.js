@@ -38,8 +38,10 @@
   // Returns { level, pct, sub, subClass } for a location|frequency entry.
   function statusInfo(freq, entry) {
     var limit = D.LIMITS[freq], warn = D.WARN_BEFORE[freq];
+    // Never submitted → neutral "gray" (not started), not an alarm. Only a task
+    // that WAS logged and has since passed its threshold counts as red overdue.
     if (!entry || !entry.datetime) {
-      return { level: 'red', pct: 0, sub: t('no_record'), subClass: 'red' };
+      return { level: 'gray', pct: 0, sub: t('not_started'), subClass: 'gray' };
     }
     var elapsed = (Date.now() - new Date(entry.datetime).getTime()) / 3600000;
     var remaining = limit - elapsed;
@@ -55,8 +57,8 @@
     return { level: 'green', pct: Math.round(remaining / limit * 100),
       sub: t('last_done', { x: ago }), subClass: 'green' };
   }
-  var RING_COLOR = { green: 'var(--green)', amber: 'var(--amber)', red: 'var(--red)', loading: 'var(--border-2)' };
-  var RING_GLYPH = { green: '✓', amber: '!', red: '!', loading: '·' };
+  var RING_COLOR = { green: 'var(--green)', amber: 'var(--amber)', red: 'var(--red)', gray: 'var(--muted)', loading: 'var(--border-2)' };
+  var RING_GLYPH = { green: '✓', amber: '!', red: '!', gray: '–', loading: '·' };
 
   // ── Tiny DOM helper ─────────────────────────────────────────────────────
   function el(html) {
@@ -241,6 +243,9 @@
     var tasks = D.TASKS[freq];
     var checked = {};       // code -> bool
     var notes = {};         // code -> string
+    // Draft persistence: survive opening an SOP / accidental refresh mid-checklist
+    // (per tab session; cleared on confirmed submit). See save/restore below.
+    var progressKey = 'dianmood:progress:' + slug + ':' + freq;
 
     document.body.classList.add('has-submit-bar');
 
@@ -253,8 +258,6 @@
           '<div class="field"><label>' + t('date') + '</label><input type="date" id="f-date"></div>' +
           '<div class="field"><label>' + t('time') + '</label><input type="time" id="f-time"></div>' +
         '</div>' +
-        '<div class="field" style="margin-top:10px"><label>' + t('notes_label') + '</label>' +
-          '<textarea id="f-abnormal" placeholder="' + t('notes_ph') + '"></textarea></div>' +
         '<div class="btn-row" style="margin-top:12px">' +
           '<button class="btn btn--ok" id="b-all">' + t('select_all') + '</button>' +
           '<button class="btn btn--warn" id="b-clear">' + t('clear_all') + '</button>' +
@@ -265,13 +268,16 @@
         '<div class="progress__text" id="ptext"></div></div>' +
 
       '<div id="tasklist"></div>' +
-      '</div>' +
+      '</div>';
 
-      '<div class="submit-bar"><div class="submit-bar__inner">' +
+    // Submit bar is a separate fixed-to-viewport node; append on its own because
+    // el() only returns the first root element (the .wrap above).
+    var barHtml = '<div class="submit-bar"><div class="submit-bar__inner">' +
         '<button class="btn btn--primary btn--block" id="b-submit" disabled>' + t('submit') + '</button>' +
         '<div class="submit-status" id="submit-status"></div>' +
       '</div></div>';
     root.appendChild(el(html));
+    root.appendChild(el(barHtml));
 
     // default date/time = now
     var now = new Date();
@@ -303,19 +309,19 @@
       card.querySelector('.checkbox').addEventListener('click', function (e) {
         e.stopPropagation(); toggle(task.code);
       });
-      card.querySelector('[data-note]').addEventListener('input', function (e) { notes[task.code] = e.target.value; });
+      card.querySelector('[data-note]').addEventListener('input', function (e) { notes[task.code] = e.target.value; saveProgress(); });
       return card;
     }
 
     function toggle(code) {
       checked[code] = !checked[code];
       document.getElementById('task-' + code).classList.toggle('done', checked[code]);
-      updateProgress();
+      updateProgress(); saveProgress();
     }
     function setAll(v) {
       tasks.forEach(function (tk) { checked[tk.code] = v;
         document.getElementById('task-' + tk.code).classList.toggle('done', v); });
-      updateProgress();
+      updateProgress(); saveProgress();
     }
     function doneCount() { return tasks.filter(function (tk) { return checked[tk.code]; }).length; }
     function updateProgress() {
@@ -325,9 +331,45 @@
       root.querySelector('#b-submit').disabled = done !== total;
     }
 
+    // ── Draft persistence (sessionStorage; best-effort, never fatal) ─────────
+    function saveProgress() {
+      try {
+        sessionStorage.setItem(progressKey, JSON.stringify({
+          checked: checked, notes: notes,
+          date: root.querySelector('#f-date').value,
+          time: root.querySelector('#f-time').value
+        }));
+      } catch (e) { /* storage full/blocked — ignore */ }
+    }
+    function clearProgress() { try { sessionStorage.removeItem(progressKey); } catch (e) {} }
+    function restoreProgress() {
+      var s;
+      try { s = JSON.parse(sessionStorage.getItem(progressKey) || 'null'); } catch (e) { return; }
+      if (!s) return;
+      if (s.date) root.querySelector('#f-date').value = s.date;
+      if (s.time) root.querySelector('#f-time').value = s.time;
+      Object.keys(s.notes || {}).forEach(function (code) {
+        notes[code] = s.notes[code];
+        var ta = root.querySelector('[data-note="' + code + '"]');
+        if (ta) ta.value = s.notes[code];
+      });
+      Object.keys(s.checked || {}).forEach(function (code) {
+        if (!s.checked[code]) return;
+        checked[code] = true;
+        var card = document.getElementById('task-' + code);
+        if (card) card.classList.add('done');
+      });
+      updateProgress();
+    }
+
     root.querySelector('#b-all').addEventListener('click', function () { setAll(true); });
     root.querySelector('#b-clear').addEventListener('click', function () { setAll(false); });
     root.querySelector('#b-submit').addEventListener('click', submit);
+    // Persist the date/time fields as they change, then restore any draft.
+    ['#f-date', '#f-time'].forEach(function (sel) {
+      root.querySelector(sel).addEventListener('input', saveProgress);
+    });
+    restoreProgress();
 
     function submit() {
       var date = root.querySelector('#f-date').value, time = root.querySelector('#f-time').value;
@@ -346,20 +388,23 @@
         date: date, time: time, datetime: datetime,
         location: loc.name, machine_id: loc.machineId,
         staff_name: '', supervisor: '', frequency: freq,
-        tasks: taskData, abnormal_issues: (root.querySelector('#f-abnormal').value || '').trim()
+        tasks: taskData, abnormal_issues: ''
       };
 
       var btn = root.querySelector('#b-submit');
       btn.disabled = true; status.className = 'submit-status'; status.textContent = t('submitting');
-      fetch(D.SCRIPT_URL, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload), mode: 'no-cors'
-      }).then(function () {
-        status.className = 'submit-status ok';
-        status.textContent = t('submitted') + ' — ' + date + ' ' + time;
-        setTimeout(function () { location.hash = '#/'; }, 1400);
-      }).catch(function () {
-        status.className = 'submit-status err'; status.textContent = t('submit_failed'); btn.disabled = false;
+      submitAndConfirm(payload).then(function (confirmed) {
+        if (confirmed) {
+          clearProgress();                 // done — drop the saved draft
+          status.className = 'submit-status ok';
+          status.textContent = t('submitted') + ' — ' + date + ' ' + time;
+          setTimeout(function () { location.hash = '#/'; }, 1400);
+        } else {
+          // Couldn't verify the row landed — keep progress, let them retry.
+          status.className = 'submit-status err';
+          status.textContent = t('submit_unconfirmed');
+          btn.disabled = false;
+        }
       });
     }
 
@@ -453,6 +498,43 @@
     if (!document.getElementById('dash-dynamic')) return;
     var multi = PRESET.mode === 'hq';
     paintDashboard(multi ? D.LOCATIONS.map(function (l) { return l.slug; }) : [PRESET.slug], multi);
+  }
+
+  // ── Submit + confirm ─────────────────────────────────────────────────────
+  // A no-cors POST response is opaque (unreadable), so the POST alone can't tell
+  // us if the write succeeded. We therefore POST, then re-read ?action=status and
+  // check our exact datetime shows up for this location|frequency. Resolves true
+  // only when confirmed — killing false "Submitted ✓" on silent failures.
+  function submitAndConfirm(payload) {
+    var key = payload.location + '|' + payload.frequency;
+    var verify = function () { return confirmLanded(key, payload.datetime, 3); };
+    return fetch(D.SCRIPT_URL, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload), mode: 'no-cors'
+    }).then(verify, verify);   // verify whether the POST resolved or rejected
+  }
+  // Poll status up to `tries` times (800ms apart) for our row. As a side effect,
+  // refresh the shared status cache so the dashboard is current after redirect.
+  function confirmLanded(key, datetime, tries) {
+    return new Promise(function (resolve) {
+      (function attempt(n) {
+        setTimeout(function () {
+          fetch(D.SCRIPT_URL + '?action=status', { cache: 'no-store' })
+            .then(function (r) { return r.json(); })
+            .then(function (json) {
+              if (json && json.data) {
+                statusData = json.data; statusLoaded = true; statusError = false;
+                lastRefresh = new Date().toLocaleTimeString();
+              }
+              var rec = statusData[key];
+              if (rec && rec.datetime === datetime) return resolve(true);
+              if (n > 1) return attempt(n - 1);
+              resolve(false);
+            })
+            .catch(function () { n > 1 ? attempt(n - 1) : resolve(false); });
+        }, 800);
+      })(tries);
+    });
   }
 
   // ── Backend status polling (shared, every 60s) ──────────────────────────
