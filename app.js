@@ -1,7 +1,7 @@
 // ============================================================================
 // app.js — shared single-page app for every Dianmood entry point.
 // Hash-routed (GitHub-Pages safe, real Back button, deep-linkable). One shell
-// renders all views: dashboard, checklist (+ Guided Mode), KB list.
+// renders all views: dashboard, checklist, SOP page, KB list.
 //
 // Entry pages set window.DIANMOOD_PRESET before loading this file:
 //   { mode: 'location', slug: 'davies' }  -> a single store
@@ -70,33 +70,13 @@
     });
   }
 
-  // ── SOP content rendering (shared by checklist, guided mode, sop view) ────
-  // SOP bodies live as Markdown files (content/sops/<code>.<lang>.md) and are
-  // fetched + cached on demand by md.js. These helpers turn a loaded doc into
-  // the unified UI and lazy-load it into a host element.
+  // ── SOP content rendering ────────────────────────────────────────────────
+  // SOP bodies live as Markdown files (content/sops/<code>.<lang>.md), fetched
+  // + cached on demand by md.js and shown on the standalone SOP page (viewSop).
   function videoChip(url, label) {
     if (!url) return '';
     return '<a class="chip-link chip-link--video" href="' + esc(url) +
       '" target="_blank" rel="noopener">▶ ' + esc(label || t('videos')) + '</a>';
-  }
-  function sopHtml(code, meta, body, withFullLink) {
-    var lang = D.getLang();
-    var label = meta['video_label_' + lang] || meta.video_label;
-    return '<div class="sop-links">' + videoChip(meta.video, label) +
-      (withFullLink ? '<a class="chip-link" href="#/sop/' + code + '">' + t('open_full') + ' ›</a>' : '') +
-      '</div><div class="sop-content">' + D.md(body, BASE) + '</div>';
-  }
-  // Lazy-load an SOP into a host element. Falls back to the legacy standalone
-  // page link if the Markdown file is missing.
-  function fillSop(host, code, fallbackUrl) {
-    host.innerHTML = '<div class="loading">' + t('loading') + '</div>';
-    D.loadSop(code, D.getLang(), BASE).then(function (doc) {
-      host.innerHTML = sopHtml(code, doc.meta, doc.body, true);
-    }).catch(function () {
-      host.innerHTML = fallbackUrl
-        ? '<div class="sop-links"><a class="chip-link" href="' + BASE + fallbackUrl + '">' + t('sop_steps') + ' ›</a></div>'
-        : '<div class="empty">' + t('sop_missing') + '</div>';
-    });
   }
 
   // ── Header (fixed; rendered once, updated per route) ─────────────────────
@@ -251,7 +231,7 @@
     if (r && lastRefresh) r.textContent = t('last_refresh', { x: lastRefresh });
   }
 
-  // ── View: checklist (+ submit + guided mode) ────────────────────────────
+  // ── View: checklist (+ submit) ──────────────────────────────────────────
   function viewChecklist(root, slug, freq) {
     var loc = D.getLocation(slug);
     if (!loc || !D.TASKS[freq]) { location.hash = '#/'; return; }
@@ -276,7 +256,6 @@
         '<div class="btn-row" style="margin-top:12px">' +
           '<button class="btn btn--ok" id="b-all">' + t('select_all') + '</button>' +
           '<button class="btn btn--warn" id="b-clear">' + t('clear_all') + '</button>' +
-          '<button class="btn btn--ghost" id="b-guided">' + t('start_guided') + '</button>' +
         '</div>' +
       '</div>' +
 
@@ -309,21 +288,15 @@
             '<span class="checkbox" data-check="' + task.code + '"></span>' +
           '</div>' +
           '<div class="task__body">' +
-            '<div class="sop-host"></div>' +
+            '<div class="sop-links"><a class="chip-link" href="#/sop/' + task.code + '">' + t('sop_steps') + ' ›</a></div>' +
             '<div class="field"><label>' + t('notes_label') + '</label>' +
               '<textarea data-note="' + task.code + '" placeholder="' + t('notes_ph') + '"></textarea></div>' +
           '</div>' +
         '</div>');
-      // header toggles expand; checkbox toggles done (without expanding).
-      // SOP content is fetched lazily the first time a task is opened.
+      // Header toggles the body (steps link + notes); checkbox toggles done.
       card.querySelector('.task__head').addEventListener('click', function (e) {
         if (e.target.closest('.checkbox')) return;
         card.classList.toggle('open');
-        var host = card.querySelector('.sop-host');
-        if (card.classList.contains('open') && !host.dataset.loaded) {
-          host.dataset.loaded = '1';
-          fillSop(host, task.code, task.sopUrl);
-        }
       });
       card.querySelector('.checkbox').addEventListener('click', function (e) {
         e.stopPropagation(); toggle(task.code);
@@ -352,17 +325,7 @@
 
     root.querySelector('#b-all').addEventListener('click', function () { setAll(true); });
     root.querySelector('#b-clear').addEventListener('click', function () { setAll(false); });
-    root.querySelector('#b-guided').addEventListener('click', function () {
-      openGuided(tasks, checked, function () { syncCards(); updateProgress(); });
-    });
     root.querySelector('#b-submit').addEventListener('click', submit);
-
-    // Keep task cards visually in sync after Guided Mode edits state.
-    function syncCards() {
-      tasks.forEach(function (tk) {
-        document.getElementById('task-' + tk.code).classList.toggle('done', !!checked[tk.code]);
-      });
-    }
 
     function submit() {
       var date = root.querySelector('#f-date').value, time = root.querySelector('#f-time').value;
@@ -422,50 +385,6 @@
     }).catch(function () {
       wrap.innerHTML = '<div class="empty">' + t('sop_missing') + '</div>';
     });
-  }
-
-  // ── Guided Mode: full-screen one-task-at-a-time stepper ─────────────────
-  function openGuided(tasks, checked, onClose) {
-    var i = 0;
-    var overlay = el('<div class="guided">' +
-      '<div class="guided__top">' +
-        '<button class="guided__close" id="g-close">×</button>' +
-        '<div class="guided__progress"><span id="g-bar"></span></div>' +
-        '<div class="guided__count" id="g-count"></div>' +
-      '</div>' +
-      '<div class="guided__stage" id="g-stage"></div>' +
-      '<div class="guided__nav">' +
-        '<button class="btn btn--ghost" id="g-prev">' + t('previous') + '</button>' +
-        '<button class="btn btn--primary" id="g-next" style="flex:2">' + t('next') + '</button>' +
-      '</div></div>');
-    document.body.appendChild(overlay);
-
-    function render() {
-      var task = tasks[i];
-      overlay.querySelector('#g-stage').innerHTML =
-        '<span class="guided__code">' + esc(task.code) + ' · ' + t('guided_step', { i: i + 1, n: tasks.length }) + '</span>' +
-        '<div class="guided__title">' + esc(task.title) + '</div>' +
-        '<div class="guided__sop sop-host" id="g-sop"></div>' +
-        '<div class="guided__check' + (checked[task.code] ? ' done' : '') + '" id="g-check">' +
-          '<span class="checkbox"></span><span>' + (checked[task.code] ? t('done_label') : t('mark_done')) + '</span>' +
-        '</div>';
-      fillSop(overlay.querySelector('#g-sop'), task.code, task.sopUrl);
-      overlay.querySelector('#g-bar').style.width = ((i + 1) / tasks.length * 100) + '%';
-      overlay.querySelector('#g-count').textContent = (i + 1) + ' / ' + tasks.length;
-      overlay.querySelector('#g-prev').style.visibility = i === 0 ? 'hidden' : 'visible';
-      overlay.querySelector('#g-next').textContent = i === tasks.length - 1 ? t('finish') : t('next');
-      overlay.querySelector('#g-check').addEventListener('click', function () {
-        checked[task.code] = !checked[task.code]; render(); onClose();
-      });
-    }
-    function close() { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); onClose(); }
-
-    overlay.querySelector('#g-close').addEventListener('click', close);
-    overlay.querySelector('#g-prev').addEventListener('click', function () { if (i > 0) { i--; render(); } });
-    overlay.querySelector('#g-next').addEventListener('click', function () {
-      if (i < tasks.length - 1) { i++; render(); } else { close(); }
-    });
-    render();
   }
 
   // ── Router ───────────────────────────────────────────────────────────────

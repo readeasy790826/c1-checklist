@@ -39,7 +39,6 @@ window.DIANMOOD = window.DIANMOOD || {};
       n_complete:     '{done} / {total} complete',
       select_all:     'Select all',
       clear_all:      'Clear all',
-      start_guided:   'Guided mode',
       date: 'Date', time: 'Time',
       sop_steps:      'SOP steps',
       videos:         'Videos',
@@ -53,14 +52,7 @@ window.DIANMOOD = window.DIANMOOD || {};
       need_all:       'Complete all tasks first. Missing: {x}',
       submit_failed:  'Submit failed — please retry.',
 
-      guided_step:    'Step {i} of {n}',
-      mark_done:      'Mark as done',
-      done_label:     'Done',
-      next:           'Next',
-      previous:       'Back',
-      finish:         'Finish',
       coming_soon:    'Coming soon',
-      open_full:      'Open full SOP',
       updated_on:     'Updated {x}',
       sop_missing:    'This SOP has not been added yet.'
     },
@@ -94,7 +86,6 @@ window.DIANMOOD = window.DIANMOOD || {};
       n_complete:     '{done} / {total} 已完成',
       select_all:     '全选',
       clear_all:      '清除',
-      start_guided:   '引导模式',
       date: '日期', time: '时间',
       sop_steps:      '操作步骤',
       videos:         '视频',
@@ -108,14 +99,7 @@ window.DIANMOOD = window.DIANMOOD || {};
       need_all:       '请先完成所有任务。缺少：{x}',
       submit_failed:  '提交失败 — 请重试。',
 
-      guided_step:    '第 {i} / {n} 步',
-      mark_done:      '标记完成',
-      done_label:     '已完成',
-      next:           '下一步',
-      previous:       '上一步',
-      finish:         '完成',
       coming_soon:    '即将推出',
-      open_full:      '打开完整 SOP',
       updated_on:     '更新于 {x}',
       sop_missing:    '此 SOP 尚未添加。'
     }
