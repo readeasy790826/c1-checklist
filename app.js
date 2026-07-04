@@ -279,9 +279,13 @@
     root.appendChild(el(html));
     root.appendChild(el(barHtml));
 
-    // default date/time = now
+    // default date/time = now; cap the date picker at today so staff can log a
+    // past completion (delayed logging) but not a future date.
     var now = new Date();
-    root.querySelector('#f-date').value = now.toISOString().split('T')[0];
+    var today = now.toISOString().split('T')[0];
+    var fDate = root.querySelector('#f-date');
+    fDate.value = today;
+    fDate.max = today;
     root.querySelector('#f-time').value = now.toTimeString().slice(0, 5);
 
     var list = root.querySelector('#tasklist');
