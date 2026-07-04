@@ -18,7 +18,8 @@
 
   // ── Shared status cache so all views poll the backend only once ─────────
   var statusData = {};
-  var statusLoaded = false;
+  var statusLoaded = false;   // true once a status fetch has resolved OK
+  var statusError = false;    // true if the last status fetch failed
   var lastRefresh = '';
 
   // ── Relative-time + duration formatting ─────────────────────────────────
@@ -54,8 +55,8 @@
     return { level: 'green', pct: Math.round(remaining / limit * 100),
       sub: t('last_done', { x: ago }), subClass: 'green' };
   }
-  var RING_COLOR = { green: 'var(--green)', amber: 'var(--amber)', red: 'var(--red)' };
-  var RING_GLYPH = { green: '✓', amber: '!', red: '!' };
+  var RING_COLOR = { green: 'var(--green)', amber: 'var(--amber)', red: 'var(--red)', loading: 'var(--border-2)' };
+  var RING_GLYPH = { green: '✓', amber: '!', red: '!', loading: '·' };
 
   // ── Tiny DOM helper ─────────────────────────────────────────────────────
   function el(html) {
@@ -127,7 +128,12 @@
 
   // ── View: dashboard (one location or all) ───────────────────────────────
   function statusCard(slug, freq) {
-    var info = statusInfo(freq, statusData[D.getLocation(slug).name + '|' + freq]);
+    // Cards always render (they're the navigation into checklists); the ring is
+    // only meaningful once status has loaded. Until then, show a neutral ring.
+    var ready = statusLoaded && !statusError;
+    var info = ready
+      ? statusInfo(freq, statusData[D.getLocation(slug).name + '|' + freq])
+      : { level: 'loading', pct: 0, sub: statusError ? '—' : t('loading'), subClass: '' };
     var label = D.FREQ_LABEL[freq];
     var card = el(
       '<a class="status-card" href="#/c/' + slug + '/' + freq + '">' +
@@ -187,7 +193,7 @@
       html += locChip(loc) +
         '<div class="page-head"><h1>' + esc(loc.name) + '</h1><p>' + esc(loc.machineId) + ' · ' + t('app_sub') + '</p></div>';
     }
-    html += '<div id="dash-dynamic">' + (statusLoaded ? '' : '<div class="loading">' + t('loading') + '</div>') + '</div>';
+    html += '<div id="dash-dynamic"></div>';
     html += kbList(multi);
     html += '<div class="last-refresh" id="dash-refresh"></div>';
     html += '</div>';
@@ -201,12 +207,15 @@
     paintDashboard(slugs, multi);
   }
 
-  // Fills the dynamic portion of the dashboard (called after status loads too).
+  // Fills the dynamic portion of the dashboard (re-run on every status poll).
+  // The banner reflects backend state; the cards are ALWAYS drawn so checklist
+  // links stay reachable while status is loading or if the fetch fails.
   function paintDashboard(slugs, multi) {
     var host = document.getElementById('dash-dynamic');
     if (!host) return;
-    if (!statusLoaded) { host.innerHTML = '<div class="loading">' + t('loading') + '</div>'; return; }
-    host.innerHTML = bannerFor(slugs);
+    host.innerHTML = statusError
+      ? '<div class="banner banner--amber"><span class="banner__icon"></span>' + t('failed_load') + '</div>'
+      : statusLoaded ? bannerFor(slugs) : '';
     slugs.forEach(function (slug) {
       var loc = D.getLocation(slug);
       var group = el('<div class="loc-group"></div>');
@@ -223,6 +232,9 @@
 
   // ── View: checklist (+ submit) ──────────────────────────────────────────
   function viewChecklist(root, slug, freq) {
+    // On a single-store entry (davies/ or itc/), ignore any slug in the URL and
+    // pin to this store — prevents e.g. /davies/#/c/itc/daily rendering ITC.
+    if (PRESET.mode === 'location') slug = PRESET.slug;
     var loc = D.getLocation(slug);
     if (!loc || !D.TASKS[freq]) { location.hash = '#/'; return; }
     setBackVisible(true);
@@ -326,8 +338,12 @@
 
       var taskData = {};
       tasks.forEach(function (tk) { taskData[tk.code] = { checked: true, notes: (notes[tk.code] || '').trim() }; });
+      // Send an absolute UTC instant, not a naive "YYYY-MM-DD HH:MM" string, so
+      // the backend/sheet timezone can't skew the recorded time. The picked
+      // date+time is read in the device's local zone, then serialised to ISO.
+      var datetime = new Date(date + 'T' + time).toISOString();
       var payload = {
-        date: date, time: time, datetime: date + ' ' + time,
+        date: date, time: time, datetime: datetime,
         location: loc.name, machine_id: loc.machineId,
         staff_name: '', supervisor: '', frequency: freq,
         tasks: taskData, abnormal_issues: (root.querySelector('#f-abnormal').value || '').trim()
@@ -432,24 +448,23 @@
     }
   }
 
+  // Repaint the dashboard's dynamic area (only if a dashboard is on screen).
+  function repaintDashboard() {
+    if (!document.getElementById('dash-dynamic')) return;
+    var multi = PRESET.mode === 'hq';
+    paintDashboard(multi ? D.LOCATIONS.map(function (l) { return l.slug; }) : [PRESET.slug], multi);
+  }
+
   // ── Backend status polling (shared, every 60s) ──────────────────────────
   function loadStatus() {
     fetch(D.SCRIPT_URL + '?action=status')
       .then(function (r) { return r.json(); })
       .then(function (json) {
-        statusData = json.data || {}; statusLoaded = true;
+        statusData = json.data || {}; statusLoaded = true; statusError = false;
         lastRefresh = new Date().toLocaleTimeString();
-        // Only the dashboard reflects status; repaint if it's showing.
-        if (document.getElementById('dash-dynamic')) {
-          var multi = PRESET.mode === 'hq';
-          paintDashboard(multi ? D.LOCATIONS.map(function (l) { return l.slug; }) : [PRESET.slug], multi);
-        }
       })
-      .catch(function () {
-        statusLoaded = true;
-        var host = document.getElementById('dash-dynamic');
-        if (host) host.innerHTML = '<div class="empty">' + t('failed_load') + '</div>';
-      });
+      .catch(function () { statusError = true; })
+      .then(repaintDashboard);   // refresh card/banner state either way
   }
 
   // ── Boot ─────────────────────────────────────────────────────────────────
