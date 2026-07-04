@@ -24,7 +24,7 @@ window.DIANMOOD = window.DIANMOOD || {};
     last_done:      'Last done {x}',
     overdue_by:     'Overdue by {x}',
     due_in:         'Due in {x}',
-    not_started:    'Not started',
+    no_record:      'No record found',
 
     loading:        'Loading…',
     failed_load:    'Could not load status — check connection.',

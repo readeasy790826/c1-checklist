@@ -38,10 +38,10 @@
   // Returns { level, pct, sub, subClass } for a location|frequency entry.
   function statusInfo(freq, entry) {
     var limit = D.LIMITS[freq], warn = D.WARN_BEFORE[freq];
-    // Never submitted → neutral "gray" (not started), not an alarm. Only a task
+    // Never submitted → neutral "gray" (no record), not an alarm. Only a task
     // that WAS logged and has since passed its threshold counts as red overdue.
     if (!entry || !entry.datetime) {
-      return { level: 'gray', pct: 0, sub: t('not_started'), subClass: 'gray' };
+      return { level: 'gray', pct: 0, sub: t('no_record'), subClass: 'gray' };
     }
     var elapsed = (Date.now() - new Date(entry.datetime).getTime()) / 3600000;
     var remaining = limit - elapsed;

@@ -169,7 +169,7 @@ button { font-family: inherit; }
 .status-card__sub.red   { color: var(--red); }
 .status-card__sub.amber { color: var(--amber); }
 .status-card__sub.green { color: var(--green); }
-.status-card__sub.gray  { color: var(--muted); }   /* not started — neutral, not an alarm */
+.status-card__sub.gray  { color: var(--muted); }   /* no record — neutral, not an alarm */
 .status-card__cta {
   font-size: 13px; font-weight: 700; color: var(--accent-strong);
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;
