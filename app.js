@@ -16,6 +16,12 @@
   // subfolder (/davies/), so they reach root content via BASE = '../'.
   var BASE = PRESET.base || '';
 
+  // HQ shows every location; a location entry shows only its own store.
+  var IS_HQ = PRESET.mode === 'hq';
+  function dashSlugs() {
+    return IS_HQ ? D.LOCATIONS.map(function (l) { return l.slug; }) : [PRESET.slug];
+  }
+
   // ── Shared status cache so all views poll the backend only once ─────────
   var statusData = {};
   var statusLoaded = false;   // true once a status fetch has resolved OK
@@ -34,7 +40,7 @@
     return rem > 0 ? d + 'd ' + rem + 'h' : d + 'd';
   }
 
-  // ── Status computation (preserves legacy thresholds exactly) ────────────
+  // ── Status computation ──────────────────────────────────────────────────
   // Returns { level, pct, sub, subClass } for a location|frequency entry.
   function statusInfo(freq, entry) {
     var limit = D.LIMITS[freq], warn = D.WARN_BEFORE[freq];
@@ -81,7 +87,7 @@
 
   // ── Header (fixed; rendered once, updated per route) ─────────────────────
   function renderHeader() {
-    var sub = PRESET.mode === 'hq' ? t('hq_sub')
+    var sub = IS_HQ ? t('hq_sub')
       : (D.getLocation(PRESET.slug) ? D.getLocation(PRESET.slug).machineId + ' · ' + t('app_sub') : t('app_sub'));
     var header = document.getElementById('app-header');
     header.innerHTML =
@@ -101,7 +107,6 @@
     if (b) b.classList.toggle('show', !!v);
   }
 
-  // ── Location chip + bottom-sheet picker ─────────────────────────────────
   // ── View: dashboard (one location or all) ───────────────────────────────
   function statusCard(slug, freq) {
     // Cards always render (they're the navigation into checklists); the ring is
@@ -142,36 +147,34 @@
 
   function viewDashboard(root) {
     setBackVisible(false);
-    var multi = PRESET.mode === 'hq';
-    var slugs = multi ? D.LOCATIONS.map(function (l) { return l.slug; }) : [PRESET.slug];
 
     var html = '<div class="wrap">';
-    if (multi) {
+    if (IS_HQ) {
       html += '<div class="page-head"><h1>' + t('hq_title') + '</h1><p>' + t('hq_sub') + '</p></div>';
     } else {
       var loc = D.getLocation(PRESET.slug);
       html += '<div class="page-head"><h1>' + esc(loc.name) + '</h1><p>' + esc(loc.machineId) + ' · ' + t('app_sub') + '</p></div>';
     }
     html += '<div id="dash-dynamic"></div>';
-    html += kbList(multi);
+    html += kbList(IS_HQ);
     html += '<div class="last-refresh" id="dash-refresh"></div>';
     html += '</div>';
     root.appendChild(el(html));
 
-    paintDashboard(slugs, multi);
+    paintDashboard();
   }
 
   // Fills the dynamic portion of the dashboard (re-run on every status poll).
   // Cards are ALWAYS drawn so checklist links stay reachable while status is
   // loading or if the fetch fails; a failed fetch is noted in the refresh line.
-  function paintDashboard(slugs, multi) {
+  function paintDashboard() {
     var host = document.getElementById('dash-dynamic');
     if (!host) return;
     host.innerHTML = '';
-    slugs.forEach(function (slug) {
+    dashSlugs().forEach(function (slug) {
       var loc = D.getLocation(slug);
       var group = el('<div class="loc-group"></div>');
-      if (multi) group.appendChild(el('<div class="loc-group__title">' + esc(loc.name) +
+      if (IS_HQ) group.appendChild(el('<div class="loc-group__title">' + esc(loc.name) +
         '<span class="loc-group__id">' + esc(loc.machineId) + '</span></div>'));
       var stack = el('<div class="card-stack"></div>');
       ['daily', 'weekly', 'monthly'].forEach(function (freq) { stack.appendChild(statusCard(slug, freq)); });
@@ -190,7 +193,7 @@
   function viewChecklist(root, slug, freq) {
     // On a single-store entry (davies/ or itc/), ignore any slug in the URL and
     // pin to this store — prevents e.g. /davies/#/c/itc/daily rendering ITC.
-    if (PRESET.mode === 'location') slug = PRESET.slug;
+    if (!IS_HQ) slug = PRESET.slug;
     var loc = D.getLocation(slug);
     if (!loc || !D.TASKS[freq]) { location.hash = '#/'; return; }
     setBackVisible(true);
@@ -454,8 +457,7 @@
   // Repaint the dashboard's dynamic area (only if a dashboard is on screen).
   function repaintDashboard() {
     if (!document.getElementById('dash-dynamic')) return;
-    var multi = PRESET.mode === 'hq';
-    paintDashboard(multi ? D.LOCATIONS.map(function (l) { return l.slug; }) : [PRESET.slug], multi);
+    paintDashboard();
   }
 
   // ── Submit + confirm ─────────────────────────────────────────────────────

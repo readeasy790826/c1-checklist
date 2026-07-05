@@ -14,7 +14,6 @@ window.DIANMOOD = window.DIANMOOD || {};
     hq_title:       'All Locations',
     hq_sub:         'HQ dashboard',
 
-    daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
     knowledge_base: 'Knowledge Base',
     open: 'Open',
 
@@ -43,7 +42,6 @@ window.DIANMOOD = window.DIANMOOD || {};
     submitted:      'Submitted',
     need_date:      'Please fill in date and time.',
     need_all:       'Complete all tasks first. Missing: {x}',
-    submit_failed:  'Submit failed — please retry.',
     submit_unconfirmed: "Couldn't confirm submission — check connection and retry.",
 
     coming_soon:    'Coming soon',

@@ -11,13 +11,14 @@ window.DIANMOOD = window.DIANMOOD || {};
   // Google Apps Script endpoint (POST submit / GET ?action=status).
   D.SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeSoG86Dx17hLxma5pnx3DNgyqUFXtjukPGQljcCO4R2JBpf-_bQwKR0oFQL8AA4G5/exec';
 
-  // Locations — add a site by adding one entry (and a /<slug>/ folder shim).
+  // Locations — add a site by adding one entry (and a /<slug>/ entry folder).
   D.LOCATIONS = [
     { slug: 'davies', name: 'Davies', machineId: 'C1-DV-01' },
     { slug: 'itc',    name: 'ITC',    machineId: 'C1-ITC-01' }
   ];
 
-  // Status windows (hours) and "warn when X hours left" — must match legacy logic.
+  // Per-frequency status windows: LIMITS = hours until overdue; WARN_BEFORE =
+  // hours-remaining at which the card turns amber ("due soon").
   D.LIMITS      = { daily: 36,  weekly: 240, monthly: 1080 };
   D.WARN_BEFORE = { daily: 6,   weekly: 24,  monthly: 72   };
 
@@ -38,7 +39,6 @@ window.DIANMOOD = window.DIANMOOD || {};
     weekly: [
       { code: 'W1', title: 'Restart Windows' },
       { code: 'W2', title: 'Reboot kiosk' },
-      // W3's content is the brewer deep-clean (swap) SOP, despite the legacy name.
       { code: 'W3', title: 'Brewer deep cleaning (swap)' },
       { code: 'W4', title: 'Clean the fridges' },
       { code: 'W5', title: 'Recalibrate the scales' }
