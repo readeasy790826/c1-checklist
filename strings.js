@@ -13,9 +13,6 @@ window.DIANMOOD = window.DIANMOOD || {};
     app_sub:        'Operations Portal',
     hq_title:       'All Locations',
     hq_sub:         'HQ dashboard',
-    pick_location:  'Choose a location',
-    switch_location:'Switch location',
-    locations:      'Locations',
 
     daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly',
     knowledge_base: 'Knowledge Base',

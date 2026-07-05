@@ -102,32 +102,6 @@
   }
 
   // ── Location chip + bottom-sheet picker ─────────────────────────────────
-  function locChip(loc) {
-    return '<div class="loc-bar"><button class="loc-chip" id="loc-chip">' +
-      '<span class="loc-chip__dot"></span>' +
-      '<span class="loc-chip__name">' + esc(loc.name) + '</span>' +
-      '<span class="loc-chip__id">' + esc(loc.machineId) + '</span>' +
-      '<span class="loc-chip__caret">▾</span></button></div>';
-  }
-  function openLocationPicker(currentSlug, onPick) {
-    var items = D.LOCATIONS.map(function (l) {
-      return '<div class="sheet__item' + (l.slug === currentSlug ? ' active' : '') + '" data-slug="' + l.slug + '">' +
-        '<span class="loc-chip__dot"></span>' +
-        '<span class="sheet__item-name">' + esc(l.name) + '</span>' +
-        '<span class="sheet__item-id">' + esc(l.machineId) + '</span></div>';
-    }).join('');
-    var back = el('<div class="sheet-backdrop"><div class="sheet">' +
-      '<div class="sheet__grip"></div>' +
-      '<div class="sheet__title">' + t('switch_location') + '</div>' + items +
-      '</div></div>');
-    function close() { if (back.parentNode) back.parentNode.removeChild(back); }
-    back.addEventListener('click', function (e) { if (e.target === back) close(); });
-    back.querySelectorAll('.sheet__item').forEach(function (it) {
-      it.addEventListener('click', function () { close(); onPick(it.dataset.slug); });
-    });
-    document.body.appendChild(back);
-  }
-
   // ── View: dashboard (one location or all) ───────────────────────────────
   function statusCard(slug, freq) {
     // Cards always render (they're the navigation into checklists); the ring is
@@ -176,8 +150,7 @@
       html += '<div class="page-head"><h1>' + t('hq_title') + '</h1><p>' + t('hq_sub') + '</p></div>';
     } else {
       var loc = D.getLocation(PRESET.slug);
-      html += locChip(loc) +
-        '<div class="page-head"><h1>' + esc(loc.name) + '</h1><p>' + esc(loc.machineId) + ' · ' + t('app_sub') + '</p></div>';
+      html += '<div class="page-head"><h1>' + esc(loc.name) + '</h1><p>' + esc(loc.machineId) + ' · ' + t('app_sub') + '</p></div>';
     }
     html += '<div id="dash-dynamic"></div>';
     html += kbList(multi);
@@ -185,11 +158,6 @@
     html += '</div>';
     root.appendChild(el(html));
 
-    if (!multi) {
-      root.querySelector('#loc-chip').addEventListener('click', function () {
-        openLocationPicker(PRESET.slug, function (slug) { location.href = '../' + slug + '/'; });
-      });
-    }
     paintDashboard(slugs, multi);
   }
 
