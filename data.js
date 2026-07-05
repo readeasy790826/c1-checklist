@@ -40,14 +40,14 @@ window.DIANMOOD = window.DIANMOOD || {};
       { code: 'W1', title: 'Restart Windows' },
       { code: 'W2', title: 'Reboot kiosk' },
       { code: 'W3', title: 'Brewer deep cleaning (swap)' },
-      { code: 'W4', title: 'Clean the fridges' },
+      { code: 'W4', title: 'Clean the fridge' },
       { code: 'W5', title: 'Recalibrate the scales' }
     ],
     monthly: [
       { code: 'M1', title: 'Empty the ice maker' },
       { code: 'M2', title: 'Powder system deep manual cleaning' },
       { code: 'M3', title: 'Deep cleaning of beverage spout groups' },
-      { code: 'M4', title: 'Clean coffee grinder with cleaning tablets' },
+      { code: 'M4', title: 'Clean coffee grinder' },
       { code: 'M5', title: 'Syrup dispenser deep cleaning' }
     ]
   };
