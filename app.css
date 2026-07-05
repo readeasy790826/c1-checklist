@@ -332,6 +332,7 @@ button { font-family: inherit; }
 .sop-content figure { margin: 14px 0; }
 .sop-content img {
   display: block; max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);
+  cursor: zoom-in;   /* tap to open in the lightbox */
 }
 .sop-content figcaption { font-size: 12px; color: var(--muted); margin-top: 6px; }
 .sop-content table {          /* GFM pipe tables (recipe/ingredient tables in KB) */
@@ -360,6 +361,19 @@ button { font-family: inherit; }
 .callout--danger { background: var(--red-bg);   border-color: var(--red-border);   color: var(--red); }
 .callout--ok     { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
 .callout--info   { background: var(--surface-2); border-color: var(--border-2);    color: var(--text-2); }
+
+/* ── Image lightbox (tap-to-zoom overlay for SOP/KB images) ─────────────── */
+.lightbox {
+  position: fixed; inset: 0; z-index: 100; display: none;
+  align-items: center; justify-content: center; padding: 24px;
+  background: rgba(20,12,8,.9);
+  -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px);
+}
+.lightbox.open { display: flex; }
+.lightbox img {
+  max-width: 100%; max-height: 100%; cursor: zoom-out;
+  border-radius: var(--radius-sm); box-shadow: var(--shadow-lg);
+}
 
 /* ── Misc / empty / loading ────────────────────────────────────────────── */
 .loading, .empty { text-align: center; color: var(--muted); font-size: 14px; padding: 48px 20px; }
