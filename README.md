@@ -4,8 +4,9 @@
 
 ## 🔗 访问链接
 
-- **Davies 店清单**: https://readeasy790826.github.io/c1-checklist/davies_checklist.html
-- **ITC 店清单**: https://readeasy790826.github.io/c1-checklist/itc_checklist.html
+- **HQ 总览**: https://readeasy790826.github.io/c1-checklist/
+- **Davies 店清单**: https://readeasy790826.github.io/c1-checklist/davies/
+- **ITC 店清单**: https://readeasy790826.github.io/c1-checklist/itc/
 
 ## 📱 如何使用
 
