@@ -30,19 +30,23 @@ video: https://drive.google.com/drive/folders/…   # optional reference video
 video_label: What to Avoid                          # optional chip label
 ---
 
+**Purpose:** One line on why this task matters. (optional)
+
 ## Materials Needed
 
 - **Urnex Cafiza Tablets (E31)**
 
-## Procedure
+## SOP Steps
 
 ### Step 1: …
 
 1. Do the thing.
    - A sub-point.
 
-> A line starting with "> " becomes a warning callout.
+> [!WARNING] A safety note or gotcha (rendered as a labelled callout).
 ```
+
+**Section order is fixed:** an optional `**Purpose:**` line, then `## Materials Needed` (omit if none), then `## SOP Steps`. Steps are a numbered list; a long multi-part task can group them under `### Step N: Title` subheadings (as the D-series SOPs do).
 
 To add a brand-new task, add it to `data.js` and drop a matching `<code>.en.md`
 here.
@@ -59,8 +63,9 @@ content/kb/refill.zh.md
 ```
 
 The article `id` (`refill`, `brewing`, …) comes from `D.KB` in `data.js`. Each
-file's frontmatter carries its own `title:` (in that language) and a short
-`summary:`. To add an article, add an entry to `D.KB` and drop the two files here.
+file's frontmatter carries its own `title:` (used as the page heading in that
+language). Card title and description on the dashboard come from `D.KB` in
+`data.js`. To add an article, add an entry to `D.KB` and drop the two files here.
 
 ## Supported Markdown (`md.js`)
 
@@ -77,6 +82,8 @@ defaults to a warning):
 > [!TIP] green — helpful confirmations
 > [!INFO] neutral — reference notes
 ```
+
+Each callout renders with an icon and a bold label header (⚠️ Warning · ❗ Important · ✅ Tip · 📌 Note); a plain `> …` with no marker shows as **Warning**.
 
 Heading sizes: `#` is a large section title, `##` is a small uppercase
 sub-label, `###` is an accent-coloured step heading.

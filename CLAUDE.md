@@ -1,23 +1,26 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude / any developer working on this repository.
 
 ## What This Is
 
-Operations portal for **Dianmood** — a robotic coffee bar with C1 Pro machines at two Vancouver locations (Davies and ITC). Staff use these pages on their phones for daily/weekly/monthly maintenance checklists, SOP references, and knowledge base articles.
+Operations portal for **Dianmood** — a robotic coffee bar with C1 Pro machines at two Vancouver locations (Davies and ITC). Staff open these pages on their phones for daily/weekly/monthly maintenance checklists, step-by-step SOPs, and knowledge-base articles.
 
 ## Tech Stack
 
 - **Plain HTML + CSS + Vanilla JS** — no frameworks, no build step, no npm
+- **Single-page app** — one shared shell (`app.js`) hash-routes every view
 - **GitHub Pages** (`readeasy790826/c1-checklist`) — push to `main`, live in ~1 min
-- **Google Apps Script** — backend endpoint that writes submissions to Google Sheets
+- **Google Apps Script** — backend that writes submissions to Google Sheets and serves status
 - **No auth** — pages are public, staff access by URL
 
 ## Local Development
 
 ```bash
 python3 -m http.server 8080
-# then open http://localhost:8080/davies_portal.html
+# HQ:     http://localhost:8080/
+# Davies: http://localhost:8080/davies/
+# ITC:    http://localhost:8080/itc/
 ```
 
 `fetch()` calls to the Apps Script backend work from localhost (CORS is open).
@@ -30,80 +33,110 @@ git commit -m "describe what changed"
 git push origin main
 ```
 
-## File Naming Convention
-
-| Prefix | Type | Example |
-|---|---|---|
-| `D0–D7` | Daily SOP pages | `D2_liquid_dispenser_cleaning.html` |
-| `W1–W5` | Weekly SOP pages | `W4_weekly_brewer_swap.html` |
-| `M1–M5` | Monthly SOP pages | `M4_monthly_grinder_cleaning.html` |
-| `davies_` / `itc_` | Location-specific checklists & portals | `davies_checklist.html` |
-| `hq_` | HQ dashboard (both locations) | `hq_portal.html` |
-| `kb_` | Knowledge base articles | `kb_brewing.html` |
-
-Some SOP pages have a matching `.md` source file (e.g. `D0_enter_maintenance_mode.md`) — these are the content source; the `.html` is the rendered version.
-
 ## Architecture
 
-### Portal → Checklist → SOP chain
-- `*_portal.html` — entry point; fetches live status from Apps Script and shows 🔴/🟡/✅ per frequency
-- `*_checklist.html` — staff checks off tasks D0–D7; each task has a collapsible SOP link
-- `D*/W*/M*_*.html` — step-by-step SOP pages staff follow while doing the task
+The whole app is one SPA shell rendered by `app.js` into three entry points. Each entry sets `window.DIANMOOD_PRESET` before loading the shared scripts, then everything is hash-routed and deep-linkable.
+
+### Entry points
+
+| File | Preset | Shows |
+|---|---|---|
+| `index.html` | `{ mode: 'hq', base: '' }` | HQ dashboard — all locations |
+| `davies/index.html` | `{ mode: 'location', slug: 'davies', base: '../' }` | Davies only |
+| `itc/index.html` | `{ mode: 'location', slug: 'itc', base: '../' }` | ITC only |
+
+Location entries live in a subfolder, so they reach the root-level content and scripts via `base: '../'`.
+
+### Routes (hash)
+
+- `#/` — dashboard (HQ shows every location; a location entry shows only itself)
+- `#/c/<slug>/<freq>` — checklist; `freq` = `daily` \| `weekly` \| `monthly`
+- `#/sop/<CODE>` — full SOP page (e.g. `#/sop/D1`)
+- `#/kb/<id>` — knowledge-base article (per-article EN / 中文 switch)
+
+### Core files
+
+| File | Role |
+|---|---|
+| `data.js` | Single source of truth: `SCRIPT_URL`, `LOCATIONS`, `LIMITS`/`WARN_BEFORE`, `TASKS`, `KB`, `getLocation()` |
+| `strings.js` | English UI copy + `t()` interpolation helper + `FREQ_LABEL` |
+| `md.js` | Dependency-free Markdown renderer + content loaders (`loadSop`, `loadKb`) |
+| `app.js` | SPA shell: routing, all views, status polling, submit-and-confirm, image lightbox |
+| `app.css` | The entire design system |
+| `content/sops/<CODE>.en.md` | SOP bodies (English) |
+| `content/kb/<id>.{en,zh}.md` | KB articles (bilingual) |
+| `assets/` | Images referenced by content |
 
 ### Status / submission flow
-- **Submit**: checklist `fetch()` POSTs to Apps Script → writes a row to Google Sheets (`Submissions` tab)
-- **Status poll**: portal `fetch(SCRIPT_URL + '?action=status')` → Apps Script returns latest submission per `location|frequency` → portal computes elapsed time and color status → auto-refreshes every 60s
+
+- **Submit**: the checklist POSTs (`no-cors`) to `SCRIPT_URL`, then re-reads `?action=status` to confirm the row actually landed before showing success (a `no-cors` POST response is opaque, so we verify by read-back). In-progress drafts are saved to `sessionStorage` and cleared on confirmed submit.
+- **Status poll**: `app.js` fetches `SCRIPT_URL + '?action=status'`, computes elapsed time per `location|frequency`, and colours each card. Refreshes every 60s. Dashboard cards render immediately in a neutral "loading" state and stay navigable even if the fetch fails.
+
+Status levels (see `statusInfo` in `app.js`): **gray** = no record yet · **green** = within window · **amber** = due soon · **red** = overdue · **loading** = transient.
 
 ### Overdue thresholds
+
+Defined in `data.js` as `LIMITS` (hours until overdue) and `WARN_BEFORE` (hours-left that turns a card amber).
+
 | Frequency | Overdue after | Warning starts |
 |---|---|---|
 | Daily | 36h | 6h remaining |
-| Weekly | 10 days | 24h remaining |
-| Monthly | 45 days | 3 days remaining |
+| Weekly | 240h (10 days) | 24h remaining |
+| Monthly | 1080h (45 days) | 72h (3 days) remaining |
 
 ### Apps Script endpoint
+
 ```
-POST  → submit checklist row
+POST → append a submission row to the "Submissions" sheet
 GET ?action=status → { status: "success", data: { "Davies|daily": { datetime, ... }, ... } }
 ```
+
+POST payload: `date`, `time`, `datetime` (absolute UTC ISO string, so the sheet timezone can't skew it), `location`, `machine_id`, `frequency`, and `tasks` (object keyed by task code → `{ checked, notes }`). The endpoint also accepts `staff_name`, `supervisor`, `abnormal_issues` (currently sent empty).
+
 URL (do not rotate unless broken):
 ```
 https://script.google.com/macros/s/AKfycbyeSoG86Dx17hLxma5pnx3DNgyqUFXtjukPGQljcCO4R2JBpf-_bQwKR0oFQL8AA4G5/exec
 ```
 After any Apps Script edit: **Deploy → Manage deployments → Edit → New version → Deploy** (changes don't take effect without a new deployment version).
 
+## Adding Things (no markup edits needed)
+
+- **A location** — add `{ slug, name, machineId }` to `D.LOCATIONS` in `data.js`, then create `<slug>/index.html` (copy `davies/index.html`, change the `slug`).
+- **A task** — add `{ code, title }` to the right frequency in `D.TASKS`, then drop `content/sops/<CODE>.en.md`.
+- **A KB article** — add an entry to `D.KB`, then drop `content/kb/<id>.en.md` (and `.zh.md` for Chinese).
+
+## Content Authoring
+
+The SOP/KB Markdown file format — frontmatter, section headings (`## Materials Needed`, `## SOP Steps`), and callout syntax — is documented in **`content/README.md`**, which lives beside the files it describes. Don't duplicate that spec here.
+
 ## Design System
 
-Dark theme, mobile-first. Keep all pages consistent with these CSS variables:
+Light, warm "coffee" theme, mobile-first. All tokens live in `:root` in `app.css`:
 
 ```css
---bg: #0f0f0f        /* page background */
---surface: #1a1a1a   /* header, sticky bars */
---card: #222          /* cards */
---border: #333        /* borders */
---accent: #f5a623    /* amber — badges, highlights */
---green: #4caf50
---red: #e53935
---blue: #42a5f5
---muted: #888        /* secondary text */
---radius: 12px
+--bg: #FBF7F2;          /* page background */
+--surface: #FFFFFF;     /* cards, header */
+--surface-2: #F5EDE3;   /* insets, chips */
+--text: #2A1A12;
+--text-2: #6F5645;
+--muted: #9C8676;
+--accent: #8A5A3B;      /* roasted coffee — primary */
+--accent-strong: #6F4427;
+--green: #2F7A4F; --amber: #B07818; --red: #BB3B36;   /* status */
+--radius: 14px;
 ```
 
-Font: `-apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`
+Font: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`. Status is shown as a conic-gradient ring with a glyph (`✓` / `!` / `–` / `·`), not stoplight emoji.
 
 ## Division of Work
 
-- **Dad (content owner)** — adds/refines text, photos, SOP steps. Don't restructure content files without discussing with him.
-- **Developer** — UX, structure, tooling, making content easier to add and display.
+- **Dad (content owner)** — writes and refines SOP/KB text, photos, and steps. Don't reword his step content without discussing; formatting/structure is fair game.
+- **Developer** — architecture, UX, tooling, making content easier to add and display.
 
-Content source markdown files for KB pages live at (on Dad's machine):
-```
-/home/hui_chen/.hermes/user_data/coffee_ops/sops/knowledge_base/
-```
-When Dad updates content, the corresponding `kb_*.html` files get rebuilt.
+Content is canonical **in this repo** under `content/`. Dad drafts SOPs via a Hermes agent on his machine (`~/.hermes/user_data/coffee_ops/sops/`); that upstream is his scratch source, not the source of truth.
 
 ## Known Issues / Backlog
 
-- Task codes (D0–D7, W1–W5, M1–M5) are duplicated across davies and itc checklists — a shared JS config would prevent sync bugs
-- Many SOP pages have thin step content — Dad fills in; developer ensures templates handle rich content
-- `history.back()` navigation breaks if SOP pages are opened directly from a shared link
+- **Hermes pipeline is out of sync.** Dad's Hermes `coffee-robot-ops` skill + `publish_c1_checklist.py` still target the old standalone-HTML layout (per-task `*.html`, `kb_*.html`, `images/`). Until that skill is re-briefed to edit `content/*.md` directly, running it will resurrect deleted files and fight this repo.
+- **Thin SOP content.** Several SOPs (e.g. M2, M4, M5, W-series) are short stubs — Dad to expand; the renderer already handles rich content.
+- **Task-code labels vs Excel.** Weekly/monthly code→task mappings should be reconciled with Dad against `C1 Pro SOP (Maintenance).xlsx`.
