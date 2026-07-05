@@ -22,6 +22,14 @@ window.DIANMOOD = window.DIANMOOD || {};
     TIP: 'ok', SUCCESS: 'ok',
     NOTE: 'info', INFO: 'info'
   };
+  // Icon + default label per variant, so callouts read as alerts (not footnotes).
+  // A "> [!MARKER]" line overrides the label with its own word.
+  var CALLOUT_META = {
+    warn:   { icon: '⚠️', label: 'Warning' },
+    danger: { icon: '❗', label: 'Important' },
+    ok:     { icon: '✅', label: 'Tip' },
+    info:   { icon: '📌', label: 'Note' }
+  };
 
   // Split a pipe-table row into trimmed cells, ignoring the optional outer pipes.
   function tableCells(line) {
@@ -148,15 +156,20 @@ window.DIANMOOD = window.DIANMOOD || {};
       if (/^>\s?/.test(line)) {
         var buf = [];
         while (i < lines.length && /^>\s?/.test(lines[i])) { buf.push(lines[i].replace(/^>\s?/, '')); i++; }
-        var kind = 'warn';
+        var kind = 'warn', label = '';
         var mk = /^\[!(\w+)\]\s*(.*)$/.exec(buf[0]);
         if (mk) {
           kind = CALLOUT_KIND[mk[1].toUpperCase()] || 'warn';
+          label = mk[1].charAt(0).toUpperCase() + mk[1].slice(1).toLowerCase();   // WARNING -> Warning
           buf[0] = mk[2];                 // keep any text after the marker
           if (!buf[0]) buf.shift();       // …or drop the marker-only line
         }
+        var meta = CALLOUT_META[kind];
         out += '<div class="callout callout--' + kind + '">' +
-          buf.map(function (b) { return inline(b, base); }).join('<br>') + '</div>';
+          '<div class="callout__label">' + meta.icon + ' ' + (label || meta.label) + '</div>' +
+          '<div class="callout__body">' +
+          buf.map(function (b) { return inline(b, base); }).join('<br>') +
+          '</div></div>';
         continue;
       }
 
