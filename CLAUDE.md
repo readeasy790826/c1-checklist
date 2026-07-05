@@ -93,12 +93,6 @@ GET ?action=status → { status: "success", data: { "Davies|daily": { datetime, 
 
 POST payload: `date`, `time`, `datetime` (absolute UTC ISO string, so the sheet timezone can't skew it), `location`, `machine_id`, `frequency`, and `tasks` (object keyed by task code → `{ checked, notes }`). The endpoint also accepts `staff_name`, `supervisor`, `abnormal_issues` (currently sent empty).
 
-URL (do not rotate unless broken):
-```
-https://script.google.com/macros/s/AKfycbyeSoG86Dx17hLxma5pnx3DNgyqUFXtjukPGQljcCO4R2JBpf-_bQwKR0oFQL8AA4G5/exec
-```
-After any Apps Script edit: **Deploy → Manage deployments → Edit → New version → Deploy** (changes don't take effect without a new deployment version).
-
 ## Adding Things (no markup edits needed)
 
 - **A location** — add `{ slug, name, machineId }` to `D.LOCATIONS` in `data.js`, then create `<slug>/index.html` (copy `davies/index.html`, change the `slug`).
@@ -127,16 +121,3 @@ Light, warm "coffee" theme, mobile-first. All tokens live in `:root` in `app.css
 ```
 
 Font: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`. Status is shown as a conic-gradient ring with a glyph (`✓` / `!` / `–` / `·`), not stoplight emoji.
-
-## Division of Work
-
-- **Dad (content owner)** — writes and refines SOP/KB text, photos, and steps. Don't reword his step content without discussing; formatting/structure is fair game.
-- **Developer** — architecture, UX, tooling, making content easier to add and display.
-
-Content is canonical **in this repo** under `content/`. Dad drafts SOPs via a Hermes agent on his machine (`~/.hermes/user_data/coffee_ops/sops/`); that upstream is his scratch source, not the source of truth.
-
-## Known Issues / Backlog
-
-- **Hermes pipeline is out of sync.** Dad's Hermes `coffee-robot-ops` skill + `publish_c1_checklist.py` still target the old standalone-HTML layout (per-task `*.html`, `kb_*.html`, `images/`). Until that skill is re-briefed to edit `content/*.md` directly, running it will resurrect deleted files and fight this repo.
-- **Thin SOP content.** Several SOPs (e.g. M2, M4, M5, W-series) are short stubs — Dad to expand; the renderer already handles rich content.
-- **Task-code labels vs Excel.** Weekly/monthly code→task mappings should be reconciled with Dad against `C1 Pro SOP (Maintenance).xlsx`.
