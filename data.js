@@ -13,8 +13,9 @@ window.DIANMOOD = window.DIANMOOD || {};
 
   // Locations — add a site by adding one entry (and a /<slug>/ entry folder).
   D.LOCATIONS = [
-    { slug: 'davies', name: 'Davies', machineId: 'C1-DV-01' },
-    { slug: 'itc',    name: 'ITC',    machineId: 'C1-ITC-01' }
+    { slug: 'davies',    name: 'Davies',    machineId: 'C1-DV-01' },
+    { slug: 'itc',       name: 'ITC',       machineId: 'C1-ITC-01' },
+    { slug: 'infinity8', name: 'Infinity8', machineId: 'C1-I8-01' }
   ];
 
   // Per-frequency status windows: LIMITS = hours until overdue; WARN_BEFORE =

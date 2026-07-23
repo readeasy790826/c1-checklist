@@ -7,6 +7,7 @@
 - **HQ 总览**: https://readeasy790826.github.io/c1-checklist/
 - **Davies 店清单**: https://readeasy790826.github.io/c1-checklist/davies/
 - **ITC 店清单**: https://readeasy790826.github.io/c1-checklist/itc/
+- **Infinity8 店清单**: https://readeasy790826.github.io/c1-checklist/infinity8/
 
 ## 📱 如何使用
 

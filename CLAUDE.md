@@ -4,7 +4,7 @@ Guidance for Claude / any developer working on this repository.
 
 ## What This Is
 
-Operations portal for **Dianmood** — a robotic coffee bar with C1 Pro machines at two Vancouver locations (Davies and ITC). Staff open these pages on their phones for daily/weekly/monthly maintenance checklists, step-by-step SOPs, and knowledge-base articles.
+Operations portal for **Dianmood** — a robotic coffee bar with C1 Pro machines at Vancouver locations (Davies, ITC, and Infinity8). Staff open these pages on their phones for daily/weekly/monthly maintenance checklists, step-by-step SOPs, and knowledge-base articles.
 
 ## Tech Stack
 
@@ -18,9 +18,10 @@ Operations portal for **Dianmood** — a robotic coffee bar with C1 Pro machines
 
 ```bash
 python3 -m http.server 8080
-# HQ:     http://localhost:8080/
-# Davies: http://localhost:8080/davies/
-# ITC:    http://localhost:8080/itc/
+# HQ:        http://localhost:8080/
+# Davies:    http://localhost:8080/davies/
+# ITC:       http://localhost:8080/itc/
+# Infinity8: http://localhost:8080/infinity8/
 ```
 
 `fetch()` calls to the Apps Script backend work from localhost (CORS is open).
@@ -35,7 +36,7 @@ git push origin main
 
 ## Architecture
 
-The whole app is one SPA shell rendered by `app.js` into three entry points. Each entry sets `window.DIANMOOD_PRESET` before loading the shared scripts, then everything is hash-routed and deep-linkable.
+The whole app is one SPA shell rendered by `app.js` into four entry points. Each entry sets `window.DIANMOOD_PRESET` before loading the shared scripts, then everything is hash-routed and deep-linkable.
 
 ### Entry points
 
@@ -44,6 +45,7 @@ The whole app is one SPA shell rendered by `app.js` into three entry points. Eac
 | `index.html` | `{ mode: 'hq', base: '' }` | HQ dashboard — all locations |
 | `davies/index.html` | `{ mode: 'location', slug: 'davies', base: '../' }` | Davies only |
 | `itc/index.html` | `{ mode: 'location', slug: 'itc', base: '../' }` | ITC only |
+| `infinity8/index.html` | `{ mode: 'location', slug: 'infinity8', base: '../' }` | Infinity8 only |
 
 Location entries live in a subfolder, so they reach the root-level content and scripts via `base: '../'`.
 
