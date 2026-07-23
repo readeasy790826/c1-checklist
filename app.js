@@ -414,12 +414,14 @@
       var lang = kbLang();
       wrap.innerHTML = '<div class="loading">' + t('loading') + '</div>';
       D.loadKb(id, lang, BASE).then(function (doc) {
+        var meta = doc.meta || {};
         wrap.innerHTML =
           '<div class="page-head kb-head"><h1>' + esc(doc.meta.title || entry.title) + '</h1>' +
             '<div class="lang-switch">' +
               '<button data-l="en"' + (lang === 'en' ? ' class="active"' : '') + '>EN</button>' +
               '<button data-l="zh"' + (lang === 'zh' ? ' class="active"' : '') + '>中文</button>' +
             '</div></div>' +
+          (meta.video ? '<div class="sop-links">' + videoChip(meta.video, meta.video_label) + '</div>' : '') +
           '<div class="sop-content sop-content--page">' + D.md(doc.body, BASE) + '</div>';
         wrap.querySelectorAll('.lang-switch button').forEach(function (b) {
           b.addEventListener('click', function () {

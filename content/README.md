@@ -64,8 +64,10 @@ content/kb/refill.zh.md
 
 The article `id` (`refill`, `brewing`, …) comes from `D.KB` in `data.js`. Each
 file's frontmatter carries its own `title:` (used as the page heading in that
-language). Card title and description on the dashboard come from `D.KB` in
-`data.js`. To add an article, add an entry to `D.KB` and drop the two files here.
+language). Optional `video:` / `video_label:` work the same as on SOP pages
+(▶ chip above the body). Card title and description on the dashboard come from
+`D.KB` in `data.js`. To add an article, add an entry to `D.KB` and drop the two
+files here.
 
 ## Supported Markdown (`md.js`)
 
