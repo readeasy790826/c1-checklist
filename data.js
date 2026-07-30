@@ -53,6 +53,20 @@ window.DIANMOOD = window.DIANMOOD || {};
     ]
   };
 
+  // Dashboard "Must Read" — page-level notice under the title on every portal.
+  // `text` is an optional lead line (not bulleted); `points` are the rules.
+  D.MUST_READ = [
+    {
+      title: 'Emergency Protocol for Robotic Arm Malfunction',
+      text: 'If the robotic arm malfunctions for any reason:',
+      points: [
+        'DO NOT attempt any manual operations on the equipment by yourself',
+        'DO NOT close the Console APP under any circumstances',
+        'Immediately notify professional technical staff to come on-site for inspection and troubleshooting.'
+      ]
+    }
+  ];
+
   // Knowledge base. scope 'all' shows everywhere; 'hq' only on the HQ dashboard.
   // KB articles are the one bilingual surface — each has its own EN/中文 switch
   // and loads content/kb/<id>.<lang>.md via the #/kb/<id> route. `soon` = no

@@ -129,6 +129,36 @@
     return card;
   }
 
+  // Emphasize DO NOT in Must Read points (bold + underline) after HTML-escaping.
+  function formatMustReadPoint(p) {
+    return esc(p).replace(/\bDO NOT\b/g, '<strong class="must-read__emph">DO NOT</strong>');
+  }
+
+  function mustReadList() {
+    if (!D.MUST_READ || !D.MUST_READ.length) return '';
+    // Always use expandable rows (chevron). First rule starts open; later ones
+    // start collapsed so many rules don't fill the page.
+    return '<aside class="must-read" role="note">' +
+      '<div class="must-read__label">' + t('must_read') + '</div>' +
+      D.MUST_READ.map(function (rule, i) {
+        var body =
+          (rule.text ? '<p class="must-read__text">' + esc(rule.text) + '</p>' : '') +
+          (rule.points && rule.points.length
+            ? '<ul class="must-read__points">' +
+                rule.points.map(function (p) { return '<li>' + formatMustReadPoint(p) + '</li>'; }).join('') +
+              '</ul>'
+            : '');
+        return '<details class="must-read__rule"' + (i === 0 ? ' open' : '') + '>' +
+          '<summary class="must-read__title">' +
+            '<span class="must-read__title-text">' +
+              esc(t('rule_n', { n: i + 1 }) + ': ' + rule.title) +
+            '</span>' +
+            '<span class="must-read__chev" aria-hidden="true"></span>' +
+          '</summary>' + body + '</details>';
+      }).join('') +
+      '</aside>';
+  }
+
   function kbList(includeHq) {
     var items = D.KB.filter(function (k) { return k.scope === 'all' || includeHq; });
     return '<div class="section-label">' + t('knowledge_base') + '</div>' +
@@ -155,6 +185,7 @@
       var loc = D.getLocation(PRESET.slug);
       html += '<div class="page-head"><h1>' + esc(loc.name) + '</h1><p>' + esc(loc.machineId) + ' · ' + t('app_sub') + '</p></div>';
     }
+    html += mustReadList();
     html += '<div id="dash-dynamic"></div>';
     html += kbList(IS_HQ);
     html += '<div class="last-refresh" id="dash-refresh"></div>';

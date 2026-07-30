@@ -60,7 +60,7 @@ Location entries live in a subfolder, so they reach the root-level content and s
 
 | File | Role |
 |---|---|
-| `data.js` | Single source of truth: `SCRIPT_URL`, `LOCATIONS`, `LIMITS`/`WARN_BEFORE`, `TASKS`, `KB`, `getLocation()` |
+| `data.js` | Single source of truth: `SCRIPT_URL`, `LOCATIONS`, `MUST_READ`, `LIMITS`/`WARN_BEFORE`, `TASKS`, `KB`, `getLocation()` |
 | `strings.js` | English UI copy + `t()` interpolation helper + `FREQ_LABEL` |
 | `md.js` | Dependency-free Markdown renderer + content loaders (`loadSop`, `loadKb`) |
 | `app.js` | SPA shell: routing, all views, status polling, submit-and-confirm, image lightbox |
@@ -100,6 +100,7 @@ POST payload: `date`, `time`, `datetime` (absolute UTC ISO string, so the sheet 
 - **A location** — add `{ slug, name, machineId }` to `D.LOCATIONS` in `data.js`, then create `<slug>/index.html` (copy `davies/index.html`, change the `slug`).
 - **A task** — add `{ code, title }` to the right frequency in `D.TASKS`, then drop `content/sops/<CODE>.en.md`.
 - **A KB article** — add an entry to `D.KB`, then drop `content/kb/<id>.en.md` (and `.zh.md` for Chinese).
+- **A Must Read rule** — add `{ title, text?, points: [...] }` to `D.MUST_READ` in `data.js` (`text` is an optional lead line). Shown under the page title with a chevron; the first rule starts open, later ones start collapsed. `DO NOT` in points is auto-emphasized.
 
 ## Content Authoring
 
