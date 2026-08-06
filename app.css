@@ -163,70 +163,107 @@ button { font-family: inherit; }
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;
 }
 
-/* ── Must Read (page-level safety notice, under the title) ─────────────── */
-/* Expandable rows with chevron; first rule starts open. */
-.must-read {
+/* ── Abnormal Handling (home entry) ────────────────────────────────────── */
+/* White card, thicker amber left rail, info "i" — important without alarm-red. */
+.abnormal-entry {
+  display: flex; align-items: center; gap: 14px;
+  margin: 0 0 16px;
+  min-height: 96px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 6px solid #C4922A;
+  border-radius: var(--radius);
+  padding: 20px 18px;
+  box-shadow: var(--shadow-sm);
+  transition: background .12s;
+}
+.abnormal-entry:active { background: var(--surface-2); }
+.abnormal-entry__icon {
+  width: 44px; height: 44px; flex-shrink: 0;
+  border-radius: 50%;
+  background: #C4922A;
+  color: #fff;
+  font-size: 22px; font-weight: 800; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.abnormal-entry__body { flex: 1; min-width: 0; }
+.abnormal-entry__title {
+  display: block; font-size: 17px; font-weight: 800; letter-spacing: -.01em; line-height: 1.25;
+}
+.abnormal-entry__desc {
+  display: block; font-size: 13px; color: var(--text-2); margin-top: 4px; line-height: 1.35;
+}
+.abnormal-entry__caret {
+  flex-shrink: 0; font-size: 22px; font-weight: 700; color: #9A7218; line-height: 1;
+}
+
+/* ── Abnormal Handling page (chevron procedures) ───────────────────────── */
+/* Simple white panels — no Must Read chrome, no yellow fill. */
+.abnormal-rules {
+  display: flex; flex-direction: column; gap: 10px;
   margin: 0 0 14px;
-  background: var(--amber-bg);
-  border: 1px solid var(--amber-border);
-  border-left: 4px solid var(--red);
-  border-radius: var(--radius-sm);
-  padding: 10px 12px 10px;
 }
-.must-read__label {
-  display: inline-block;
-  font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-  color: #fff; background: var(--red);
-  padding: 2px 7px; border-radius: 4px;
-  margin-bottom: 8px;
+.abnormal-rules__item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid #C4922A;
+  border-radius: var(--radius);
+  padding: 4px 14px 4px;
+  box-shadow: var(--shadow-sm);
 }
-.must-read__rule + .must-read__rule {
-  margin-top: 6px; padding-top: 6px;
-  border-top: 1px solid var(--amber-border);
-}
-.must-read__title {
-  font-size: 13.5px; font-weight: 800; letter-spacing: -.01em; line-height: 1.3;
-  color: var(--text); margin: 0;
-}
-summary.must-read__title {
+.abnormal-rules__item[open] { padding-bottom: 14px; }
+.abnormal-rules__title {
   display: flex; align-items: center; gap: 10px;
+  font-size: 15px; font-weight: 800; letter-spacing: -.01em; line-height: 1.3;
+  color: var(--text); margin: 0;
   cursor: pointer; list-style: none;
-  min-height: 36px; /* comfortable thumb target when accordion is active */
+  min-height: 48px;
 }
-summary.must-read__title::-webkit-details-marker,
-summary.must-read__title::marker { display: none; }
-.must-read__title-text { flex: 1; min-width: 0; }
-/* Chevron in a soft hit target — rotates when open (standard accordion cue). */
-.must-read__chev {
+.abnormal-rules__title::-webkit-details-marker,
+.abnormal-rules__title::marker { display: none; }
+/* Small i left of the procedure title (same cue as the home entry card). */
+.abnormal-rules__i {
+  width: 22px; height: 22px; flex-shrink: 0;
+  border-radius: 50%;
+  background: #C4922A; color: #fff;
+  font-size: 12px; font-weight: 800; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+}
+.abnormal-rules__title-text { flex: 1; min-width: 0; }
+.abnormal-rules__chev {
   width: 28px; height: 28px; flex-shrink: 0;
   border-radius: 8px;
-  background: rgba(187, 59, 54, .12);
-  border: 1px solid rgba(187, 59, 54, .22);
+  background: rgba(196, 146, 42, .12);
+  border: 1px solid rgba(196, 146, 42, .28);
   display: flex; align-items: center; justify-content: center;
   transition: transform .15s ease;
 }
-.must-read__chev::before {
+.abnormal-rules__chev::before {
   content: "";
   width: 7px; height: 7px;
-  border-right: 2px solid var(--red);
-  border-bottom: 2px solid var(--red);
-  transform: translateY(-1px) rotate(45deg); /* points down = expand */
+  border-right: 2px solid #C4922A;
+  border-bottom: 2px solid #C4922A;
+  transform: translateY(-1px) rotate(45deg);
 }
-.must-read__rule[open] .must-read__chev { transform: rotate(180deg); }
-.must-read__text {
-  font-size: 13px; color: var(--text); line-height: 1.35;
-  margin: 6px 0 4px;
+.abnormal-rules__item[open] .abnormal-rules__chev { transform: rotate(180deg); }
+.abnormal-rules__body { padding: 0 2px 2px; }
+.abnormal-rules__lead {
+  font-size: 13.5px; color: var(--text); line-height: 1.4;
+  margin: 0 0 8px;
 }
-.must-read__points {
-  margin: 0; padding: 0 0 0 1.15em;
-  display: flex; flex-direction: column; gap: 2px;
+.abnormal-rules__points {
+  margin: 0; padding: 0 0 0 1.25em;
+  display: flex; flex-direction: column; gap: 8px;
 }
-.must-read__points li {
-  font-size: 13px; line-height: 1.35; color: var(--text);
+.abnormal-rules__points .abnormal-rules__points {
+  margin-top: 6px; gap: 5px;
+  list-style: disc;
+}
+.abnormal-rules__points li {
+  font-size: 13.5px; line-height: 1.45; color: var(--text);
   padding-left: 2px;
 }
-.must-read__points li::marker { color: var(--red); }
-.must-read__emph {
+.abnormal-rules__emph {
   font-weight: 800;
   text-decoration: underline;
   text-underline-offset: 2px;

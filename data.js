@@ -53,9 +53,32 @@ window.DIANMOOD = window.DIANMOOD || {};
     ]
   };
 
-  // Dashboard "Must Read" — page-level notice under the title on every portal.
-  // `text` is an optional lead line (not bulleted); `points` are the rules.
-  D.MUST_READ = [
+  // Abnormal Handling — emergency / outage procedures. Home shows one entry
+  // card; full chevron list lives on #/abnormal. Points may be strings or
+  // { text, points } for nested bullets under a step.
+  D.ABNORMAL_HANDLING = [
+    {
+      title: 'Power Outage Operation Steps',
+      points: [
+        'Press the restart button on the EcoFlow power unit’s socket to reboot the power supply.',
+        'Long-press the power button of the robotic arm control host to power on the robotic arm.',
+        'After the computer restarts, launch the app and run console-restart.',
+        {
+          text: 'If the power outage lasts more than two hours:',
+          points: [
+            'Discard all raw materials stored in the refrigerator and perform a deep cleaning.'
+          ]
+        },
+        {
+          text: 'If the power outage lasts less than two hours:',
+          points: [
+            'Inspect the raw materials for spoilage.',
+            'If no spoilage is found — business operations may resume normally.',
+            'If any spoilage is detected — follow the handling rules for outages exceeding two hours.'
+          ]
+        }
+      ]
+    },
     {
       title: 'Emergency Protocol for Robotic Arm Malfunction',
       text: 'If the robotic arm malfunctions for any reason:',

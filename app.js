@@ -1,7 +1,7 @@
 // ============================================================================
 // app.js — shared single-page app for every Dianmood entry point.
 // Hash-routed (GitHub-Pages safe, real Back button, deep-linkable). One shell
-// renders all views: dashboard, checklist, SOP page, KB article.
+// renders all views: dashboard, checklist, Abnormal Handling, SOP page, KB article.
 //
 // Entry pages set window.DIANMOOD_PRESET before loading this file:
 //   { mode: 'location', slug: 'davies' }  -> a single store
@@ -129,34 +129,55 @@
     return card;
   }
 
-  // Emphasize DO NOT in Must Read points (bold + underline) after HTML-escaping.
-  function formatMustReadPoint(p) {
-    return esc(p).replace(/\bDO NOT\b/g, '<strong class="must-read__emph">DO NOT</strong>');
+  // Emphasize DO NOT in Abnormal Handling points (bold + underline) after escaping.
+  function formatAbnormalPoint(p) {
+    return esc(p).replace(/\bDO NOT\b/g, '<strong class="abnormal-rules__emph">DO NOT</strong>');
   }
 
-  function mustReadList() {
-    if (!D.MUST_READ || !D.MUST_READ.length) return '';
-    // Always use expandable rows (chevron). First rule starts open; later ones
-    // start collapsed so many rules don't fill the page.
-    return '<aside class="must-read" role="note">' +
-      '<div class="must-read__label">' + t('must_read') + '</div>' +
-      D.MUST_READ.map(function (rule, i) {
+  // Render points: strings, or { text, points } for nested bullets under a step.
+  function abnormalPointsHtml(points, nested) {
+    if (!points || !points.length) return '';
+    var tag = nested ? 'ul' : 'ol';
+    return '<' + tag + ' class="abnormal-rules__points">' +
+      points.map(function (p) {
+        if (typeof p === 'string') {
+          return '<li>' + formatAbnormalPoint(p) + '</li>';
+        }
+        return '<li>' + formatAbnormalPoint(p.text || '') +
+          abnormalPointsHtml(p.points, true) + '</li>';
+      }).join('') + '</' + tag + '>';
+  }
+
+  // Chevron procedure list on the Abnormal Handling page (all start collapsed).
+  function abnormalRulesHtml() {
+    var rules = D.ABNORMAL_HANDLING || [];
+    if (!rules.length) return '';
+    return '<div class="abnormal-rules">' +
+      rules.map(function (rule) {
         var body =
-          (rule.text ? '<p class="must-read__text">' + esc(rule.text) + '</p>' : '') +
-          (rule.points && rule.points.length
-            ? '<ul class="must-read__points">' +
-                rule.points.map(function (p) { return '<li>' + formatMustReadPoint(p) + '</li>'; }).join('') +
-              '</ul>'
-            : '');
-        return '<details class="must-read__rule"' + (i === 0 ? ' open' : '') + '>' +
-          '<summary class="must-read__title">' +
-            '<span class="must-read__title-text">' +
-              esc(t('rule_n', { n: i + 1 }) + ': ' + rule.title) +
-            '</span>' +
-            '<span class="must-read__chev" aria-hidden="true"></span>' +
-          '</summary>' + body + '</details>';
+          (rule.text ? '<p class="abnormal-rules__lead">' + esc(rule.text) + '</p>' : '') +
+          abnormalPointsHtml(rule.points);
+        return '<details class="abnormal-rules__item">' +
+          '<summary class="abnormal-rules__title">' +
+            '<span class="abnormal-rules__i" aria-hidden="true">i</span>' +
+            '<span class="abnormal-rules__title-text">' + esc(rule.title) + '</span>' +
+            '<span class="abnormal-rules__chev" aria-hidden="true"></span>' +
+          '</summary>' +
+          '<div class="abnormal-rules__body">' + body + '</div>' +
+          '</details>';
       }).join('') +
-      '</aside>';
+      '</div>';
+  }
+
+  // Top-of-dashboard entry into the Abnormal Handling page (HQ + every store).
+  function abnormalEntry() {
+    return '<a class="abnormal-entry" href="#/abnormal">' +
+      '<span class="abnormal-entry__icon" aria-hidden="true">i</span>' +
+      '<span class="abnormal-entry__body">' +
+        '<span class="abnormal-entry__title">' + t('abnormal_handling') + '</span>' +
+        '<span class="abnormal-entry__desc">' + t('abnormal_handling_desc') + '</span>' +
+      '</span>' +
+      '<span class="abnormal-entry__caret">›</span></a>';
   }
 
   function kbList(includeHq) {
@@ -185,7 +206,7 @@
       var loc = D.getLocation(PRESET.slug);
       html += '<div class="page-head"><h1>' + esc(loc.name) + '</h1><p>' + esc(loc.machineId) + ' · ' + t('app_sub') + '</p></div>';
     }
-    html += mustReadList();
+    html += abnormalEntry();
     html += '<div id="dash-dynamic"></div>';
     html += kbList(IS_HQ);
     html += '<div class="last-refresh" id="dash-refresh"></div>';
@@ -466,6 +487,17 @@
     render();
   }
 
+  // ── View: Abnormal Handling (one page, Must Read chevron list) ──────────
+  function viewAbnormal(root) {
+    setBackVisible(true);
+    root.appendChild(el(
+      '<div class="wrap">' +
+        '<div class="page-head"><h1>' + t('abnormal_handling') + '</h1>' +
+          '<p>' + t('abnormal_handling_desc') + '</p></div>' +
+        abnormalRulesHtml() +
+      '</div>'));
+  }
+
   // ── Router ───────────────────────────────────────────────────────────────
   function route() {
     var root = document.getElementById('app');
@@ -482,6 +514,8 @@
       viewSop(root, parts[1]);
     } else if (parts[0] === 'kb' && parts[1]) {
       viewKb(root, parts[1]);
+    } else if (parts[0] === 'abnormal') {
+      viewAbnormal(root);
     } else {
       viewDashboard(root);
     }

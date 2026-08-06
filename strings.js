@@ -15,8 +15,8 @@ window.DIANMOOD = window.DIANMOOD || {};
     hq_sub:         'HQ dashboard',
 
     knowledge_base: 'Knowledge Base',
-    must_read:      'Must Read',
-    rule_n:         'Rule {n}',
+    abnormal_handling: 'Abnormal Handling',
+    abnormal_handling_desc: 'Must-read procedures for emergency situations',
     open: 'Open',
 
     last_done:      'Last done {x}',
