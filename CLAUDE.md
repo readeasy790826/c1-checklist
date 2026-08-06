@@ -1,18 +1,18 @@
 # CLAUDE.md
 
-Guidance for Claude / any developer working on this repository.
+Guidance for anyone working on this repository.
 
 ## What This Is
 
-Operations portal for **Dianmood** — a robotic coffee bar with C1 Pro machines at Vancouver locations (Davies, ITC, and Infinity8). Staff open these pages on their phones for daily/weekly/monthly maintenance checklists, step-by-step SOPs, and knowledge-base articles.
+Operations portal for **Dianmood** — C1 Pro robotic coffee bars at Vancouver locations (Davies, ITC, Infinity8). Staff use these pages on their phones for maintenance checklists, SOPs, Abnormal Handling procedures, and knowledge-base articles.
 
 ## Tech Stack
 
-- **Plain HTML + CSS + Vanilla JS** — no frameworks, no build step, no npm
-- **Single-page app** — one shared shell (`app.js`) hash-routes every view
-- **GitHub Pages** (`readeasy790826/c1-checklist`) — push to `main`, live in ~1 min
-- **Google Apps Script** — backend that writes submissions to Google Sheets and serves status
-- **No auth** — pages are public, staff access by URL
+- Plain HTML + CSS + vanilla JS — no frameworks, no build step, no npm
+- One SPA shell (`app.js`) hash-routes every view
+- GitHub Pages (`readeasy790826/c1-checklist`) — push to `main`, live in ~1 min
+- Google Apps Script backend → Google Sheets (status + submissions)
+- No auth — public URLs
 
 ## Local Development
 
@@ -24,7 +24,7 @@ python3 -m http.server 8080
 # Infinity8: http://localhost:8080/infinity8/
 ```
 
-`fetch()` calls to the Apps Script backend work from localhost (CORS is open).
+Apps Script `fetch()` works from localhost (CORS open).
 
 ## Deploying
 
@@ -36,92 +36,63 @@ git push origin main
 
 ## Architecture
 
-The whole app is one SPA shell rendered by `app.js` into four entry points. Each entry sets `window.DIANMOOD_PRESET` before loading the shared scripts, then everything is hash-routed and deep-linkable.
-
-### Entry points
+Each entry HTML sets `window.DIANMOOD_PRESET`, then loads shared scripts. Location entries use `base: '../'` so root content/scripts resolve.
 
 | File | Preset | Shows |
 |---|---|---|
-| `index.html` | `{ mode: 'hq', base: '' }` | HQ dashboard — all locations |
-| `davies/index.html` | `{ mode: 'location', slug: 'davies', base: '../' }` | Davies only |
-| `itc/index.html` | `{ mode: 'location', slug: 'itc', base: '../' }` | ITC only |
-| `infinity8/index.html` | `{ mode: 'location', slug: 'infinity8', base: '../' }` | Infinity8 only |
+| `index.html` | `{ mode: 'hq', base: '' }` | All locations |
+| `davies/index.html` | `{ mode: 'location', slug: 'davies', base: '../' }` | Davies |
+| `itc/index.html` | `{ mode: 'location', slug: 'itc', base: '../' }` | ITC |
+| `infinity8/index.html` | `{ mode: 'location', slug: 'infinity8', base: '../' }` | Infinity8 |
 
-Location entries live in a subfolder, so they reach the root-level content and scripts via `base: '../'`.
+### Routes
 
-### Routes (hash)
-
-- `#/` — dashboard (HQ shows every location; a location entry shows only itself)
-- `#/c/<slug>/<freq>` — checklist; `freq` = `daily` \| `weekly` \| `monthly`
-- `#/abnormal` — Abnormal Handling (chevron procedure list: power outage, robotic arm, …)
-- `#/sop/<CODE>` — full SOP page (e.g. `#/sop/D1`)
-- `#/kb/<id>` — knowledge-base article (per-article EN / 中文 switch)
+- `#/` — dashboard
+- `#/c/<slug>/<freq>` — checklist (`daily` \| `weekly` \| `monthly`)
+- `#/abnormal` — Abnormal Handling procedures
+- `#/sop/<CODE>` — SOP page
+- `#/kb/<id>` — KB article (EN / 中文)
 
 ### Core files
 
 | File | Role |
 |---|---|
-| `data.js` | Single source of truth: `SCRIPT_URL`, `LOCATIONS`, `ABNORMAL_HANDLING`, `LIMITS`/`WARN_BEFORE`, `TASKS`, `KB`, `getLocation()` |
-| `strings.js` | English UI copy + `t()` interpolation helper + `FREQ_LABEL` |
-| `md.js` | Dependency-free Markdown renderer + content loaders (`loadSop`, `loadKb`) |
-| `app.js` | SPA shell: routing, all views, status polling, submit-and-confirm, image lightbox |
-| `app.css` | The entire design system |
-| `content/sops/<CODE>.en.md` | SOP bodies (English) |
-| `content/kb/<id>.{en,zh}.md` | KB articles (bilingual) |
+| `data.js` | `SCRIPT_URL`, `LOCATIONS`, `ABNORMAL_HANDLING`, `LIMITS`/`WARN_BEFORE`, `TASKS`, `KB`, `getLocation()` |
+| `strings.js` | English UI copy + `t()` + `FREQ_LABEL` |
+| `md.js` | Markdown renderer + `loadSop` / `loadKb` |
+| `app.js` | Routing, views, status poll, submit-and-confirm, lightbox |
+| `app.css` | Design system (tokens in `:root`) |
+| `content/sops/<CODE>.en.md` | SOP bodies |
+| `content/kb/<id>.{en,zh}.md` | KB articles |
 | `assets/` | Images referenced by content |
 
-### Status / submission flow
+### Status / submission
 
-- **Submit**: the checklist POSTs (`no-cors`) to `SCRIPT_URL`, then re-reads `?action=status` to confirm the row actually landed before showing success (a `no-cors` POST response is opaque, so we verify by read-back). In-progress drafts are saved to `sessionStorage` and cleared on confirmed submit.
-- **Status poll**: `app.js` fetches `SCRIPT_URL + '?action=status'`, computes elapsed time per `location|frequency`, and colours each card. Refreshes every 60s. Dashboard cards render immediately in a neutral "loading" state and stay navigable even if the fetch fails.
+- **Submit**: `no-cors` POST to `SCRIPT_URL`, then GET `?action=status` until the row’s `datetime` appears for `location|frequency`. Drafts live in `sessionStorage` until confirmed.
+- **Status poll**: every 60s; cards stay navigable while loading or if the fetch fails.
 
-Status levels (see `statusInfo` in `app.js`): **gray** = no record yet · **green** = within window · **amber** = due soon · **red** = overdue · **loading** = transient.
+Levels: **gray** no record · **green** within window · **amber** due soon · **red** overdue · **loading** transient.
 
-### Overdue thresholds
-
-Defined in `data.js` as `LIMITS` (hours until overdue) and `WARN_BEFORE` (hours-left that turns a card amber).
-
-| Frequency | Overdue after | Warning starts |
+| Frequency | Overdue after | Amber starts |
 |---|---|---|
 | Daily | 36h | 6h remaining |
 | Weekly | 240h (10 days) | 24h remaining |
-| Monthly | 1080h (45 days) | 72h (3 days) remaining |
+| Monthly | 1080h (45 days) | 72h remaining |
 
-### Apps Script endpoint
+### Apps Script
 
 ```
-POST → append a submission row to the "Submissions" sheet
+POST → append row to "Submissions"
 GET ?action=status → { status: "success", data: { "Davies|daily": { datetime, ... }, ... } }
 ```
 
-POST payload: `date`, `time`, `datetime` (absolute UTC ISO string, so the sheet timezone can't skew it), `location`, `machine_id`, `frequency`, and `tasks` (object keyed by task code → `{ checked, notes }`). The endpoint also accepts `staff_name`, `supervisor`, `abnormal_issues` (currently sent empty).
+POST fields: `date`, `time`, `datetime` (UTC ISO), `location`, `machine_id`, `frequency`, `tasks` (`code` → `{ checked, notes }`), plus empty `staff_name`, `supervisor`, `abnormal_issues`.
 
-## Adding Things (no markup edits needed)
+## Adding Things
 
-- **A location** — add `{ slug, name, machineId }` to `D.LOCATIONS` in `data.js`, then create `<slug>/index.html` (copy `davies/index.html`, change the `slug`).
-- **A task** — add `{ code, title }` to the right frequency in `D.TASKS`, then drop `content/sops/<CODE>.en.md`.
-- **A KB article** — add an entry to `D.KB`, then drop `content/kb/<id>.en.md` (and `.zh.md` for Chinese).
-- **An Abnormal Handling procedure** — add `{ title, text?, points: [...] }` to `D.ABNORMAL_HANDLING` in `data.js`. Shown on `#/abnormal` (home has one top entry card). Points may nest as `{ text, points }`. `DO NOT` in points is auto-emphasized.
+- **Location** — `{ slug, name, machineId }` in `D.LOCATIONS` + `<slug>/index.html` (copy `davies/`).
+- **Task** — entry in `D.TASKS` + `content/sops/<CODE>.en.md`.
+- **KB article** — entry in `D.KB` + `content/kb/<id>.en.md` (and `.zh.md`).
+- **Abnormal Handling procedure** — `{ title, text?, points }` in `D.ABNORMAL_HANDLING` (`points` may nest as `{ text, points }`).
 
-## Content Authoring
-
-The SOP/KB Markdown file format — frontmatter, section headings (`## Materials Needed`, `## SOP Steps`), and callout syntax — is documented in **`content/README.md`**, which lives beside the files it describes. Don't duplicate that spec here.
-
-## Design System
-
-Light, warm "coffee" theme, mobile-first. All tokens live in `:root` in `app.css`:
-
-```css
---bg: #FBF7F2;          /* page background */
---surface: #FFFFFF;     /* cards, header */
---surface-2: #F5EDE3;   /* insets, chips */
---text: #2A1A12;
---text-2: #6F5645;
---muted: #9C8676;
---accent: #8A5A3B;      /* roasted coffee — primary */
---accent-strong: #6F4427;
---green: #2F7A4F; --amber: #B07818; --red: #BB3B36;   /* status */
---radius: 14px;
-```
-
-Font: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`. Status is shown as a conic-gradient ring with a glyph (`✓` / `!` / `–` / `·`), not stoplight emoji.
+Markdown authoring rules: **`content/README.md`**.

@@ -1,6 +1,5 @@
 ---
 title: Ingredient Restocking SOP
-summary: Fridge 1/2, coffee beans, chocolate powder, cups, syrups
 ---
 
 > [!WARNING] Complete before starting

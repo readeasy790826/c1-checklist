@@ -1,31 +1,27 @@
 // ============================================================================
-// data.js — single source of truth for config, locations, tasks, KB, backend.
-// Everything that differs between locations or needs to scale lives here so
-// adding a site or a task never means editing markup.
+// data.js — config, locations, tasks, Abnormal Handling, KB, backend URL.
+// Scale by editing this file (plus a content/*.md and/or entry HTML as needed).
 // ============================================================================
 window.DIANMOOD = window.DIANMOOD || {};
 
 (function (D) {
   'use strict';
 
-  // Google Apps Script endpoint (POST submit / GET ?action=status).
+  // Google Apps Script: POST submit, GET ?action=status.
   D.SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyeSoG86Dx17hLxma5pnx3DNgyqUFXtjukPGQljcCO4R2JBpf-_bQwKR0oFQL8AA4G5/exec';
 
-  // Locations — add a site by adding one entry (and a /<slug>/ entry folder).
+  // Add a site: one entry here + copy davies/index.html to <slug>/index.html.
   D.LOCATIONS = [
     { slug: 'davies',    name: 'Davies',    machineId: 'C1-DV-01' },
     { slug: 'itc',       name: 'ITC',       machineId: 'C1-ITC-01' },
     { slug: 'infinity8', name: 'Infinity8', machineId: 'C1-I8-01' }
   ];
 
-  // Per-frequency status windows: LIMITS = hours until overdue; WARN_BEFORE =
-  // hours-remaining at which the card turns amber ("due soon").
+  // Hours until overdue (LIMITS) and hours-left when the card turns amber (WARN_BEFORE).
   D.LIMITS      = { daily: 36,  weekly: 240, monthly: 1080 };
   D.WARN_BEFORE = { daily: 6,   weekly: 24,  monthly: 72   };
 
-  // Maintenance tasks per frequency. `code` links each task to its SOP content
-  // at content/sops/<code>.en.md (steps + reference video live in that file's
-  // frontmatter). The checklist links out to the SOP page via #/sop/<code>.
+  // Checklist tasks. SOP body: content/sops/<code>.en.md → route #/sop/<code>.
   D.TASKS = {
     daily: [
       { code: 'D0', title: 'Enter maintenance mode' },
@@ -53,9 +49,8 @@ window.DIANMOOD = window.DIANMOOD || {};
     ]
   };
 
-  // Abnormal Handling — emergency / outage procedures. Home shows one entry
-  // card; full chevron list lives on #/abnormal. Points may be strings or
-  // { text, points } for nested bullets under a step.
+  // Emergency procedures → home entry + #/abnormal.
+  // Point = string, or { text, points } for nested bullets. DO NOT is emphasized in the UI.
   D.ABNORMAL_HANDLING = [
     {
       title: 'Power Outage Operation Steps',
@@ -90,10 +85,8 @@ window.DIANMOOD = window.DIANMOOD || {};
     }
   ];
 
-  // Knowledge base. scope 'all' shows everywhere; 'hq' only on the HQ dashboard.
-  // KB articles are the one bilingual surface — each has its own EN/中文 switch
-  // and loads content/kb/<id>.<lang>.md via the #/kb/<id> route. `soon` = no
-  // content yet (non-clickable card). Card title/desc below are English.
+  // KB cards. scope 'all' | 'hq'. soon: true = non-clickable placeholder.
+  // Bodies: content/kb/<id>.{en,zh}.md (EN/中文 switch on the article page).
   D.KB = [
     { id: 'refill',     scope: 'all',
       title: 'Ingredient Restocking SOP',
@@ -118,7 +111,6 @@ window.DIANMOOD = window.DIANMOOD || {};
       desc:  'Calibration, adjustment and performance tuning' }
   ];
 
-  // Helpers
   D.getLocation = function (slug) {
     return D.LOCATIONS.filter(function (l) { return l.slug === slug; })[0] || null;
   };

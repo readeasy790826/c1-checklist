@@ -1,7 +1,6 @@
 /* ============================================================================
-   Dianmood Ops — unified design system (app.css)
-   One theme for the entire app shell: dashboard, checklist, SOP pages, KB.
-   Mobile-first, warm "coffee" palette, light. No emoji, no per-page CSS.
+   Dianmood Ops — app design system.
+   Mobile-first, warm coffee palette. All views share this file.
    ========================================================================== */
 
 /* ── Reset ─────────────────────────────────────────────────────────────── */
@@ -25,20 +24,20 @@
   --border:       #EADFD4;
   --border-2:     #DCCBBC;
 
-  /* Status — muted, accessible on light bg */
+  /* Status */
   --green:        #2F7A4F; --green-bg: #EAF5EE; --green-border: #B7DCC4;
   --amber:        #B07818; --amber-bg: #FBF2DF; --amber-border: #EAD09A;
   --red:          #BB3B36; --red-bg:   #FBECEB; --red-border:   #ECB7B4;
+  /* Abnormal Handling accent (info rail / i mark) */
+  --info:         #C4922A;
 
   /* Elevation */
   --shadow-sm: 0 1px 2px rgba(42,26,18,.06);
   --shadow:    0 2px 8px rgba(42,26,18,.08);
-  --shadow-md: 0 8px 24px rgba(42,26,18,.12);
   --shadow-lg: 0 16px 48px rgba(42,26,18,.18);
 
   --radius:    14px;
   --radius-sm: 10px;
-  --radius-lg: 20px;
 
   --header-h:  56px;
 
@@ -54,7 +53,6 @@ body {
   font-size: 15px;
   line-height: 1.5;
   min-height: 100vh;
-  /* leave room for fixed header + any fixed footer bars */
   padding-top: var(--header-h);
   -webkit-font-smoothing: antialiased;
 }
@@ -76,7 +74,7 @@ button { font-family: inherit; }
   padding: 0 14px;
 }
 .app-header__back {
-  display: none; /* shown by router only when a back target exists */
+  display: none;
   align-items: center; justify-content: center;
   width: 34px; height: 34px; border-radius: 50%;
   border: 1px solid var(--border); background: var(--surface);
@@ -157,21 +155,20 @@ button { font-family: inherit; }
 .status-card__sub.red   { color: var(--red); }
 .status-card__sub.amber { color: var(--amber); }
 .status-card__sub.green { color: var(--green); }
-.status-card__sub.gray  { color: var(--muted); }   /* no record — neutral, not an alarm */
+.status-card__sub.gray  { color: var(--muted); }
 .status-card__cta {
   font-size: 13px; font-weight: 700; color: var(--accent-strong);
   flex-shrink: 0; display: inline-flex; align-items: center; gap: 4px;
 }
 
-/* ── Abnormal Handling (home entry) ────────────────────────────────────── */
-/* White card, thicker amber left rail, info "i" — important without alarm-red. */
+/* ── Abnormal Handling ─────────────────────────────────────────────────── */
 .abnormal-entry {
   display: flex; align-items: center; gap: 14px;
   margin: 0 0 16px;
   min-height: 96px;
   background: var(--surface);
   border: 1px solid var(--border);
-  border-left: 6px solid #C4922A;
+  border-left: 6px solid var(--info);
   border-radius: var(--radius);
   padding: 20px 18px;
   box-shadow: var(--shadow-sm);
@@ -181,7 +178,7 @@ button { font-family: inherit; }
 .abnormal-entry__icon {
   width: 44px; height: 44px; flex-shrink: 0;
   border-radius: 50%;
-  background: #C4922A;
+  background: var(--info);
   color: #fff;
   font-size: 22px; font-weight: 800; line-height: 1;
   display: flex; align-items: center; justify-content: center;
@@ -194,11 +191,9 @@ button { font-family: inherit; }
   display: block; font-size: 13px; color: var(--text-2); margin-top: 4px; line-height: 1.35;
 }
 .abnormal-entry__caret {
-  flex-shrink: 0; font-size: 22px; font-weight: 700; color: #9A7218; line-height: 1;
+  flex-shrink: 0; font-size: 22px; font-weight: 700; color: var(--info); line-height: 1;
 }
 
-/* ── Abnormal Handling page (chevron procedures) ───────────────────────── */
-/* Simple white panels — no Must Read chrome, no yellow fill. */
 .abnormal-rules {
   display: flex; flex-direction: column; gap: 10px;
   margin: 0 0 14px;
@@ -206,7 +201,7 @@ button { font-family: inherit; }
 .abnormal-rules__item {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-left: 4px solid #C4922A;
+  border-left: 4px solid var(--info);
   border-radius: var(--radius);
   padding: 4px 14px 4px;
   box-shadow: var(--shadow-sm);
@@ -221,11 +216,10 @@ button { font-family: inherit; }
 }
 .abnormal-rules__title::-webkit-details-marker,
 .abnormal-rules__title::marker { display: none; }
-/* Small i left of the procedure title (same cue as the home entry card). */
 .abnormal-rules__i {
   width: 22px; height: 22px; flex-shrink: 0;
   border-radius: 50%;
-  background: #C4922A; color: #fff;
+  background: var(--info); color: #fff;
   font-size: 12px; font-weight: 800; line-height: 1;
   display: flex; align-items: center; justify-content: center;
 }
@@ -241,8 +235,8 @@ button { font-family: inherit; }
 .abnormal-rules__chev::before {
   content: "";
   width: 7px; height: 7px;
-  border-right: 2px solid #C4922A;
-  border-bottom: 2px solid #C4922A;
+  border-right: 2px solid var(--info);
+  border-bottom: 2px solid var(--info);
   transform: translateY(-1px) rotate(45deg);
 }
 .abnormal-rules__item[open] .abnormal-rules__chev { transform: rotate(180deg); }
@@ -352,7 +346,6 @@ button { font-family: inherit; }
 .task__title { flex: 1; font-size: 14.5px; font-weight: 600; line-height: 1.35; }
 .task.done .task__title { color: var(--muted); }
 
-/* SOP shortcut lives in the header (always visible, one tap to the steps). */
 .task__sop {
   flex-shrink: 0; white-space: nowrap;
   display: inline-flex; align-items: center; gap: 4px;
@@ -376,17 +369,11 @@ button { font-family: inherit; }
 
 .task__body { display: none; padding: 0 14px 14px; }
 .task.open .task__body { display: block; }
-/* Video button row on the standalone SOP page. */
 .sop-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 18px; }
 .chip-link {
-  display: inline-flex; align-items: center; gap: 6px;
-  font-size: 12.5px; font-weight: 700; padding: 7px 12px; border-radius: 999px;
-  border: 1px solid var(--border); background: var(--surface-2); color: var(--accent-strong);
-}
-/* Watch-the-video call to action — a filled, prominent pill (not a subtle chip). */
-.chip-link--video {
-  font-size: 15px; font-weight: 800; padding: 12px 20px; gap: 9px;
-  background: var(--accent); border-color: var(--accent); color: #fff;
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: 15px; font-weight: 800; padding: 12px 20px; border-radius: 999px;
+  background: var(--accent); border: 1px solid var(--accent); color: #fff;
   box-shadow: 0 6px 18px rgba(138,90,59,.28);
 }
 .chip-link:active { opacity: .8; }
@@ -405,7 +392,7 @@ button { font-family: inherit; }
 .submit-status.err { color: var(--red);   font-weight: 700; }
 .has-submit-bar { padding-bottom: 104px; }
 
-/* ── SOP content (rendered Markdown: checklist link-out + full page) ────── */
+/* ── SOP / KB Markdown body ────────────────────────────────────────────── */
 .sop-meta { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 2px 14px; }
 .meta-chip {
   font-size: 12px; font-weight: 700; padding: 5px 10px; border-radius: 999px;
@@ -415,12 +402,13 @@ button { font-family: inherit; }
 
 .sop-content { font-size: 14.5px; color: var(--text); line-height: 1.62; }
 .sop-content > *:first-child { margin-top: 0; }
+/* md.js maps #→h2, ##→h3, ###→h4 */
 .sop-content h2 { font-size: 19px; font-weight: 800; margin: 22px 0 10px; letter-spacing: -.01em; }
-.sop-content h3 {            /* "## Section" (Materials, Procedure, SOP Steps) */
+.sop-content h3 {
   font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em;
   color: var(--muted); margin: 22px 0 10px;
 }
-.sop-content h4 {            /* "### Step N" */
+.sop-content h4 {
   font-size: 14.5px; font-weight: 800; color: var(--accent-strong); margin: 16px 0 6px;
 }
 .sop-content p  { margin: 8px 0; }
@@ -438,10 +426,10 @@ button { font-family: inherit; }
 .sop-content figure { margin: 14px 0; }
 .sop-content img {
   display: block; max-width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border);
-  cursor: zoom-in;   /* tap to open in the lightbox */
+  cursor: zoom-in;
 }
 .sop-content figcaption { font-size: 12px; color: var(--muted); margin-top: 6px; }
-.sop-content table {          /* GFM pipe tables (recipe/ingredient tables in KB) */
+.sop-content table {
   width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13.5px;
   border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden;
 }
@@ -450,8 +438,7 @@ button { font-family: inherit; }
 .sop-content tbody tr:last-child td { border-bottom: 0; }
 .sop-content tbody tr:nth-child(even) td { background: var(--surface); }
 
-/* Alert callout (renders from "> ..." blockquotes). Thick coloured left edge +
-   an icon/label header so it reads as an alert, not a footnote. */
+/* Callouts from Markdown `> [!WARNING]` / DANGER / TIP / INFO (plain `>` = warn). */
 .callout {
   border-radius: var(--radius-sm); padding: 12px 14px; margin: 18px 0;
   font-size: 13.5px; line-height: 1.55;
@@ -468,7 +455,7 @@ button { font-family: inherit; }
 .callout--ok     { background: var(--green-bg); border-color: var(--green-border); color: var(--green); }
 .callout--info   { background: var(--surface-2); border-color: var(--border-2);    color: var(--text-2); }
 
-/* ── Image lightbox (tap-to-zoom overlay for SOP/KB images) ─────────────── */
+/* ── Image lightbox ────────────────────────────────────────────────────── */
 .lightbox {
   position: fixed; inset: 0; z-index: 100; display: none;
   align-items: center; justify-content: center; padding: 24px;

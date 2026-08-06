@@ -1,8 +1,6 @@
 // ============================================================================
-// strings.js — central table of English UI copy (chrome labels, buttons,
-// status + submit messages) plus a tiny interpolation helper. The app UI is
-// English-only; page content (SOP/KB bodies) lives in Markdown files and
-// carries its own language separately (KB has its own per-article switch).
+// strings.js — English UI chrome + t() interpolation. SOP/KB body language
+// lives in the Markdown files (KB has its own EN/中文 switch).
 // ============================================================================
 window.DIANMOOD = window.DIANMOOD || {};
 
@@ -47,14 +45,12 @@ window.DIANMOOD = window.DIANMOOD || {};
     submit_unconfirmed: "Couldn't confirm submission — check connection and retry.",
 
     coming_soon:    'Coming soon',
-    updated_on:     'Updated {x}',
     sop_missing:    'This SOP has not been added yet.'
   };
 
-  // Frequency labels for the dashboard/checklist headings.
   D.FREQ_LABEL = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
 
-  // t('due_in', {x:'3h'}) — looks up UI copy and fills {token} placeholders.
+  // t('due_in', { x: '3h' }) — lookup + {token} replacement.
   D.t = function (key, vars) {
     var s = STRINGS[key] || key;
     if (vars) Object.keys(vars).forEach(function (k) { s = s.replace('{' + k + '}', vars[k]); });

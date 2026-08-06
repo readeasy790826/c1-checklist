@@ -1,9 +1,8 @@
 // ============================================================================
-// md.js — tiny, dependency-free Markdown renderer for SOP/KB content.
-// Supports: # h1-h3, **bold**, *italic*, `code`, [links](url), ![images](src),
-// ordered/unordered lists (one nesting level), > callouts, --- dividers, tables.
-// Relative image/link paths are prefixed with `base` so content authored once
-// at the repo root resolves correctly from /davies/ and /itc/ subfolders too.
+// md.js — Markdown renderer + content loaders for SOP/KB.
+// Supports: #–### headings (rendered as h2–h4), **bold**, *italic*, `code`,
+// links, images, lists (one nest level), > callouts, ---, pipe tables.
+// Relative paths get `base` so root-authored content works from /<slug>/ entries.
 // ============================================================================
 window.DIANMOOD = window.DIANMOOD || {};
 
@@ -15,15 +14,13 @@ window.DIANMOOD = window.DIANMOOD || {};
   }
   function isExternal(u) { return /^(https?:)?\/\//.test(u) || u.charAt(0) === '#'; }
 
-  // Maps a callout marker word to a colour variant (see .callout--* in app.css).
+  // > [!WARNING] → .callout--warn, etc. (see app.css).
   var CALLOUT_KIND = {
     WARNING: 'warn', CAUTION: 'warn',
     DANGER: 'danger', IMPORTANT: 'danger',
     TIP: 'ok', SUCCESS: 'ok',
     NOTE: 'info', INFO: 'info'
   };
-  // Icon + default label per variant, so callouts read as alerts (not footnotes).
-  // A "> [!MARKER]" line overrides the label with its own word.
   var CALLOUT_META = {
     warn:   { icon: '⚠️', label: 'Warning' },
     danger: { icon: '❗', label: 'Important' },
@@ -31,16 +28,13 @@ window.DIANMOOD = window.DIANMOOD || {};
     info:   { icon: '📌', label: 'Note' }
   };
 
-  // Split a pipe-table row into trimmed cells, ignoring the optional outer pipes.
   function tableCells(line) {
     return line.trim().replace(/^\||\|$/g, '').split('|').map(function (c) { return c.trim(); });
   }
-  // A GFM separator row: | --- | :--: | (dashes, optional colons for alignment).
   function isTableSep(line) {
     return /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/.test(line) && line.indexOf('-') >= 0;
   }
 
-  // Inline span formatting (run after block-level escaping).
   function inline(text, base) {
     var s = escHtml(text);
     // images ![alt](src)
@@ -59,9 +53,7 @@ window.DIANMOOD = window.DIANMOOD || {};
     return s;
   }
 
-  // Build a (possibly nested) list from consecutive list lines.
   function renderList(items, base) {
-    // items: [{ indent, ordered, text }]
     var html = '', i = 0;
     function build(level) {
       var ordered = items[i].ordered;
@@ -80,8 +72,7 @@ window.DIANMOOD = window.DIANMOOD || {};
     return html;
   }
 
-  // Parse optional YAML-ish frontmatter ( --- key: value --- ) from the top of
-  // a Markdown file. Returns { meta:{...}, body:'<markdown>' }.
+  // --- key: value --- frontmatter → { meta, body }.
   function parseFrontmatter(text) {
     text = text.replace(/^\uFEFF/, '');
     var meta = {}, body = text;
@@ -98,8 +89,7 @@ window.DIANMOOD = window.DIANMOOD || {};
     return { meta: meta, body: body };
   }
 
-  // Fetch + parse a content file once, then cache the promise. On failure the
-  // cache entry is cleared so a later view can retry.
+  // Cache by path; clear on failure so the next view can retry.
   var docCache = {};
   D.loadDoc = function (path) {
     if (!docCache[path]) {
@@ -111,14 +101,12 @@ window.DIANMOOD = window.DIANMOOD || {};
     return docCache[path];
   };
 
-  // Load an SOP body by task code. SOPs are English-only:
   // content/sops/<CODE>.en.md
   D.loadSop = function (code, base) {
     return D.loadDoc((base || '') + 'content/sops/' + code + '.en.md');
   };
 
-  // Load a KB article, preferring the requested language and falling back to
-  // English: content/kb/<id>.<lang>.md -> content/kb/<id>.en.md
+  // content/kb/<id>.<lang>.md, falling back to .en.md
   D.loadKb = function (id, lang, base) {
     base = base || '';
     var primary = base + 'content/kb/' + id + '.' + lang + '.md';
@@ -150,9 +138,7 @@ window.DIANMOOD = window.DIANMOOD || {};
       // horizontal rule
       if (/^---+$/.test(line.trim())) { out += '<hr>'; i++; continue; }
 
-      // callout (consecutive > lines). An optional GitHub-style marker on the
-      // first line — > [!WARNING] / [!DANGER] / [!TIP] / [!NOTE] — picks the
-      // colour; plain "> ..." defaults to a warning.
+      // Callout: consecutive > lines; optional [!WARNING] / DANGER / TIP / INFO.
       if (/^>\s?/.test(line)) {
         var buf = [];
         while (i < lines.length && /^>\s?/.test(lines[i])) { buf.push(lines[i].replace(/^>\s?/, '')); i++; }
@@ -160,9 +146,9 @@ window.DIANMOOD = window.DIANMOOD || {};
         var mk = /^\[!(\w+)\]\s*(.*)$/.exec(buf[0]);
         if (mk) {
           kind = CALLOUT_KIND[mk[1].toUpperCase()] || 'warn';
-          label = mk[1].charAt(0).toUpperCase() + mk[1].slice(1).toLowerCase();   // WARNING -> Warning
-          buf[0] = mk[2];                 // keep any text after the marker
-          if (!buf[0]) buf.shift();       // …or drop the marker-only line
+          label = mk[1].charAt(0).toUpperCase() + mk[1].slice(1).toLowerCase();
+          buf[0] = mk[2];
+          if (!buf[0]) buf.shift();
         }
         var meta = CALLOUT_META[kind];
         out += '<div class="callout callout--' + kind + '">' +
@@ -182,7 +168,7 @@ window.DIANMOOD = window.DIANMOOD || {};
         i++; continue;
       }
 
-      // table: header row immediately followed by a separator row (GFM pipes)
+      // GFM pipe table (header + separator row).
       if (line.indexOf('|') >= 0 && i + 1 < lines.length && isTableSep(lines[i + 1])) {
         var head = tableCells(line);
         var aligns = tableCells(lines[i + 1]).map(function (c) {
@@ -192,7 +178,6 @@ window.DIANMOOD = window.DIANMOOD || {};
         i += 2;
         var rows = [];
         while (i < lines.length && lines[i].trim() && lines[i].indexOf('|') >= 0) { rows.push(tableCells(lines[i])); i++; }
-        // Cell renderer keyed to header column count so ragged rows stay aligned.
         var cell = function (tag, txt, idx) {
           return '<' + tag + (aligns[idx] ? ' style="text-align:' + aligns[idx] + '"' : '') + '>' +
             inline(txt || '', base) + '</' + tag + '>';
@@ -207,7 +192,6 @@ window.DIANMOOD = window.DIANMOOD || {};
         continue;
       }
 
-      // list (gather consecutive list lines)
       if (listMatch(line)) {
         var items = [];
         while (i < lines.length && listMatch(lines[i])) { items.push(listMatch(lines[i])); i++; }
@@ -215,7 +199,6 @@ window.DIANMOOD = window.DIANMOOD || {};
         continue;
       }
 
-      // paragraph (gather until blank/structural)
       var para = [];
       while (i < lines.length && lines[i].trim() &&
              !/^(#{1,3})\s/.test(lines[i]) && !/^>\s?/.test(lines[i]) &&

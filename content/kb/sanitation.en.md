@@ -1,6 +1,5 @@
 ---
 title: Container Cleaning & Sanitising SOP
-summary: Milk jug, tea urn & water bucket cover cleaning
 ---
 
 > [!NOTE] Bleach dilution standard: **1 ml bleach + 1 L water = 50 ppm**

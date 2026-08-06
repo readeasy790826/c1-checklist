@@ -1,34 +1,30 @@
 // ============================================================================
-// app.js — shared single-page app for every Dianmood entry point.
-// Hash-routed (GitHub-Pages safe, real Back button, deep-linkable). One shell
-// renders all views: dashboard, checklist, Abnormal Handling, SOP page, KB article.
+// app.js — SPA shell for every Dianmood entry point. Hash-routed views:
+// dashboard, checklist, Abnormal Handling, SOP, KB.
 //
 // Entry pages set window.DIANMOOD_PRESET before loading this file:
-//   { mode: 'location', slug: 'davies' }  -> a single store
-//   { mode: 'hq' }                         -> all locations (root)
+//   { mode: 'location', slug: 'davies', base: '../' }  -> one store
+//   { mode: 'hq', base: '' }                            -> all locations
 // ============================================================================
 (function () {
   'use strict';
   var D = window.DIANMOOD;
   var t = D.t;
   var PRESET = window.DIANMOOD_PRESET || { mode: 'hq' };
-  // Content (SOP/KB) files live at the repo root. Location entries sit in a
-  // subfolder (/davies/), so they reach root content via BASE = '../'.
+  // Location entries live in /<slug>/, so BASE reaches root content/scripts.
   var BASE = PRESET.base || '';
-
-  // HQ shows every location; a location entry shows only its own store.
   var IS_HQ = PRESET.mode === 'hq';
+
   function dashSlugs() {
     return IS_HQ ? D.LOCATIONS.map(function (l) { return l.slug; }) : [PRESET.slug];
   }
 
-  // ── Shared status cache so all views poll the backend only once ─────────
+  // ── Shared status cache (one poll feeds every view) ─────────────────────
   var statusData = {};
-  var statusLoaded = false;   // true once a status fetch has resolved OK
-  var statusError = false;    // true if the last status fetch failed
+  var statusLoaded = false;
+  var statusError = false;
   var lastRefresh = '';
 
-  // ── Relative-time + duration formatting ─────────────────────────────────
   function formatAgo(h) {
     if (h < 1)  return Math.max(1, Math.round(h * 60)) + 'm ago';
     if (h < 24) return Math.round(h) + 'h ago';
@@ -40,12 +36,10 @@
     return rem > 0 ? d + 'd ' + rem + 'h' : d + 'd';
   }
 
-  // ── Status computation ──────────────────────────────────────────────────
-  // Returns { level, pct, sub, subClass } for a location|frequency entry.
+  // { level, pct, sub, subClass } for a location|frequency status entry.
   function statusInfo(freq, entry) {
     var limit = D.LIMITS[freq], warn = D.WARN_BEFORE[freq];
-    // Never submitted → neutral "gray" (no record), not an alarm. Only a task
-    // that WAS logged and has since passed its threshold counts as red overdue.
+    // No submission yet → gray (neutral). Red only after a logged run goes past LIMITS.
     if (!entry || !entry.datetime) {
       return { level: 'gray', pct: 0, sub: t('no_record'), subClass: 'gray' };
     }
@@ -66,7 +60,6 @@
   var RING_COLOR = { green: 'var(--green)', amber: 'var(--amber)', red: 'var(--red)', gray: 'var(--muted)', loading: 'var(--border-2)' };
   var RING_GLYPH = { green: '✓', amber: '!', red: '!', gray: '–', loading: '·' };
 
-  // ── Tiny DOM helper ─────────────────────────────────────────────────────
   function el(html) {
     var d = document.createElement('div'); d.innerHTML = html.trim(); return d.firstChild;
   }
@@ -76,19 +69,23 @@
     });
   }
 
-  // ── SOP content rendering ────────────────────────────────────────────────
-  // SOP bodies live as Markdown files (content/sops/<code>.<lang>.md), fetched
-  // + cached on demand by md.js and shown on the standalone SOP page (viewSop).
+  // Reference-video chip for SOP / KB pages (frontmatter `video` / `video_label`).
   function videoChip(url, label) {
     if (!url) return '';
-    return '<a class="chip-link chip-link--video" href="' + esc(url) +
+    return '<a class="chip-link" href="' + esc(url) +
       '" target="_blank" rel="noopener">▶ ' + esc(label || t('videos')) + '</a>';
   }
+  function videoBlock(meta) {
+    return meta && meta.video
+      ? '<div class="sop-links">' + videoChip(meta.video, meta.video_label) + '</div>'
+      : '';
+  }
 
-  // ── Header (fixed; rendered once, updated per route) ─────────────────────
+  // ── Header ──────────────────────────────────────────────────────────────
   function renderHeader() {
+    var loc = !IS_HQ ? D.getLocation(PRESET.slug) : null;
     var sub = IS_HQ ? t('hq_sub')
-      : (D.getLocation(PRESET.slug) ? D.getLocation(PRESET.slug).machineId + ' · ' + t('app_sub') : t('app_sub'));
+      : (loc ? loc.machineId + ' · ' + t('app_sub') : t('app_sub'));
     var header = document.getElementById('app-header');
     header.innerHTML =
       '<button class="app-header__back" id="nav-back" aria-label="Back">‹</button>' +
@@ -99,7 +96,6 @@
           '<span class="brand__sub">' + esc(sub) + '</span>' +
         '</span>' +
       '</a>';
-
     header.querySelector('#nav-back').addEventListener('click', function () { history.back(); });
   }
   function setBackVisible(v) {
@@ -107,34 +103,13 @@
     if (b) b.classList.toggle('show', !!v);
   }
 
-  // ── View: dashboard (one location or all) ───────────────────────────────
-  function statusCard(slug, freq) {
-    // Cards always render (they're the navigation into checklists); the ring is
-    // only meaningful once status has loaded. Until then, show a neutral ring.
-    var ready = statusLoaded && !statusError;
-    var info = ready
-      ? statusInfo(freq, statusData[D.getLocation(slug).name + '|' + freq])
-      : { level: 'loading', pct: 0, sub: statusError ? '—' : t('loading'), subClass: '' };
-    var label = D.FREQ_LABEL[freq];
-    var card = el(
-      '<a class="status-card" href="#/c/' + slug + '/' + freq + '">' +
-        '<span class="ring" style="--pct:' + info.pct + ';--ring:' + RING_COLOR[info.level] + '">' +
-          '<span class="ring__glyph">' + RING_GLYPH[info.level] + '</span></span>' +
-        '<span class="status-card__body">' +
-          '<span class="status-card__title">' + esc(label) + '</span>' +
-          '<span class="status-card__sub ' + info.subClass + '">' + esc(info.sub) + '</span>' +
-        '</span>' +
-        '<span class="status-card__cta">' + t('open') + ' ›</span>' +
-      '</a>');
-    return card;
-  }
-
-  // Emphasize DO NOT in Abnormal Handling points (bold + underline) after escaping.
+  // ── Abnormal Handling ───────────────────────────────────────────────────
+  // Emphasize DO NOT after escaping (used in procedure points).
   function formatAbnormalPoint(p) {
     return esc(p).replace(/\bDO NOT\b/g, '<strong class="abnormal-rules__emph">DO NOT</strong>');
   }
 
-  // Render points: strings, or { text, points } for nested bullets under a step.
+  // Points: strings, or { text, points } for nested bullets under a step.
   function abnormalPointsHtml(points, nested) {
     if (!points || !points.length) return '';
     var tag = nested ? 'ul' : 'ol';
@@ -148,7 +123,6 @@
       }).join('') + '</' + tag + '>';
   }
 
-  // Chevron procedure list on the Abnormal Handling page (all start collapsed).
   function abnormalRulesHtml() {
     var rules = D.ABNORMAL_HANDLING || [];
     if (!rules.length) return '';
@@ -169,7 +143,6 @@
       '</div>';
   }
 
-  // Top-of-dashboard entry into the Abnormal Handling page (HQ + every store).
   function abnormalEntry() {
     return '<a class="abnormal-entry" href="#/abnormal">' +
       '<span class="abnormal-entry__icon" aria-hidden="true">i</span>' +
@@ -180,13 +153,32 @@
       '<span class="abnormal-entry__caret">›</span></a>';
   }
 
+  // ── Dashboard ───────────────────────────────────────────────────────────
+  function statusCard(slug, freq) {
+    // Always navigable; ring is neutral until status loads (or stays neutral on error).
+    var ready = statusLoaded && !statusError;
+    var info = ready
+      ? statusInfo(freq, statusData[D.getLocation(slug).name + '|' + freq])
+      : { level: 'loading', pct: 0, sub: statusError ? '—' : t('loading'), subClass: '' };
+    var label = D.FREQ_LABEL[freq];
+    return el(
+      '<a class="status-card" href="#/c/' + slug + '/' + freq + '">' +
+        '<span class="ring" style="--pct:' + info.pct + ';--ring:' + RING_COLOR[info.level] + '">' +
+          '<span class="ring__glyph">' + RING_GLYPH[info.level] + '</span></span>' +
+        '<span class="status-card__body">' +
+          '<span class="status-card__title">' + esc(label) + '</span>' +
+          '<span class="status-card__sub ' + info.subClass + '">' + esc(info.sub) + '</span>' +
+        '</span>' +
+        '<span class="status-card__cta">' + t('open') + ' ›</span>' +
+      '</a>');
+  }
+
   function kbList(includeHq) {
     var items = D.KB.filter(function (k) { return k.scope === 'all' || includeHq; });
     return '<div class="section-label">' + t('knowledge_base') + '</div>' +
       '<div class="card-stack">' + items.map(function (k) {
         var body = '<span class="kb-card__body"><span class="kb-card__title">' + esc(k.title) + '</span>' +
           '<span class="kb-card__desc">' + esc(k.desc) + '</span></span>';
-        // "Coming soon" articles have no content yet — render a non-clickable card.
         if (k.soon) {
           return '<div class="kb-card kb-card--soon">' + body +
             '<span class="kb-card__tag">' + t('coming_soon') + '</span></div>';
@@ -198,7 +190,6 @@
 
   function viewDashboard(root) {
     setBackVisible(false);
-
     var html = '<div class="wrap">';
     if (IS_HQ) {
       html += '<div class="page-head"><h1>' + t('hq_title') + '</h1><p>' + t('hq_sub') + '</p></div>';
@@ -212,13 +203,10 @@
     html += '<div class="last-refresh" id="dash-refresh"></div>';
     html += '</div>';
     root.appendChild(el(html));
-
     paintDashboard();
   }
 
-  // Fills the dynamic portion of the dashboard (re-run on every status poll).
-  // Cards are ALWAYS drawn so checklist links stay reachable while status is
-  // loading or if the fetch fails; a failed fetch is noted in the refresh line.
+  // Rebuild frequency cards + refresh line (safe to call when dashboard is off-screen).
   function paintDashboard() {
     var host = document.getElementById('dash-dynamic');
     if (!host) return;
@@ -241,19 +229,17 @@
     }
   }
 
-  // ── View: checklist (+ submit) ──────────────────────────────────────────
+  // ── Checklist ───────────────────────────────────────────────────────────
   function viewChecklist(root, slug, freq) {
-    // On a single-store entry (davies/ or itc/), ignore any slug in the URL and
-    // pin to this store — prevents e.g. /davies/#/c/itc/daily rendering ITC.
+    // Location entries ignore a foreign slug in the hash (e.g. /davies/#/c/itc/…).
     if (!IS_HQ) slug = PRESET.slug;
     var loc = D.getLocation(slug);
     if (!loc || !D.TASKS[freq]) { location.hash = '#/'; return; }
     setBackVisible(true);
     var tasks = D.TASKS[freq];
-    var checked = {};       // code -> bool
-    var notes = {};         // code -> string
-    // Draft persistence: survive opening an SOP / accidental refresh mid-checklist
-    // (per tab session; cleared on confirmed submit). See save/restore below.
+    var checked = {};
+    var notes = {};
+    // sessionStorage draft — survives SOP navigation / refresh; cleared on confirmed submit.
     var progressKey = 'dianmood:progress:' + slug + ':' + freq;
 
     document.body.classList.add('has-submit-bar');
@@ -279,8 +265,7 @@
       '<div id="tasklist"></div>' +
       '</div>';
 
-    // Submit bar is a separate fixed-to-viewport node; append on its own because
-    // el() only returns the first root element (the .wrap above).
+    // el() returns only the first root — append the fixed bar separately.
     var barHtml = '<div class="submit-bar"><div class="submit-bar__inner">' +
         '<button class="btn btn--primary btn--block" id="b-submit" disabled>' + t('submit') + '</button>' +
         '<div class="submit-status" id="submit-status"></div>' +
@@ -288,8 +273,7 @@
     root.appendChild(el(html));
     root.appendChild(el(barHtml));
 
-    // default date/time = now; cap the date picker at today so staff can log a
-    // past completion (delayed logging) but not a future date.
+    // Default to now; max=today allows delayed logging but not future dates.
     var now = new Date();
     var today = now.toISOString().split('T')[0];
     var fDate = root.querySelector('#f-date');
@@ -314,7 +298,7 @@
               '<textarea data-note="' + task.code + '" placeholder="' + t('notes_ph') + '"></textarea></div>' +
           '</div>' +
         '</div>');
-      // Header toggles the notes body; the SOP link and checkbox act on their own.
+      // Head toggles notes; SOP link and checkbox handle their own clicks.
       card.querySelector('.task__head').addEventListener('click', function (e) {
         if (e.target.closest('.checkbox') || e.target.closest('.task__sop')) return;
         card.classList.toggle('open');
@@ -344,7 +328,6 @@
       root.querySelector('#b-submit').disabled = done !== total;
     }
 
-    // ── Draft persistence (sessionStorage; best-effort, never fatal) ─────────
     function saveProgress() {
       try {
         sessionStorage.setItem(progressKey, JSON.stringify({
@@ -352,7 +335,7 @@
           date: root.querySelector('#f-date').value,
           time: root.querySelector('#f-time').value
         }));
-      } catch (e) { /* storage full/blocked — ignore */ }
+      } catch (e) { /* ignore quota / private mode */ }
     }
     function clearProgress() { try { sessionStorage.removeItem(progressKey); } catch (e) {} }
     function restoreProgress() {
@@ -378,7 +361,6 @@
     root.querySelector('#b-all').addEventListener('click', function () { setAll(true); });
     root.querySelector('#b-clear').addEventListener('click', function () { setAll(false); });
     root.querySelector('#b-submit').addEventListener('click', submit);
-    // Persist the date/time fields as they change, then restore any draft.
     ['#f-date', '#f-time'].forEach(function (sel) {
       root.querySelector(sel).addEventListener('input', saveProgress);
     });
@@ -393,9 +375,7 @@
 
       var taskData = {};
       tasks.forEach(function (tk) { taskData[tk.code] = { checked: true, notes: (notes[tk.code] || '').trim() }; });
-      // Send an absolute UTC instant, not a naive "YYYY-MM-DD HH:MM" string, so
-      // the backend/sheet timezone can't skew the recorded time. The picked
-      // date+time is read in the device's local zone, then serialised to ISO.
+      // Absolute UTC ISO — avoids sheet-timezone skew on naive local strings.
       var datetime = new Date(date + 'T' + time).toISOString();
       var payload = {
         date: date, time: time, datetime: datetime,
@@ -408,12 +388,11 @@
       btn.disabled = true; status.className = 'submit-status'; status.textContent = t('submitting');
       submitAndConfirm(payload).then(function (confirmed) {
         if (confirmed) {
-          clearProgress();                 // done — drop the saved draft
+          clearProgress();
           status.className = 'submit-status ok';
           status.textContent = t('submitted') + ' — ' + date + ' ' + time;
           setTimeout(function () { location.hash = '#/'; }, 1400);
         } else {
-          // Couldn't verify the row landed — keep progress, let them retry.
           status.className = 'submit-status err';
           status.textContent = t('submit_unconfirmed');
           btn.disabled = false;
@@ -424,7 +403,7 @@
     updateProgress();
   }
 
-  // ── View: full-page SOP (deep-linkable, printable) ──────────────────────
+  // ── SOP page ────────────────────────────────────────────────────────────
   function viewSop(root, code) {
     setBackVisible(true);
     var wrap = el('<div class="wrap"><div class="loading">' + t('loading') + '</div></div>');
@@ -437,22 +416,16 @@
         '<span class="meta-chip meta-chip--code">' + esc(code) + '</span>' +
         (freqLabel ? '<span class="meta-chip">' + esc(freqLabel) + '</span>' : '') +
         (meta.time ? '<span class="meta-chip">' + esc(meta.time) + '</span>' : '') + '</div>';
-      var foot = meta.updated
-        ? '<div class="last-refresh">' + t('updated_on', { x: meta.updated }) +
-          (meta.version ? ' · v' + esc(meta.version) : '') + '</div>'
-        : '';
       wrap.innerHTML =
         '<div class="page-head"><h1>' + esc(title) + '</h1></div>' + metaRow +
-        (meta.video ? '<div class="sop-links">' + videoChip(meta.video, meta.video_label) + '</div>' : '') +
-        '<div class="sop-content sop-content--page">' + D.md(doc.body, BASE) + '</div>' + foot;
+        videoBlock(meta) +
+        '<div class="sop-content">' + D.md(doc.body, BASE) + '</div>';
     }).catch(function () {
       wrap.innerHTML = '<div class="empty">' + t('sop_missing') + '</div>';
     });
   }
 
-  // ── View: KB article (bilingual, per-article EN/中文 switch) ─────────────
-  // KB is the only bilingual surface. The reader's language choice is remembered
-  // across articles in localStorage; content loads from content/kb/<id>.<lang>.md.
+  // ── KB article (EN / 中文 via localStorage `dm_kb_lang`) ─────────────────
   function kbLang() { return localStorage.getItem('dm_kb_lang') === 'zh' ? 'zh' : 'en'; }
 
   function viewKb(root, id) {
@@ -473,8 +446,8 @@
               '<button data-l="en"' + (lang === 'en' ? ' class="active"' : '') + '>EN</button>' +
               '<button data-l="zh"' + (lang === 'zh' ? ' class="active"' : '') + '>中文</button>' +
             '</div></div>' +
-          (meta.video ? '<div class="sop-links">' + videoChip(meta.video, meta.video_label) + '</div>' : '') +
-          '<div class="sop-content sop-content--page">' + D.md(doc.body, BASE) + '</div>';
+          videoBlock(meta) +
+          '<div class="sop-content">' + D.md(doc.body, BASE) + '</div>';
         wrap.querySelectorAll('.lang-switch button').forEach(function (b) {
           b.addEventListener('click', function () {
             localStorage.setItem('dm_kb_lang', b.dataset.l); render();
@@ -487,7 +460,7 @@
     render();
   }
 
-  // ── View: Abnormal Handling (one page, Must Read chevron list) ──────────
+  // ── Abnormal Handling page ──────────────────────────────────────────────
   function viewAbnormal(root) {
     setBackVisible(true);
     root.appendChild(el(
@@ -498,15 +471,15 @@
       '</div>'));
   }
 
-  // ── Router ───────────────────────────────────────────────────────────────
+  // ── Router ──────────────────────────────────────────────────────────────
   function route() {
     var root = document.getElementById('app');
     root.innerHTML = '';
     document.body.classList.remove('has-submit-bar');
     window.scrollTo(0, 0);
 
-    var hash = location.hash.replace(/^#/, '');         // e.g. /c/davies/daily
-    var parts = hash.split('/').filter(Boolean);        // ['c','davies','daily']
+    var hash = location.hash.replace(/^#/, '');
+    var parts = hash.split('/').filter(Boolean);
 
     if (parts[0] === 'c' && parts[1] && parts[2]) {
       viewChecklist(root, parts[1], parts[2]);
@@ -521,27 +494,19 @@
     }
   }
 
-  // Repaint the dashboard's dynamic area (only if a dashboard is on screen).
-  function repaintDashboard() {
-    if (!document.getElementById('dash-dynamic')) return;
-    paintDashboard();
-  }
-
-  // ── Submit + confirm ─────────────────────────────────────────────────────
-  // A no-cors POST response is opaque (unreadable), so the POST alone can't tell
-  // us if the write succeeded. We therefore POST, then re-read ?action=status and
-  // check our exact datetime shows up for this location|frequency. Resolves true
-  // only when confirmed — killing false "Submitted ✓" on silent failures.
+  // ── Submit + confirm ────────────────────────────────────────────────────
+  // no-cors POST responses are opaque, so we POST then re-read ?action=status
+  // and require our datetime on location|frequency before showing success.
   function submitAndConfirm(payload) {
     var key = payload.location + '|' + payload.frequency;
     var verify = function () { return confirmLanded(key, payload.datetime, 3); };
     return fetch(D.SCRIPT_URL, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload), mode: 'no-cors'
-    }).then(verify, verify);   // verify whether the POST resolved or rejected
+    }).then(verify, verify);
   }
-  // Poll status up to `tries` times (800ms apart) for our row. As a side effect,
-  // refresh the shared status cache so the dashboard is current after redirect.
+
+  // Poll status up to `tries` times (800ms apart); refreshes shared status cache.
   function confirmLanded(key, datetime, tries) {
     return new Promise(function (resolve) {
       (function attempt(n) {
@@ -564,7 +529,7 @@
     });
   }
 
-  // ── Backend status polling (shared, every 60s) ──────────────────────────
+  // ── Status polling (every 60s) ──────────────────────────────────────────
   function loadStatus() {
     fetch(D.SCRIPT_URL + '?action=status')
       .then(function (r) { return r.json(); })
@@ -573,12 +538,10 @@
         lastRefresh = new Date().toLocaleTimeString();
       })
       .catch(function () { statusError = true; })
-      .then(repaintDashboard);   // refresh card state either way
+      .then(paintDashboard);
   }
 
-  // ── Image lightbox (tap any content image to zoom) ──────────────────────
-  // One reusable overlay for every view; opened via delegated clicks on images
-  // inside .sop-content, so it covers SOP and KB pages without per-view wiring.
+  // ── Image lightbox (delegated clicks on .sop-content img) ───────────────
   function initLightbox() {
     var box = el('<div class="lightbox"><img alt=""></div>');
     document.body.appendChild(box);
@@ -587,14 +550,14 @@
     box.addEventListener('click', close);
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
     document.addEventListener('click', function (e) {
-      var t = e.target;
-      if (t.tagName === 'IMG' && t.closest('.sop-content')) {
-        full.src = t.src; full.alt = t.alt || ''; box.classList.add('open');
+      var img = e.target;
+      if (img.tagName === 'IMG' && img.closest('.sop-content')) {
+        full.src = img.src; full.alt = img.alt || ''; box.classList.add('open');
       }
     });
   }
 
-  // ── Boot ─────────────────────────────────────────────────────────────────
+  // ── Boot ────────────────────────────────────────────────────────────────
   renderHeader();
   initLightbox();
   window.addEventListener('hashchange', route);

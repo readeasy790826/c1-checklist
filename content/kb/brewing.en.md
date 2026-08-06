@@ -1,6 +1,5 @@
 ---
 title: Tea Brewing SOP
-summary: Jasmine, black tea & matcha recipes and steps
 ---
 
 # Jasmine Green Tea

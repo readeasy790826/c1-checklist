@@ -1,6 +1,5 @@
 ---
 title: 粹茶 SOP
-summary: 茉莉、红茶与抹茶配方及步骤
 ---
 
 # 茉莉花茶 Jasmine Green Tea

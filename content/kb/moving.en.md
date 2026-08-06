@@ -1,6 +1,5 @@
 ---
 title: Machine Moving SOP
-summary: Steps for safely relocating the machine
 ---
 
 *Pre-move preparation checklist — complete every step before relocating the machine.*
