@@ -1,8 +1,8 @@
 // ============================================================================
 // md.js — Markdown renderer + content loaders for SOP / Abnormal / KB.
 // Supports: #–### headings (rendered as h2–h4), **bold**, *italic*, `code`,
-// links, images, lists (one nest level), > callouts, ---, pipe tables.
-// Relative paths get `base` so root-authored content works from /<slug>/ entries.
+// links, images, lists (one nest level; images between steps stay in the list),
+// > callouts, ---, pipe tables. Relative paths get `base` for /<slug>/ entries.
 // ============================================================================
 window.DIANMOOD = window.DIANMOOD || {};
 
@@ -53,6 +53,12 @@ window.DIANMOOD = window.DIANMOOD || {};
     return s;
   }
 
+  function figureHtml(alt, src, base) {
+    var url = isExternal(src) ? src : base + src;
+    return '<figure><img src="' + url + '" alt="' + alt + '">' +
+      (alt ? '<figcaption>' + escHtml(alt) + '</figcaption>' : '') + '</figure>';
+  }
+
   function renderList(items, base) {
     var html = '', i = 0;
     function build(level) {
@@ -61,9 +67,14 @@ window.DIANMOOD = window.DIANMOOD || {};
       var out = '<' + tag + '>';
       while (i < items.length && items[i].indent >= level) {
         if (items[i].indent > level) { out += build(items[i].indent); continue; }
-        var li = '<li>' + inline(items[i].text, base);
+        var item = items[i];
+        var li = '<li>' + inline(item.text, base);
         i++;
         if (i < items.length && items[i].indent > level) li += build(items[i].indent);
+        // Images placed after a step (same list) attach to that <li>.
+        if (item.media) {
+          item.media.forEach(function (m) { li += figureHtml(m[1], m[2], base); });
+        }
         out += li + '</li>';
       }
       return out + '</' + tag + '>';
@@ -161,12 +172,10 @@ window.DIANMOOD = window.DIANMOOD || {};
         continue;
       }
 
-      // standalone image -> figure
+      // Standalone image -> figure (also absorbed into lists below when after a step).
       var img = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/.exec(line);
       if (img) {
-        var src = isExternal(img[2]) ? img[2] : base + img[2];
-        out += '<figure><img src="' + src + '" alt="' + img[1] + '">' +
-          (img[1] ? '<figcaption>' + escHtml(img[1]) + '</figcaption>' : '') + '</figure>';
+        out += figureHtml(img[1], img[2], base);
         i++; continue;
       }
 
@@ -194,9 +203,23 @@ window.DIANMOOD = window.DIANMOOD || {};
         continue;
       }
 
+      // List — keep one <ol>/<ul> across blank lines + images between steps.
       if (listMatch(line)) {
         var items = [];
-        while (i < lines.length && listMatch(lines[i])) { items.push(listMatch(lines[i])); i++; }
+        while (i < lines.length) {
+          if (!lines[i].trim()) { i++; continue; }
+          var lm = listMatch(lines[i]);
+          if (lm) { items.push(lm); i++; continue; }
+          var listImg = /^!\[([^\]]*)\]\(([^)]+)\)\s*$/.exec(lines[i]);
+          if (listImg && items.length) {
+            var last = items[items.length - 1];
+            last.media = last.media || [];
+            last.media.push(listImg);
+            i++;
+            continue;
+          }
+          break;
+        }
         out += renderList(items, base);
         continue;
       }

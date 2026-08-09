@@ -79,7 +79,8 @@ from `D.KB`.
 
 `#` `##` `###` (rendered as h2–h4), **bold**, *italic*, `code`, lists (one nest
 level), links, images, `---`, pipe tables, callouts. Image paths are repo-root
-relative: `![alt](assets/foo.jpg)`.
+relative: `![alt](assets/foo.jpg)`. Images placed between numbered steps stay in
+that list (numbering does not restart).
 
 ```markdown
 > [!WARNING] amber — cautions
