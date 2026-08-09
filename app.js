@@ -69,7 +69,7 @@
     });
   }
 
-  // Reference-video chip for SOP / KB pages (frontmatter `video` / `video_label`).
+  // Reference-video chip (frontmatter `video` / `video_label` on SOP / KB / Abnormal).
   function videoChip(url, label) {
     if (!url) return '';
     return '<a class="chip-link" href="' + esc(url) +
@@ -103,46 +103,7 @@
     if (b) b.classList.toggle('show', !!v);
   }
 
-  // ── Abnormal Handling ───────────────────────────────────────────────────
-  // Emphasize DO NOT after escaping (used in procedure points).
-  function formatAbnormalPoint(p) {
-    return esc(p).replace(/\bDO NOT\b/g, '<strong class="abnormal-rules__emph">DO NOT</strong>');
-  }
-
-  // Points: strings, or { text, points } for nested bullets under a step.
-  function abnormalPointsHtml(points, nested) {
-    if (!points || !points.length) return '';
-    var tag = nested ? 'ul' : 'ol';
-    return '<' + tag + ' class="abnormal-rules__points">' +
-      points.map(function (p) {
-        if (typeof p === 'string') {
-          return '<li>' + formatAbnormalPoint(p) + '</li>';
-        }
-        return '<li>' + formatAbnormalPoint(p.text || '') +
-          abnormalPointsHtml(p.points, true) + '</li>';
-      }).join('') + '</' + tag + '>';
-  }
-
-  function abnormalRulesHtml() {
-    var rules = D.ABNORMAL_HANDLING || [];
-    if (!rules.length) return '';
-    return '<div class="abnormal-rules">' +
-      rules.map(function (rule) {
-        var body =
-          (rule.text ? '<p class="abnormal-rules__lead">' + esc(rule.text) + '</p>' : '') +
-          abnormalPointsHtml(rule.points);
-        return '<details class="abnormal-rules__item">' +
-          '<summary class="abnormal-rules__title">' +
-            '<span class="abnormal-rules__i" aria-hidden="true">i</span>' +
-            '<span class="abnormal-rules__title-text">' + esc(rule.title) + '</span>' +
-            '<span class="abnormal-rules__chev" aria-hidden="true"></span>' +
-          '</summary>' +
-          '<div class="abnormal-rules__body">' + body + '</div>' +
-          '</details>';
-      }).join('') +
-      '</div>';
-  }
-
+  // ── Abnormal Handling (accordion UI; bodies from content/abnormal/*.md) ──
   function abnormalEntry() {
     return '<a class="abnormal-entry" href="#/abnormal">' +
       '<span class="abnormal-entry__icon" aria-hidden="true">i</span>' +
@@ -151,6 +112,32 @@
         '<span class="abnormal-entry__desc">' + t('abnormal_handling_desc') + '</span>' +
       '</span>' +
       '<span class="abnormal-entry__caret">›</span></a>';
+  }
+
+  function paintAbnormal(host) {
+    var rules = D.ABNORMAL_HANDLING || [];
+    if (!rules.length) { host.innerHTML = ''; return; }
+    host.innerHTML = rules.map(function (rule) {
+      return '<details class="abnormal-rules__item">' +
+        '<summary class="abnormal-rules__title">' +
+          '<span class="abnormal-rules__i" aria-hidden="true">i</span>' +
+          '<span class="abnormal-rules__title-text">' + esc(rule.title) + '</span>' +
+          '<span class="abnormal-rules__chev" aria-hidden="true"></span>' +
+        '</summary>' +
+        '<div class="abnormal-rules__body" data-abnormal-body="' + esc(rule.id) + '">' +
+          '<div class="loading">' + t('loading') + '</div>' +
+        '</div></details>';
+    }).join('');
+    rules.forEach(function (rule) {
+      var body = host.querySelector('[data-abnormal-body="' + rule.id + '"]');
+      D.loadAbnormal(rule.id, BASE).then(function (doc) {
+        if (!body) return;
+        body.innerHTML = videoBlock(doc.meta) +
+          '<div class="sop-content">' + D.md(doc.body, BASE) + '</div>';
+      }).catch(function () {
+        if (body) body.innerHTML = '<div class="empty">' + t('content_missing') + '</div>';
+      });
+    });
   }
 
   // ── Dashboard ───────────────────────────────────────────────────────────
@@ -421,7 +408,7 @@
         videoBlock(meta) +
         '<div class="sop-content">' + D.md(doc.body, BASE) + '</div>';
     }).catch(function () {
-      wrap.innerHTML = '<div class="empty">' + t('sop_missing') + '</div>';
+      wrap.innerHTML = '<div class="empty">' + t('content_missing') + '</div>';
     });
   }
 
@@ -454,7 +441,7 @@
           });
         });
       }).catch(function () {
-        wrap.innerHTML = '<div class="empty">' + t('sop_missing') + '</div>';
+        wrap.innerHTML = '<div class="empty">' + t('content_missing') + '</div>';
       });
     }
     render();
@@ -463,12 +450,14 @@
   // ── Abnormal Handling page ──────────────────────────────────────────────
   function viewAbnormal(root) {
     setBackVisible(true);
-    root.appendChild(el(
+    var wrap = el(
       '<div class="wrap">' +
         '<div class="page-head"><h1>' + t('abnormal_handling') + '</h1>' +
           '<p>' + t('abnormal_handling_desc') + '</p></div>' +
-        abnormalRulesHtml() +
-      '</div>'));
+        '<div class="abnormal-rules" id="abnormal-list"></div>' +
+      '</div>');
+    root.appendChild(wrap);
+    paintAbnormal(wrap.querySelector('#abnormal-list'));
   }
 
   // ── Router ──────────────────────────────────────────────────────────────

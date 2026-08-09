@@ -18,7 +18,7 @@
 
 提交后数据保存到 [Google Sheets](https://docs.google.com/spreadsheets/d/1MB_agRj8oEzNw6hHnskVjPZO5IKmYUSNKdanr3JAbWo/edit)。
 
-首页 **Abnormal Handling** 为停电、机械臂等应急流程。
+首页 **Abnormal Handling** 为停电、POS 重启、机械臂等应急流程。
 
 ## 技术架构
 

@@ -49,40 +49,11 @@ window.DIANMOOD = window.DIANMOOD || {};
     ]
   };
 
-  // Emergency procedures → home entry + #/abnormal.
-  // Point = string, or { text, points } for nested bullets. DO NOT is emphasized in the UI.
+  // Abnormal Handling — accordion index; body at content/abnormal/<id>.en.md.
   D.ABNORMAL_HANDLING = [
-    {
-      title: 'Power Outage Operation Steps',
-      points: [
-        'Press the restart button on the EcoFlow power unit’s socket to reboot the power supply.',
-        'Long-press the power button of the robotic arm control host to power on the robotic arm.',
-        'After the computer restarts, launch the app and run console-restart.',
-        {
-          text: 'If the power outage lasts more than two hours:',
-          points: [
-            'Discard all raw materials stored in the refrigerator and perform a deep cleaning.'
-          ]
-        },
-        {
-          text: 'If the power outage lasts less than two hours:',
-          points: [
-            'Inspect the raw materials for spoilage.',
-            'If no spoilage is found — business operations may resume normally.',
-            'If any spoilage is detected — follow the handling rules for outages exceeding two hours.'
-          ]
-        }
-      ]
-    },
-    {
-      title: 'Emergency Protocol for Robotic Arm Malfunction',
-      text: 'If the robotic arm malfunctions for any reason:',
-      points: [
-        'DO NOT attempt any manual operations on the equipment by yourself',
-        'DO NOT close the Console APP under any circumstances',
-        'Immediately notify professional technical staff to come on-site for inspection and troubleshooting.'
-      ]
-    }
+    { id: 'power-outage', title: 'Power Outage Operation Steps' },
+    { id: 'pos-restart',  title: 'POS Restart' },
+    { id: 'robotic-arm',  title: 'Emergency Protocol for Robotic Arm Malfunction' }
   ];
 
   // KB cards. scope 'all' | 'hq'. soon: true = non-clickable placeholder.
@@ -97,9 +68,6 @@ window.DIANMOOD = window.DIANMOOD || {};
     { id: 'sanitation', scope: 'all',
       title: 'Container Cleaning & Sanitising SOP',
       desc:  'Milk jug, tea urn & water bucket cover cleaning' },
-    { id: 'pos-restart', scope: 'all',
-      title: 'POS Restart SOP',
-      desc:  'How to restart / turn on the POS machine' },
     { id: 'setup',      scope: 'hq', soon: true,
       title: 'Machine Setup SOP',
       desc:  'Initial machine setup and installation' },

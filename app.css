@@ -241,27 +241,11 @@ button { font-family: inherit; }
 }
 .abnormal-rules__item[open] .abnormal-rules__chev { transform: rotate(180deg); }
 .abnormal-rules__body { padding: 0 2px 2px; }
-.abnormal-rules__lead {
-  font-size: 13.5px; color: var(--text); line-height: 1.4;
-  margin: 0 0 8px;
-}
-.abnormal-rules__points {
-  margin: 0; padding: 0 0 0 1.25em;
-  display: flex; flex-direction: column; gap: 8px;
-}
-.abnormal-rules__points .abnormal-rules__points {
-  margin-top: 6px; gap: 5px;
-  list-style: disc;
-}
-.abnormal-rules__points li {
-  font-size: 13.5px; line-height: 1.45; color: var(--text);
-  padding-left: 2px;
-}
-.abnormal-rules__emph {
-  font-weight: 800;
-  text-decoration: underline;
-  text-underline-offset: 2px;
-}
+.abnormal-rules__body .sop-links { margin: 4px 0 10px; }
+.abnormal-rules__body .sop-content { font-size: 13.5px; }
+.abnormal-rules__body .sop-content > *:first-child { margin-top: 0; }
+.abnormal-rules__body .loading,
+.abnormal-rules__body .empty { padding: 12px 0 8px; text-align: left; }
 
 /* ── KB cards ──────────────────────────────────────────────────────────── */
 .kb-card {

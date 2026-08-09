@@ -1,5 +1,5 @@
 // ============================================================================
-// md.js — Markdown renderer + content loaders for SOP/KB.
+// md.js — Markdown renderer + content loaders for SOP / Abnormal / KB.
 // Supports: #–### headings (rendered as h2–h4), **bold**, *italic*, `code`,
 // links, images, lists (one nest level), > callouts, ---, pipe tables.
 // Relative paths get `base` so root-authored content works from /<slug>/ entries.
@@ -101,10 +101,12 @@ window.DIANMOOD = window.DIANMOOD || {};
     return docCache[path];
   };
 
-  // content/sops/<CODE>.en.md
-  D.loadSop = function (code, base) {
-    return D.loadDoc((base || '') + 'content/sops/' + code + '.en.md');
-  };
+  // English-only docs: content/<folder>/<id>.en.md
+  function loadEn(folder, id, base) {
+    return D.loadDoc((base || '') + 'content/' + folder + '/' + id + '.en.md');
+  }
+  D.loadSop = function (code, base) { return loadEn('sops', code, base); };
+  D.loadAbnormal = function (id, base) { return loadEn('abnormal', id, base); };
 
   // content/kb/<id>.<lang>.md, falling back to .en.md
   D.loadKb = function (id, lang, base) {

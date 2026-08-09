@@ -1,6 +1,6 @@
 // ============================================================================
-// strings.js — English UI chrome + t() interpolation. SOP/KB body language
-// lives in the Markdown files (KB has its own EN/中文 switch).
+// strings.js — English UI chrome + t() interpolation.
+// Instructional bodies live in Markdown (KB has its own EN/中文 switch).
 // ============================================================================
 window.DIANMOOD = window.DIANMOOD || {};
 
@@ -45,7 +45,7 @@ window.DIANMOOD = window.DIANMOOD || {};
     submit_unconfirmed: "Couldn't confirm submission — check connection and retry.",
 
     coming_soon:    'Coming soon',
-    sop_missing:    'This SOP has not been added yet.'
+    content_missing: 'This content has not been added yet.'
   };
 
   D.FREQ_LABEL = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };

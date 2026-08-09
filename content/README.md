@@ -41,6 +41,26 @@ then `## SOP Steps`. Long tasks may group steps under `### Step N: Title`.
 
 To add a task: entry in `data.js` + matching `<code>.en.md` here.
 
+## Abnormal Handling — `content/abnormal/`
+
+English-only emergency procedures on `#/abnormal`. Add `{ id, title }` to
+`D.ABNORMAL_HANDLING` (accordion label + order), then:
+
+```
+content/abnormal/<id>.en.md
+```
+
+```markdown
+---
+title: Power Outage Operation Steps   # for editors; UI title comes from data.js
+video: https://…                      # optional ▶ chip
+---
+
+1. Do the thing.
+2. If condition:
+   - Nested action.
+```
+
 ## Knowledge base — `content/kb/`
 
 Bilingual. Each article needs both files; the page EN/中文 switch loads the match

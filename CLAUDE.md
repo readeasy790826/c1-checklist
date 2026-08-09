@@ -59,10 +59,11 @@ Each entry HTML sets `window.DIANMOOD_PRESET`, then loads shared scripts. Locati
 |---|---|
 | `data.js` | `SCRIPT_URL`, `LOCATIONS`, `ABNORMAL_HANDLING`, `LIMITS`/`WARN_BEFORE`, `TASKS`, `KB`, `getLocation()` |
 | `strings.js` | English UI copy + `t()` + `FREQ_LABEL` |
-| `md.js` | Markdown renderer + `loadSop` / `loadKb` |
+| `md.js` | Markdown renderer + `loadSop` / `loadAbnormal` / `loadKb` |
 | `app.js` | Routing, views, status poll, submit-and-confirm, lightbox |
 | `app.css` | Design system (tokens in `:root`) |
 | `content/sops/<CODE>.en.md` | SOP bodies |
+| `content/abnormal/<id>.en.md` | Abnormal Handling procedure bodies |
 | `content/kb/<id>.{en,zh}.md` | KB articles |
 | `assets/` | Images referenced by content |
 
@@ -93,6 +94,6 @@ POST fields: `date`, `time`, `datetime` (UTC ISO), `location`, `machine_id`, `fr
 - **Location** — `{ slug, name, machineId }` in `D.LOCATIONS` + `<slug>/index.html` (copy `davies/`).
 - **Task** — entry in `D.TASKS` + `content/sops/<CODE>.en.md`.
 - **KB article** — entry in `D.KB` + `content/kb/<id>.en.md` (and `.zh.md`).
-- **Abnormal Handling procedure** — `{ title, text?, points }` in `D.ABNORMAL_HANDLING` (`points` may nest as `{ text, points }`).
+- **Abnormal Handling procedure** — `{ id, title }` in `D.ABNORMAL_HANDLING` + `content/abnormal/<id>.en.md`.
 
 Markdown authoring rules: **`content/README.md`**.
