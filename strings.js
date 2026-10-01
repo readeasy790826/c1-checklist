@@ -48,7 +48,7 @@ window.DIANMOOD = window.DIANMOOD || {};
     content_missing: 'This content has not been added yet.'
   };
 
-  D.FREQ_LABEL = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly' };
+  D.FREQ_LABEL = { daily: 'Daily', weekly: 'Weekly', monthly: 'Monthly', yearly: 'Yearly' };
 
   // t('due_in', { x: '3h' }) — lookup + {token} replacement.
   D.t = function (key, vars) {

@@ -17,9 +17,13 @@ window.DIANMOOD = window.DIANMOOD || {};
     { slug: 'infinity8', name: 'Infinity8', machineId: 'C1-I8-01' }
   ];
 
+  // Dashboard card order. Each name also needs LIMITS, WARN_BEFORE, FREQ_LABEL, and TASKS.
+  D.FREQUENCIES = ['daily', 'weekly', 'monthly', 'yearly'];
+
   // Hours until overdue (LIMITS) and hours-left when the card turns amber (WARN_BEFORE).
-  D.LIMITS      = { daily: 36,  weekly: 240, monthly: 1080 };
-  D.WARN_BEFORE = { daily: 6,   weekly: 24,  monthly: 72   };
+  // Yearly: overdue after 400 days, amber for the last 30 days.
+  D.LIMITS      = { daily: 36,  weekly: 240, monthly: 1080, yearly: 9600 };
+  D.WARN_BEFORE = { daily: 6,   weekly: 24,  monthly: 72,   yearly: 720  };
 
   // Checklist tasks. SOP body: content/sops/<code>.en.md → route #/sop/<code>.
   D.TASKS = {
@@ -46,6 +50,9 @@ window.DIANMOOD = window.DIANMOOD || {};
     monthly: [
       { code: 'M1', title: 'Clean coffee grinder' },
       { code: 'M2', title: 'Syrup dispenser deep cleaning' }
+    ],
+    yearly: [
+      { code: 'Y1', title: 'Descaling the coffee machine water system' }
     ]
   };
 

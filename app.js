@@ -204,7 +204,7 @@
       if (IS_HQ) group.appendChild(el('<div class="loc-group__title">' + esc(loc.name) +
         '<span class="loc-group__id">' + esc(loc.machineId) + '</span></div>'));
       var stack = el('<div class="card-stack"></div>');
-      ['daily', 'weekly', 'monthly'].forEach(function (freq) { stack.appendChild(statusCard(slug, freq)); });
+      D.FREQUENCIES.forEach(function (freq) { stack.appendChild(statusCard(slug, freq)); });
       group.appendChild(stack);
       host.appendChild(group);
     });

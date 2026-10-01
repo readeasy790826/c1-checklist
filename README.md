@@ -12,7 +12,7 @@
 ## 如何使用
 
 1. 手机浏览器打开对应店铺链接
-2. 打开 Daily / Weekly / Monthly 清单，勾选任务（可用 Select all）
+2. 打开 Daily / Weekly / Monthly / Yearly 清单，勾选任务（可用 Select all）
 3. 确认日期、时间，异常情况可写在 Notes
 4. 点击 **Submit checklist** 提交
 

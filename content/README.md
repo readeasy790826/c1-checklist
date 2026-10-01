@@ -14,7 +14,7 @@ content/sops/D1.en.md
 ```markdown
 ---
 title: Coffee System Tablet Cleaning
-freq: daily            # daily | weekly | monthly
+freq: daily            # daily | weekly | monthly | yearly
 time: 10–15 min        # optional chip
 video: https://…       # optional reference video
 video_label: What to Avoid   # optional chip label

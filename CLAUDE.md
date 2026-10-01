@@ -48,7 +48,7 @@ Each entry HTML sets `window.DIANMOOD_PRESET`, then loads shared scripts. Locati
 ### Routes
 
 - `#/` — dashboard
-- `#/c/<slug>/<freq>` — checklist (`daily` \| `weekly` \| `monthly`)
+- `#/c/<slug>/<freq>` — checklist (`daily` \| `weekly` \| `monthly` \| `yearly`)
 - `#/abnormal` — Abnormal Handling procedures
 - `#/sop/<CODE>` — SOP page
 - `#/kb/<id>` — KB article (EN / 中文)
@@ -79,6 +79,7 @@ Levels: **gray** no record · **green** within window · **amber** due soon · *
 | Daily | 36h | 6h remaining |
 | Weekly | 240h (10 days) | 24h remaining |
 | Monthly | 1080h (45 days) | 72h remaining |
+| Yearly | 9600h (400 days) | 720h (30 days) remaining |
 
 ### Apps Script
 
