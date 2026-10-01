@@ -1,6 +1,6 @@
 // ============================================================================
 // md.js — Markdown renderer + content loaders for SOP / Abnormal / KB.
-// Supports: #–### headings (rendered as h2–h4), **bold**, *italic*, `code`,
+// Supports: #–### headings (rendered as h2–h4), **bold**, {red}text{/red}, *italic*, `code`,
 // links, images, lists (one nest level; images between steps stay in the list),
 // > callouts, ---, pipe tables. Relative paths get `base` for /<slug>/ entries.
 // ============================================================================
@@ -21,6 +21,9 @@ window.DIANMOOD = window.DIANMOOD || {};
     TIP: 'ok', SUCCESS: 'ok',
     NOTE: 'info', INFO: 'info'
   };
+  // {red}text{/red}. Names match text color tokens in :root (app.css).
+  var INK_COLORS = { red: 1, amber: 1, green: 1, accent: 1, 'accent-strong': 1, muted: 1, info: 1 };
+
   var CALLOUT_META = {
     warn:   { icon: '⚠️', label: 'Warning' },
     danger: { icon: '❗', label: 'Important' },
@@ -48,6 +51,10 @@ window.DIANMOOD = window.DIANMOOD || {};
         (ext ? ' target="_blank" rel="noopener"' : '') + '>' + txt + '</a>';
     });
     s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+    s = s.replace(/\{([a-z][a-z0-9-]*)\}([\s\S]+?)\{\/\1\}/g, function (_, name, body) {
+      if (!INK_COLORS[name]) return '{' + name + '}' + body + '{/' + name + '}';
+      return '<span class="ink" style="color: var(--' + name + ')">' + body + '</span>';
+    });
     s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
     s = s.replace(/(^|[^*])\*([^*]+)\*/g, '$1<em>$2</em>');
     return s;

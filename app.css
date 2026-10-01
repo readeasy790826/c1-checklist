@@ -400,6 +400,8 @@ button { font-family: inherit; }
 .sop-content li { margin: 5px 0; }
 .sop-content li > ul, .sop-content li > ol { margin: 5px 0 5px; }
 .sop-content strong { font-weight: 800; }
+/* Hue comes from a :root token set by {color}…{/color} in Markdown. */
+.sop-content .ink { font-weight: 700; }
 .sop-content a { color: var(--accent-strong); font-weight: 700; text-decoration: underline; }
 .sop-content code {
   background: var(--surface-2); border: 1px solid var(--border); border-radius: 6px;

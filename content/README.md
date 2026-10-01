@@ -82,6 +82,10 @@ level), links, images, `---`, pipe tables, callouts. Image paths are repo-root
 relative: `![alt](assets/foo.jpg)`. Images placed between numbered steps stay in
 that list (numbering does not restart).
 
+`{red}text{/red}` colors a span. The name is a text color token from `app.css`
+(`red`, `amber`, `green`, `accent`, `accent-strong`, `muted`, `info`), so the
+hex stays in `:root`.
+
 ```markdown
 > [!WARNING] amber — cautions
 > [!DANGER] red — hard safety warnings
