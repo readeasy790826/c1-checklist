@@ -7,8 +7,8 @@ title: Machine Moving SOP
 # 1. Coffee Machine Wash & Boiler Cooldown
 
 1. Run the machine's full cleaning cycle (Tablet Cleaning).
-2. When cleaning finishes, **switch off the coffee machine** and let the boiler cool naturally.
-3. Wait at least **60 minutes** and confirm the body is no longer warm before moving it.
+2. When cleaning finishes, click the three bars at the **top-right** corner, then select **Service menu → Maintenance → Empty water supply**.
+3. Wait and confirm the body is no longer warm before moving it.
 
 > [!DANGER] Never move the machine before the boiler has cooled — risk of burns and internal damage.
 
